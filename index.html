@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,21 +31,18 @@
       <small>Today's AEPS</small>
       <p id="biznextCollection">₹0.00</p>
     </div>
-
     <div class="wallet">
       <small>Roinet Wallet</small>
       <h2 id="roinetBalance">₹0.00</h2>
       <small>Today's AEPS</small>
       <p id="roinetCollection">₹0.00</p>
     </div>
-    
     <div class="wallet">
       <small>Tez Wallet</small>
       <h2 id="tezBalance">₹0.00</h2>
       <small>Today's AEPS</small>
       <p id="tezCollection">₹0.00</p>
     </div>
-
     <div class="wallet">
       <small>Fino Wallet</small>
       <h2 id="finoBalance">₹0.00</h2>
@@ -92,7 +90,7 @@
 
     <label>Fino Opening Wallet (₹)</label>
     <input type="number" id="openingFino" placeholder="Enter Fino balance">
-    
+
     <button class="gold" id="startDayBtn" onclick="startBusinessDay()">
       START BUSINESS DAY
     </button>
@@ -111,26 +109,101 @@
       <option value="OTHER">Other Collection</option>
     </select>
 
-  <div id="platformSection">
-   <label>Software</label>
-   <select id="platform">
-    <option value="Biznext">Biznext</option>
-    <option value="Roinet">Roinet</option>
-    <option value="Tez">Tez</option>
-    <option value="Fino">Fino</option>
-   </select>
-  </div>
+    <div id="platformSection">
+      <label>Software</label>
+      <select id="platform">
+        <option value="Biznext">Biznext</option>
+        <option value="Roinet">Roinet</option>
+        <option value="Tez">Tez</option>
+        <option value="Fino">Fino</option>
+      </select>
+    </div>
 
     <label>Transaction Amount (₹)</label>
-    <input type="number" id="transactionAmount" min="0.01" step="0.01" placeholder="Enter amount" oninput="calculateChargePreview()">
+    <input type="number" id="transactionAmount" min="0.01" step="0.01"
+      placeholder="Enter amount" oninput="calculateChargePreview()">
 
     <label>Customer Charge (₹)</label>
-    <input type="number" id="customerCharge" readonly placeholder="Automatic calculation">
+    <input type="number" id="customerCharge" readonly
+      placeholder="Automatic calculation">
 
     <p id="chargePreview">Customer charge will appear here.</p>
 
     <button onclick="addBusinessTransaction()">
       SAVE TRANSACTION
+    </button>
+  </div>
+
+  <!-- SERVICES MANAGEMENT -->
+  <h3 class="section-title">Services Management</h3>
+  <div class="card">
+
+    <label>Select Service</label>
+    <select id="serviceType" onchange="updateServiceFields()">
+      <option value="BW_PRINT">Black & White Print</option>
+      <option value="COLOR_PRINT">Colour Print</option>
+      <option value="XEROX">Xerox</option>
+      <option value="PASSPORT_PHOTO">Passport Photo</option>
+      <option value="AADHAAR_LAMINATION">Aadhaar Card with Lamination</option>
+      <option value="A4_LAMINATION">A4 Lamination</option>
+      <option value="ID_LAMINATION">ID Card Lamination</option>
+      <option value="OTHER_SERVICE">Other Services</option>
+    </select>
+
+    <div id="serviceQuantitySection">
+      <label id="serviceQuantityLabel">Number of Pages</label>
+      <input type="number" id="serviceQuantity" min="1" step="1"
+        value="1" oninput="calculateServiceTotal()">
+    </div>
+
+    <div id="idLaminationSection" style="display:none">
+      <label>ID Card Lamination Quality</label>
+      <select id="idLaminationPrice" onchange="calculateServiceTotal()">
+        <option value="20">Regular - ₹20</option>
+        <option value="30">Premium - ₹30</option>
+      </select>
+    </div>
+
+    <div id="otherServiceSection" style="display:none">
+      <label>Service Description</label>
+      <input type="text" id="otherServiceDescription"
+        placeholder="Enter service description">
+
+      <label>Amount (₹)</label>
+      <input type="number" id="otherServiceAmount" min="0.01"
+        step="0.01" placeholder="Enter amount"
+        oninput="calculateServiceTotal()">
+    </div>
+
+    <label>Total Service Amount (₹)</label>
+    <input type="number" id="serviceTotal" readonly
+      placeholder="Automatic calculation">
+
+    <p id="servicePricePreview">Select a service to calculate the amount.</p>
+
+    <label>Payment Method</label>
+    <select id="servicePaymentMethod" onchange="updateServicePaymentFields()">
+      <option value="Cash">Cash</option>
+      <option value="Online">Online</option>
+      <option value="Split">Split Payment</option>
+    </select>
+
+    <div id="serviceSplitSection" style="display:none">
+      <label>Cash Received (₹)</label>
+      <input type="number" id="serviceCashAmount" min="0"
+        step="0.01" placeholder="Enter cash amount"
+        oninput="calculateServiceSplit()">
+
+      <label>Online Received (₹)</label>
+      <input type="number" id="serviceOnlineAmount" min="0"
+        step="0.01" placeholder="Enter online amount"
+        oninput="calculateServiceSplit()">
+
+      <p id="serviceSplitPreview">Cash + Online must equal total amount.</p>
+    </div>
+
+    <button onclick="addServiceTransaction()">
+      SAVE SERVICE
     </button>
 
   </div>
@@ -173,4 +246,3 @@
 <script src="app.js"></script>
 </body>
 </html>
-
