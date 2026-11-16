@@ -33,7 +33,9 @@ function startBusinessDay() {
       cash: Number(document.getElementById("openingCash").value),
       online: Number(document.getElementById("openingOnline").value),
       biznext: Number(document.getElementById("openingBiznext").value),
-      roinet: Number(document.getElementById("openingRoinet").value)
+      roinet: Number(document.getElementById("openingRoinet").value),
+      tez: Number(document.getElementById("openingTez").value),
+      fino: Number(document.getElementById("openingFino").value)
     },
     transactions: [],
     closed: false
