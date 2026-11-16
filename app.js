@@ -1,5 +1,5 @@
 
-const KEY = "aditya_multi_services_v2";
+const KEY = "aditya_multi_services_v3";
 
 let data = JSON.parse(localStorage.getItem(KEY) || '{"days":[],"currentDay":null}');
 
@@ -27,25 +27,26 @@ function startBusinessDay() {
     return;
   }
 
-  data.currentDay = {
-    date: today(),
-    opening: {
-      cash: Number(document.getElementById("openingCash").value),
-      online: Number(document.getElementById("openingOnline").value),
-      biznext: Number(document.getElementById("openingBiznext").value),
-      roinet: Number(document.getElementById("openingRoinet").value),
-      tez: Number(document.getElementById("openingTez").value),
-      fino: Number(document.getElementById("openingFino").value)
-    },
-    transactions: [],
-    closed: false
+  const opening = {
+    cash: Number(document.getElementById("openingCash").value),
+    online: Number(document.getElementById("openingOnline").value),
+    biznext: Number(document.getElementById("openingBiznext").value),
+    roinet: Number(document.getElementById("openingRoinet").value),
+    tez: Number(document.getElementById("openingTez").value),
+    fino: Number(document.getElementById("openingFino").value)
   };
 
-  if (Object.values(data.currentDay.opening).some(v => !Number.isFinite(v) || v < 0)) {
-    data.currentDay = null;
+  if (Object.values(opening).some(v => !Number.isFinite(v) || v < 0)) {
     alert("Enter valid opening balances.");
     return;
   }
+
+  data.currentDay = {
+    date: today(),
+    opening,
+    transactions: [],
+    closed: false
+  };
 
   persist();
   refreshDashboard();
@@ -63,6 +64,7 @@ function chargeFor(amount) {
 
 function updateTransactionFields() {
   const type = document.getElementById("transactionType").value;
+
   document.getElementById("platformSection").style.display =
     type === "AEPS" ? "block" : "none";
 
@@ -84,8 +86,10 @@ function calculateChargePreview() {
 
 function calculateTotals(day) {
   const totals = {
-    biznext: 0,
-    roinet: 0,
+    biznext: day.opening.biznext || 0,
+    roinet: day.opening.roinet || 0,
+    tez: day.opening.tez || 0,
+    fino: day.opening.fino || 0,
     aeps: 0,
     cash: day.opening.cash,
     online: day.opening.online,
@@ -105,6 +109,8 @@ function calculateTotals(day) {
 
       if (t.platform === "Biznext") totals.biznext += amount;
       if (t.platform === "Roinet") totals.roinet += amount;
+      if (t.platform === "Tez") totals.tez += amount;
+      if (t.platform === "Fino") totals.fino += amount;
 
       totals.cash -= amount;
     }
@@ -127,9 +133,6 @@ function calculateTotals(day) {
     totals.charges += charge;
     totals.profit += charge;
   });
-
-  totals.biznext += day.opening.biznext;
-  totals.roinet += day.opening.roinet;
 
   return totals;
 }
@@ -179,7 +182,7 @@ function addBusinessTransaction() {
     return;
   }
 
-  if (type === "AEPS" && amount > totals.cash + 0.000001) {
+  if (type === "AEPS" && amount > totals.cash) {
     alert("Insufficient cash balance.");
     return;
   }
@@ -189,9 +192,10 @@ function addBusinessTransaction() {
 
   document.getElementById("transactionAmount").value = "";
   document.getElementById("customerCharge").value = "";
-  calculateChargePreview();
 
+  calculateChargePreview();
   refreshDashboard();
+
   alert("Transaction saved successfully!");
 }
 
@@ -200,15 +204,23 @@ function refreshDashboard() {
 
   document.getElementById("todayDate").textContent =
     new Date().toLocaleDateString("en-IN", {
-      day: "2-digit", month: "short", year: "numeric"
+      day: "2-digit",
+      month: "short",
+      year: "numeric"
     });
 
+  const walletIds = [
+    "biznextBalance", "roinetBalance", "tezBalance", "finoBalance",
+    "biznextCollection", "roinetCollection", "tezCollection", "finoCollection",
+    "cashBalance", "onlineBalance", "totalBusiness", "dailyProfit"
+  ];
+
   if (!day) {
-    ["biznextBalance", "roinetBalance", "biznextCollection",
-     "roinetCollection", "cashBalance", "onlineBalance",
-     "totalBusiness", "dailyProfit"].forEach(id => {
-       document.getElementById(id).textContent = money(0);
+    walletIds.forEach(id => {
+      document.getElementById(id).textContent = money(0);
     });
+
+    document.getElementById("openingSection").style.display = "block";
 
     document.getElementById("transactionList").innerHTML =
       "<p>No active business day. Enter opening balances to begin.</p>";
@@ -220,10 +232,21 @@ function refreshDashboard() {
 
   document.getElementById("biznextBalance").textContent = money(t.biznext);
   document.getElementById("roinetBalance").textContent = money(t.roinet);
+  document.getElementById("tezBalance").textContent = money(t.tez);
+  document.getElementById("finoBalance").textContent = money(t.fino);
+
   document.getElementById("biznextCollection").textContent =
     money(t.biznext - day.opening.biznext);
+
   document.getElementById("roinetCollection").textContent =
     money(t.roinet - day.opening.roinet);
+
+  document.getElementById("tezCollection").textContent =
+    money(t.tez - day.opening.tez);
+
+  document.getElementById("finoCollection").textContent =
+    money(t.fino - day.opening.fino);
+
   document.getElementById("cashBalance").textContent = money(t.cash);
   document.getElementById("onlineBalance").textContent = money(t.online);
   document.getElementById("totalBusiness").textContent = money(t.business);
@@ -249,6 +272,7 @@ function refreshDashboard() {
 
 function previewClosing() {
   const day = currentDay();
+
   if (!day) {
     alert("Start a business day first.");
     return;
@@ -312,16 +336,16 @@ function saveBusinessDay() {
   data.currentDay = null;
 
   persist();
+
   document.getElementById("openingSection").style.display = "block";
   document.getElementById("closingResult").innerHTML = "";
-  refreshDashboard();
 
+  refreshDashboard();
   alert("Business day saved successfully!");
 }
 
 function showHistory() {
   const history = document.getElementById("historyList");
-
   const days = data.days.filter(d => d.date.startsWith(today().slice(0, 7)));
 
   if (!days.length) {
@@ -357,4 +381,3 @@ function exportData() {
 
 updateTransactionFields();
 refreshDashboard();
-
