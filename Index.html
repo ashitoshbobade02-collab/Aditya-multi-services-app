@@ -1,1 +1,101 @@
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#101d35">
+<title>Aditya Multi Services</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Arial,sans-serif;
+  background:#f3f5f9;
+  color:#17243b;
+}
+header{
+  background:#101d35;
+  color:white;
+  padding:25px 20px;
+  border-radius:0 0 22px 22px;
+}
+header p{color:#b9c6d9;font-size:13px;margin-top:7px}
+main{padding:18px;max-width:700px;margin:auto}
+.section-title{font-size:16px;margin:22px 0 12px}
+.card{
+  background:white;
+  border-radius:16px;
+  padding:18px;
+  margin-bottom:13px;
+  box-shadow:0 4px 16px #17243b0b;
+}
+.wallets{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.wallet{background:#fff;border-radius:15px;padding:16px}
+.wallet small{color:#68758a}
+.wallet h2{font-size:21px;margin-top:10px;color:#17243b}
+input{
+  width:100%;
+  padding:13px;
+  margin-top:8px;
+  border:1px solid #dce2eb;
+  border-radius:10px;
+  font-size:15px;
+}
+button{
+  border:0;
+  background:#b58a43;
+  color:white;
+  padding:14px;
+  border-radius:10px;
+  width:100%;
+  font-size:15px;
+  font-weight:bold;
+  margin-top:12px;
+}
+</style>
+</head>
+<body>
+<header>
+  <h2>ADITYA MULTI SERVICES</h2>
+  <p>Business Management Dashboard</p>
+</header>
+
+<main>
+  <h3 class="section-title">Wallet Overview</h3>
+
+  <div class="wallets">
+    <div class="wallet">
+      <small>Biznext Balance</small>
+      <h2>₹0.00</h2>
+    </div>
+    <div class="wallet">
+      <small>Roinet Balance</small>
+      <h2>₹0.00</h2>
+    </div>
+  </div>
+
+  <h3 class="section-title">Daily Overview</h3>
+  <div class="card">
+    <p>Today's Business</p>
+    <h2>₹0.00</h2>
+  </div>
+
+  <div class="card">
+    <p>Today's Profit</p>
+    <h2>₹0.00</h2>
+  </div>
+
+  <h3 class="section-title">Business Entry</h3>
+  <div class="card">
+    <label>Transaction Amount (₹)</label>
+    <input type="number" placeholder="Enter amount">
+    <button>Save Transaction</button>
+  </div>
+</main>
+</body>
+</html>
