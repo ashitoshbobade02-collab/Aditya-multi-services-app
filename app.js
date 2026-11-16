@@ -31,10 +31,11 @@ function syncOpeningWalletFields() {
   const carry = data.walletCarryForward;
 
   const fields = {
-    biznext: "openingBiznext",
-    roinet: "openingRoinet",
-    tez: "openingTez",
-    fino: "openingFino"
+   biznext: "openingBiznext",
+   roinet: "openingRoinet",
+   tez: "openingTez",
+   fino: "openingFino",
+   sbi: "openingSbi"
   };
 
   Object.entries(fields).forEach(([key, id]) => {
@@ -75,7 +76,10 @@ function startBusinessDay() {
       : Number(document.getElementById("openingTez").value),
     fino: carry
       ? Number(carry.fino)
-      : Number(document.getElementById("openingFino").value)
+      : Number(document.getElementById("openingFino").value),
+    sbi: carry
+      ? Number(carry.sbi)
+      : Number(document.getElementById("openingSbi").value)
   };
 
   if (Object.values(opening).some(v => !Number.isFinite(v) || v < 0)) {
@@ -416,6 +420,7 @@ function calculateTotals(day) {
     roinet: day.opening.roinet || 0,
     tez: day.opening.tez || 0,
     fino: day.opening.fino || 0,
+    sbi: day.opening.sbi || 0,
     aeps: 0,
     cash: day.opening.cash,
     online: day.opening.online,
@@ -438,6 +443,7 @@ function calculateTotals(day) {
       if (t.platform === "Roinet") totals.roinet += amount;
       if (t.platform === "Tez") totals.tez += amount;
       if (t.platform === "Fino") totals.fino += amount;
+      if (t.platform === "SBI") totals.sbi += amount;
 
       totals.cash -= amount;
     }
@@ -556,10 +562,12 @@ function refreshDashboard() {
     });
 
   const walletIds = [
-    "biznextBalance", "roinetBalance", "tezBalance", "finoBalance",
-    "biznextCollection", "roinetCollection", "tezCollection",
-    "finoCollection", "cashBalance", "onlineBalance",
-    "totalBusiness", "dailyProfit"
+   "biznextBalance", "roinetBalance", "tezBalance", "finoBalance",
+   "sbiBalance",
+   "biznextCollection", "roinetCollection", "tezCollection",
+   "finoCollection", "sbiCollection",
+   "cashBalance", "onlineBalance",
+   "totalBusiness", "dailyProfit"
   ];
 
   if (!day) {
@@ -582,6 +590,7 @@ function refreshDashboard() {
   document.getElementById("roinetBalance").textContent = money(t.roinet);
   document.getElementById("tezBalance").textContent = money(t.tez);
   document.getElementById("finoBalance").textContent = money(t.fino);
+  document.getElementById("sbiBalance").textContent = money(t.sbi);
 
   document.getElementById("biznextCollection").textContent =
     money(t.biznext - day.opening.biznext);
@@ -594,6 +603,9 @@ function refreshDashboard() {
 
   document.getElementById("finoCollection").textContent =
     money(t.fino - day.opening.fino);
+
+  document.getElementById("sbiCollection").textContent =
+  money(t.sbi - day.opening.sbi);
 
   document.getElementById("cashBalance").textContent = money(t.cash);
   document.getElementById("onlineBalance").textContent = money(t.online);
