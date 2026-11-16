@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,18 +30,21 @@
       <small>Today's AEPS</small>
       <p id="biznextCollection">₹0.00</p>
     </div>
+
     <div class="wallet">
       <small>Roinet Wallet</small>
       <h2 id="roinetBalance">₹0.00</h2>
       <small>Today's AEPS</small>
       <p id="roinetCollection">₹0.00</p>
     </div>
+
     <div class="wallet">
       <small>Tez Wallet</small>
       <h2 id="tezBalance">₹0.00</h2>
       <small>Today's AEPS</small>
       <p id="tezCollection">₹0.00</p>
     </div>
+
     <div class="wallet">
       <small>Fino Wallet</small>
       <h2 id="finoBalance">₹0.00</h2>
@@ -73,6 +75,7 @@
 
   <h3 class="section-title">Opening Balances</h3>
   <div class="card" id="openingSection">
+
     <label>Opening Cash (₹)</label>
     <input type="number" id="openingCash" placeholder="Enter cash balance">
 
@@ -136,77 +139,92 @@
 
   <!-- SERVICES MANAGEMENT -->
   <h3 class="section-title">Services Management</h3>
-  <div class="card">
 
-    <label>Select Service</label>
-    <select id="serviceType" onchange="updateServiceFields()">
-      <option value="BW_PRINT">Black & White Print</option>
-      <option value="COLOR_PRINT">Colour Print</option>
-      <option value="XEROX">Xerox</option>
-      <option value="PASSPORT_PHOTO">Passport Photo</option>
-      <option value="AADHAAR_LAMINATION">Aadhaar Card with Lamination</option>
-      <option value="A4_LAMINATION">A4 Lamination</option>
-      <option value="ID_LAMINATION">ID Card Lamination</option>
-      <option value="OTHER_SERVICE">Other Services</option>
-    </select>
+  <details class="card" id="servicesDrawer">
+    <summary style="cursor:pointer;font-weight:bold;padding:8px 0">
+      + Add New Service
+    </summary>
 
-    <div id="serviceQuantitySection">
-      <label id="serviceQuantityLabel">Number of Pages</label>
-      <input type="number" id="serviceQuantity" min="1" step="1"
-        value="1" oninput="calculateServiceTotal()">
-    </div>
+    <div style="margin-top:18px">
 
-    <div id="idLaminationSection" style="display:none">
-      <label>ID Card Lamination Quality</label>
-      <select id="idLaminationPrice" onchange="calculateServiceTotal()">
-        <option value="20">Regular - ₹20</option>
-        <option value="30">Premium - ₹30</option>
+      <label>Select Service</label>
+      <select id="serviceType" onchange="updateServiceFields()">
+        <option value="BW_PRINT">Black & White Print</option>
+        <option value="COLOR_PRINT">Colour Print</option>
+        <option value="XEROX">Xerox</option>
+        <option value="PASSPORT_PHOTO">Passport Photo</option>
+        <option value="AADHAAR_LAMINATION">Aadhaar with Lamination</option>
+        <option value="A4_LAMINATION">A4 Lamination</option>
+        <option value="ID_LAMINATION">ID Card Lamination</option>
+        <option value="OTHER_SERVICE">Other Services</option>
       </select>
+
+      <label>Entry Method</label>
+      <select id="serviceEntryMode" onchange="updateServiceFields()">
+        <option value="quantity">Calculate by Quantity</option>
+        <option value="direct">Enter Total Amount</option>
+      </select>
+
+      <div id="serviceQuantitySection">
+        <label id="serviceQuantityLabel">Number of Pages</label>
+        <input type="number" id="serviceQuantity" min="1" step="1"
+          value="1" oninput="calculateServiceTotal()">
+      </div>
+
+      <div id="idLaminationSection" style="display:none">
+        <label>Lamination Quality</label>
+        <select id="idLaminationPrice" onchange="calculateServiceTotal()">
+          <option value="20">Regular - ₹20</option>
+          <option value="30">Premium - ₹30</option>
+        </select>
+      </div>
+
+      <div id="otherServiceSection" style="display:none">
+        <label>Service Description</label>
+        <input type="text" id="otherServiceDescription"
+          placeholder="Enter service name">
+      </div>
+
+      <div id="directAmountSection" style="display:none">
+        <label>Total Amount Collected (₹)</label>
+        <input type="number" id="serviceDirectAmount" min="0.01"
+          step="0.01" placeholder="Enter amount"
+          oninput="calculateServiceTotal()">
+      </div>
+
+      <label>Total Service Amount</label>
+      <h2 id="serviceTotalPreview">₹0.00</h2>
+      <input type="hidden" id="serviceTotal">
+
+      <label>Payment Method</label>
+      <select id="servicePaymentMethod" onchange="updateServicePaymentFields()">
+        <option value="Cash">Cash</option>
+        <option value="Online">Online</option>
+        <option value="Split">Split Payment</option>
+      </select>
+
+      <div id="serviceSplitSection" style="display:none">
+        <label>Cash Received (₹)</label>
+        <input type="number" id="serviceCashAmount" min="0"
+          step="0.01" placeholder="Cash amount"
+          oninput="calculateServiceSplit()">
+
+        <label>Online Received (₹)</label>
+        <input type="number" id="serviceOnlineAmount" min="0"
+          step="0.01" placeholder="Online amount"
+          oninput="calculateServiceSplit()">
+
+        <p id="serviceSplitPreview">
+          Cash and Online must equal the total.
+        </p>
+      </div>
+
+      <button onclick="addServiceTransaction()">
+        SAVE SERVICE
+      </button>
+
     </div>
-
-    <div id="otherServiceSection" style="display:none">
-      <label>Service Description</label>
-      <input type="text" id="otherServiceDescription"
-        placeholder="Enter service description">
-
-      <label>Amount (₹)</label>
-      <input type="number" id="otherServiceAmount" min="0.01"
-        step="0.01" placeholder="Enter amount"
-        oninput="calculateServiceTotal()">
-    </div>
-
-    <label>Total Service Amount (₹)</label>
-    <input type="number" id="serviceTotal" readonly
-      placeholder="Automatic calculation">
-
-    <p id="servicePricePreview">Select a service to calculate the amount.</p>
-
-    <label>Payment Method</label>
-    <select id="servicePaymentMethod" onchange="updateServicePaymentFields()">
-      <option value="Cash">Cash</option>
-      <option value="Online">Online</option>
-      <option value="Split">Split Payment</option>
-    </select>
-
-    <div id="serviceSplitSection" style="display:none">
-      <label>Cash Received (₹)</label>
-      <input type="number" id="serviceCashAmount" min="0"
-        step="0.01" placeholder="Enter cash amount"
-        oninput="calculateServiceSplit()">
-
-      <label>Online Received (₹)</label>
-      <input type="number" id="serviceOnlineAmount" min="0"
-        step="0.01" placeholder="Enter online amount"
-        oninput="calculateServiceSplit()">
-
-      <p id="serviceSplitPreview">Cash + Online must equal total amount.</p>
-    </div>
-
-    <button onclick="addServiceTransaction()">
-      SAVE SERVICE
-    </button>
-
-  </div>
+  </details>
 
   <h3 class="section-title">Today's Transactions</h3>
   <div class="card" id="transactionList">
@@ -215,6 +233,7 @@
 
   <h3 class="section-title">Daily Closing</h3>
   <div class="card">
+
     <label>Actual Cash Available (₹)</label>
     <input type="number" id="actualCash" placeholder="Enter actual cash">
 
