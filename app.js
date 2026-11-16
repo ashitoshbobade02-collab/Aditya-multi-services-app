@@ -1,7 +1,13 @@
 
 const KEY = "aditya_multi_services_v3";
 
-let data = JSON.parse(localStorage.getItem(KEY) || '{"days":[],"currentDay":null}');
+let data = JSON.parse(
+  localStorage.getItem(KEY) || '{"days":[],"currentDay":null}'
+);
+
+if (!data.walletCarryForward) {
+  data.walletCarryForward = null;
+}
 
 function money(value) {
   return "₹" + Number(value || 0).toLocaleString("en-IN", {
@@ -21,19 +27,55 @@ function persist() {
   localStorage.setItem(KEY, JSON.stringify(data));
 }
 
+function syncOpeningWalletFields() {
+  const carry = data.walletCarryForward;
+
+  const fields = {
+    biznext: "openingBiznext",
+    roinet: "openingRoinet",
+    tez: "openingTez",
+    fino: "openingFino"
+  };
+
+  Object.entries(fields).forEach(([key, id]) => {
+    const input = document.getElementById(id);
+
+    if (carry) {
+      input.value = carry[key];
+      input.readOnly = true;
+      input.title = "Automatically carried forward from previous day";
+    } else {
+      input.readOnly = false;
+      input.title = "";
+    }
+  });
+}
+
 function startBusinessDay() {
   if (data.currentDay) {
     alert("A business day is already running.");
     return;
   }
 
+  syncOpeningWalletFields();
+
+  const carry = data.walletCarryForward;
+
   const opening = {
     cash: Number(document.getElementById("openingCash").value),
     online: Number(document.getElementById("openingOnline").value),
-    biznext: Number(document.getElementById("openingBiznext").value),
-    roinet: Number(document.getElementById("openingRoinet").value),
-    tez: Number(document.getElementById("openingTez").value),
-    fino: Number(document.getElementById("openingFino").value)
+    biznext: carry
+      ? Number(carry.biznext)
+      : Number(document.getElementById("openingBiznext").value),
+    roinet: carry
+      ? Number(carry.roinet)
+      : Number(document.getElementById("openingRoinet").value),
+    tez: carry
+      ? Number(carry.tez)
+      : Number(document.getElementById("openingTez").value),
+    fino: carry
+      ? Number(carry.fino)
+      : Number(document.getElementById("openingFino").value)
   };
 
   if (Object.values(opening).some(v => !Number.isFinite(v) || v < 0)) {
@@ -73,7 +115,8 @@ function updateTransactionFields() {
 
 function calculateChargePreview() {
   const type = document.getElementById("transactionType").value;
-  const amount = Number(document.getElementById("transactionAmount").value) || 0;
+  const amount =
+    Number(document.getElementById("transactionAmount").value) || 0;
 
   const charge = ["AEPS", "C+", "C-"].includes(type)
     ? chargeFor(amount)
@@ -146,7 +189,8 @@ function addBusinessTransaction() {
   }
 
   const type = document.getElementById("transactionType").value;
-  const amount = Number(document.getElementById("transactionAmount").value);
+  const amount =
+    Number(document.getElementById("transactionAmount").value);
 
   if (!Number.isFinite(amount) || amount <= 0) {
     alert("Enter a valid transaction amount.");
@@ -211,8 +255,9 @@ function refreshDashboard() {
 
   const walletIds = [
     "biznextBalance", "roinetBalance", "tezBalance", "finoBalance",
-    "biznextCollection", "roinetCollection", "tezCollection", "finoCollection",
-    "cashBalance", "onlineBalance", "totalBusiness", "dailyProfit"
+    "biznextCollection", "roinetCollection", "tezCollection",
+    "finoCollection", "cashBalance", "onlineBalance",
+    "totalBusiness", "dailyProfit"
   ];
 
   if (!day) {
@@ -221,6 +266,7 @@ function refreshDashboard() {
     });
 
     document.getElementById("openingSection").style.display = "block";
+    syncOpeningWalletFields();
 
     document.getElementById("transactionList").innerHTML =
       "<p>No active business day. Enter opening balances to begin.</p>";
@@ -332,6 +378,15 @@ function saveBusinessDay() {
   };
 
   day.closed = true;
+
+  // Carry forward only the four portal wallet balances.
+  data.walletCarryForward = {
+    biznext: totals.biznext,
+    roinet: totals.roinet,
+    tez: totals.tez,
+    fino: totals.fino
+  };
+
   data.days.push(day);
   data.currentDay = null;
 
@@ -339,14 +394,18 @@ function saveBusinessDay() {
 
   document.getElementById("openingSection").style.display = "block";
   document.getElementById("closingResult").innerHTML = "";
+  document.getElementById("actualCash").value = "";
 
   refreshDashboard();
-  alert("Business day saved successfully!");
+
+  alert("Business day saved! Portal balances are ready for the next day.");
 }
 
 function showHistory() {
   const history = document.getElementById("historyList");
-  const days = data.days.filter(d => d.date.startsWith(today().slice(0, 7)));
+  const days = data.days.filter(d =>
+    d.date.startsWith(today().slice(0, 7))
+  );
 
   if (!days.length) {
     history.innerHTML = "<p>No saved records this month.</p>";
