@@ -1,1 +1,161 @@
 
+
+:root {
+  --navy: #003b7a;
+  --blue: #0875c9;
+  --light-blue: #eaf4ff;
+  --gold: #f5b400;
+  --background: #f4f7fb;
+  --white: #ffffff;
+  --text: #183451;
+  --muted: #71849a;
+  --border: #e2eaf2;
+  --green: #168653;
+  --red: #d94343;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: var(--background);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+header {
+  background: linear-gradient(135deg, #003b7a, #0875c9);
+  color: white;
+  padding: 28px 22px;
+  border-radius: 0 0 22px 22px;
+}
+
+header h2 {
+  font-size: 21px;
+  letter-spacing: .5px;
+}
+
+header p {
+  color: #d6eaff;
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+main {
+  max-width: 850px;
+  margin: auto;
+  padding: 20px;
+}
+
+.section-title {
+  font-size: 17px;
+  font-weight: 700;
+  margin: 25px 0 14px;
+}
+
+.wallets {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 13px;
+}
+
+.wallet, .card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  padding: 19px;
+  box-shadow: 0 4px 15px #003b7a0a;
+}
+
+.wallet {
+  border-top: 3px solid var(--blue);
+}
+
+.wallet small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.wallet h2 {
+  font-size: 21px;
+  margin-top: 12px;
+  color: var(--navy);
+}
+
+.card {
+  margin-bottom: 14px;
+}
+
+.card p {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.card h2 {
+  font-size: 25px;
+  margin-top: 9px;
+}
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 14px;
+}
+
+input, select {
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #f9fbfe;
+  color: var(--text);
+  font-size: 15px;
+}
+
+input:focus, select:focus {
+  border-color: var(--blue);
+  outline: none;
+  background: white;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 14px;
+  border: none;
+  border-radius: 10px;
+  background: var(--navy);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--blue);
+}
+
+button.gold {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+.green {
+  color: var(--green);
+}
+
+.red {
+  color: var(--red);
+}
+
+@media (max-width: 380px) {
+  main { padding: 14px; }
+  .wallet { padding: 14px; }
+  .wallet h2 { font-size: 18px; }
+}
