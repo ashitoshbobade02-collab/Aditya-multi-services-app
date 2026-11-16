@@ -37,19 +37,20 @@
       <small>Today's AEPS</small>
       <p id="roinetCollection">₹0.00</p>
     </div>
+    
     <div class="wallet">
-    <small>Tez Wallet</small>
-    <h2 id="tezBalance">₹0.00</h2>
-    <small>Today's AEPS</small>
-    <p id="tezCollection">₹0.00</p>
-</div>
+      <small>Tez Wallet</small>
+      <h2 id="tezBalance">₹0.00</h2>
+      <small>Today's AEPS</small>
+      <p id="tezCollection">₹0.00</p>
+    </div>
 
-<div class="wallet">
-    <small>Fino Wallet</small>
-    <h2 id="finoBalance">₹0.00</h2>
-    <small>Today's AEPS</small>
-    <p id="finoCollection">₹0.00</p>
-</div>
+    <div class="wallet">
+      <small>Fino Wallet</small>
+      <h2 id="finoBalance">₹0.00</h2>
+      <small>Today's AEPS</small>
+      <p id="finoCollection">₹0.00</p>
+    </div>
   </div>
 
   <h3 class="section-title">Today's Overview</h3>
@@ -110,13 +111,15 @@
       <option value="OTHER">Other Collection</option>
     </select>
 
-    <div id="platformSection">
-      <label>Software</label>
-      <select id="platform">
-        <option value="Biznext">Biznext</option>
-        <option value="Roinet">Roinet</option>
-      </select>
-    </div>
+  <div id="platformSection">
+   <label>Software</label>
+   <select id="platform">
+    <option value="Biznext">Biznext</option>
+    <option value="Roinet">Roinet</option>
+    <option value="Tez">Tez</option>
+    <option value="Fino">Fino</option>
+   </select>
+  </div>
 
     <label>Transaction Amount (₹)</label>
     <input type="number" id="transactionAmount" min="0.01" step="0.01" placeholder="Enter amount" oninput="calculateChargePreview()">
