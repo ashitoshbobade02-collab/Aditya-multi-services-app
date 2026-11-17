@@ -1131,6 +1131,42 @@ async function logoutUser() {
   }
 }
 
+
+async function linkGoogleAccount() {
+  if (!auth.currentUser) {
+    showLoginMessage("Please sign in first.");
+    return;
+  }
+
+  try {
+    const provider = new GoogleAuthProvider();
+
+    await linkWithPopup(auth.currentUser, provider);
+
+    showCustomPopup(
+      "Google Account Linked",
+      "Google Sign-In is now linked to your existing account.",
+      "success"
+    );
+
+  } catch (error) {
+    let message = error.message;
+
+    if (error.code === "auth/credential-already-in-use") {
+      message = "This Google account is already connected to another account. Automatic account merging is not supported.";
+    }
+
+    showCustomPopup(
+      "Google Linking Failed",
+      message,
+      "error"
+    );
+  }
+}
+
+window.linkGoogleAccount = linkGoogleAccount;
+
+
 /* ==================================
    APP STARTUP
 ================================== */
