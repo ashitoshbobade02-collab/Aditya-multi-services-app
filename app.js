@@ -507,7 +507,11 @@ function addBusinessTransaction() {
   const day = currentDay();
 
   if (!day || day.closed) {
-    alert("Start a business day first.");
+    showCustomPopup(
+      "Business Day Not Started",
+      "Please start a business day first.",
+      "error"
+    );
     return;
   }
 
@@ -516,7 +520,11 @@ function addBusinessTransaction() {
     Number(document.getElementById("transactionAmount").value);
 
   if (!Number.isFinite(amount) || amount <= 0) {
-    alert("Enter a valid transaction amount.");
+    showCustomPopup(
+      "Invalid Amount",
+      "Please enter a valid transaction amount.",
+      "error"
+    );
     return;
   }
 
@@ -540,17 +548,29 @@ function addBusinessTransaction() {
   const totals = calculateTotals(day);
 
   if (type === "C+" && amount > totals.online) {
-    alert("Insufficient online balance.");
+    showCustomPopup(
+      "Insufficient Balance",
+      "You don't have enough online balance.",
+      "error"
+    );
     return;
   }
 
   if (type === "C-" && amount + charge > totals.cash) {
-    alert("Insufficient cash balance.");
+    showCustomPopup(
+      "Insufficient Balance",
+      "You don't have enough cash for this transaction.",
+      "error"
+    );
     return;
   }
 
   if (type === "AEPS" && amount > totals.cash) {
-    alert("Insufficient cash balance.");
+    showCustomPopup(
+      "Insufficient Balance",
+      "You don't have enough cash for this AEPS transaction.",
+      "error"
+    );
     return;
   }
 
@@ -564,15 +584,15 @@ function addBusinessTransaction() {
   refreshDashboard();
 
   showCustomPopup(
-  "Transaction Successful!",
-  "Your transaction has been saved successfully.",
-  "success",
-  `<div style="padding:12px;background:#f1f6fc;border-radius:10px;">
-    <strong>Amount:</strong> ${money(amount)}
-    <br>
-    <strong>Customer Charge:</strong> ${money(charge)}
-  </div>`
-);
+    "Transaction Successful!",
+    "Your transaction has been saved successfully.",
+    "success",
+    `<div style="padding:12px;background:#f1f6fc;border-radius:10px;">
+      <strong>Amount:</strong> ${money(amount)}
+      <br>
+      <strong>Customer Charge:</strong> ${money(charge)}
+    </div>`
+  );
 }
 
 function addOnlineWithdrawal() {
