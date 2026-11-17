@@ -977,12 +977,21 @@ async function signInWithEmail() {
   }
 }
 
-async function createAccount() {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
 
-  if (!email || !password) {
-    showLoginMessage("Please enter your email and password.");
+async function createAccount() {
+  const password = document.getElementById("loginPassword").value;
+  const confirmGroup = document.getElementById("confirmPasswordGroup");
+  const confirmPassword = document.getElementById("confirmPassword");
+
+  if (confirmGroup.style.display === "none") {
+    confirmGroup.style.display = "block";
+    showLoginMessage("Please confirm your password, then click CREATE ACCOUNT again.", false);
+    confirmPassword.focus();
+    return;
+  }
+
+  if (!password || !confirmPassword.value) {
+    showLoginMessage("Please enter and confirm your password.");
     return;
   }
 
@@ -991,12 +1000,19 @@ async function createAccount() {
     return;
   }
 
+  if (password !== confirmPassword.value) {
+    showLoginMessage("Passwords do not match.");
+    return;
+  }
+
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const loginEmail = getMobileLoginEmail();
+    await createUserWithEmailAndPassword(auth, loginEmail, password);
   } catch (error) {
     showLoginMessage(error.message);
   }
 }
+
 
 async function resetPassword() {
   const email = document.getElementById("loginEmail").value.trim();
