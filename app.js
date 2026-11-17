@@ -788,4 +788,19 @@ updateTransactionFields();
 updateServiceFields();
 updateServicePaymentFields();
 refreshDashboard();
+ Object.assign(window, {
+  startBusinessDay,
+  updateTransactionFields,
+  calculateChargePreview,
+  addBusinessTransaction,
+  updateServiceFields,
+  calculateServiceTotal,
+  updateServicePaymentFields,
+  calculateServiceSplit,
+  addServiceTransaction,
+  previewClosing,
+  saveBusinessDay,
+  showHistory,
+  exportData
+ });
   
