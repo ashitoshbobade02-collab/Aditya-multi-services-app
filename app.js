@@ -1252,6 +1252,52 @@ function moveHeaderActionsToMenu() {
   }
 }
 
+/* ==================================
+   MENU ICONS
+================================== */
+
+function addMenuIcons() {
+  const icons = [
+    ["Dashboard", "🏠"],
+    ["New Transaction", "➕"],
+    ["Cash In / Cash Out", "💸"],
+    ["Customer Ledger", "👥"],
+    ["Services", "🖨️"],
+    ["Wallet Management", "👛"],
+    ["History & Calendar", "📅"],
+    ["Daily Closing", "📋"],
+    ["Reports", "📊"],
+    ["Expenses", "🧾"],
+    ["Backup & Restore", "💾"],
+    ["Settings", "⚙️"],
+    ["Dark Mode", "🌙"],
+    ["Light Mode", "☀️"],
+    ["Link Google Account", "🔗"],
+    ["Sign Out", "🚪"]
+  ];
+
+  const elements = document.querySelectorAll(
+    ".drawer-nav a, .drawer-actions button"
+  );
+
+  elements.forEach(element => {
+    if (element.querySelector(".menu-icon")) return;
+
+    const label = element.textContent.trim().toLowerCase();
+
+    const match = icons.find(([name]) =>
+      label.includes(name.toLowerCase())
+    );
+
+    if (!match) return;
+
+    const icon = document.createElement("span");
+    icon.className = "menu-icon";
+    icon.textContent = match[1];
+
+    element.prepend(icon);
+  });
+}
 
 /* ==================================
    LOAD USER BUSINESS DATA
@@ -1363,6 +1409,7 @@ function toggleTheme() {
 
 applyTheme(localStorage.getItem(THEME_KEY) || "light");
 moveHeaderActionsToMenu();
+addMenuIcons();
 
 /* ==================================
    INITIALIZE APP
