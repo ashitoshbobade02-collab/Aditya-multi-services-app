@@ -57,6 +57,7 @@
 </div>
 
 <!-- HEADER -->
+
 <header>
   <div class="brand">
     <div>
@@ -64,22 +65,24 @@
       <p>Business Management System</p>
     </div>
 
-    <div style="text-align:right;">
+    <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
       <div class="date" id="todayDate"></div>
 
       <button id="themeToggle" onclick="toggleTheme()">
         DARK MODE
       </button>
 
-      <button
-        onclick="logoutUser()"
-        style="margin-top:8px;padding:8px 14px;background:#dc2626;color:white;border:none;border-radius:6px;cursor:pointer;"
-      >
+      <button onclick="linkGoogleAccount()">
+        LINK GOOGLE
+      </button>
+
+      <button onclick="logoutUser()" style="background:#dc2626;">
         SIGN OUT
       </button>
     </div>
   </div>
 </header>
+
 
 <main>
 
