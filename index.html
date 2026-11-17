@@ -135,9 +135,8 @@
       </select>
     </div>
 
-    <label>Transaction Amount (₹)</label>
-    <input type="text" id="transactionAmount" inputmode="decimal"
-      placeholder="Enter amount" oninput="calculateChargePreview()">
+    <input type="number" id="transactionAmount" min="0" step="10"
+  placeholder="Enter amount" oninput="calculateChargePreview()">
 
     <label>Customer Charge (₹)</label>
     <input type="number" id="customerCharge" readonly
