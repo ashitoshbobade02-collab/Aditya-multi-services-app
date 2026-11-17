@@ -1197,6 +1197,63 @@ function closeCustomPopup() {
 }
 
 /* ==================================
+   SIDE MENU ACTIONS
+================================== */
+
+function moveHeaderActionsToMenu() {
+  const drawer = document.getElementById("sideDrawer");
+  if (!drawer) return;
+
+  let actions = drawer.querySelector(".drawer-actions");
+
+  if (!actions) {
+    actions = document.createElement("div");
+    actions.className = "drawer-actions";
+    actions.innerHTML = "<strong>Account & Appearance</strong>";
+    drawer.appendChild(actions);
+  }
+
+  const themeButton = document.getElementById("themeToggle");
+  const headerButtons = document.querySelectorAll("header button");
+
+  let googleButton = null;
+  let signOutButton = null;
+
+  headerButtons.forEach(button => {
+    const action = button.getAttribute("onclick") || "";
+
+    if (action.includes("linkGoogleAccount")) {
+      googleButton = button;
+    }
+
+    if (action.includes("logoutUser")) {
+      signOutButton = button;
+    }
+  });
+
+  if (themeButton) {
+    themeButton.textContent =
+      document.documentElement.dataset.theme === "dark"
+        ? "LIGHT MODE"
+        : "DARK MODE";
+
+    actions.appendChild(themeButton);
+  }
+
+  if (googleButton) {
+    googleButton.textContent = "LINK GOOGLE ACCOUNT";
+    actions.appendChild(googleButton);
+  }
+
+  if (signOutButton) {
+    signOutButton.textContent = "SIGN OUT";
+    signOutButton.classList.add("sign-out-button");
+    actions.appendChild(signOutButton);
+  }
+}
+
+
+/* ==================================
    LOAD USER BUSINESS DATA
 ================================== */
 
@@ -1305,6 +1362,7 @@ function toggleTheme() {
 }
 
 applyTheme(localStorage.getItem(THEME_KEY) || "light");
+moveHeaderActionsToMenu();
 
 /* ==================================
    INITIALIZE APP
