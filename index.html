@@ -10,6 +10,7 @@
 </head>
 <body>
 <!-- LOGIN SCREEN -->
+
 <div id="loginScreen" style="display:none;">
 
   <div class="login-box">
@@ -23,31 +24,35 @@
 
     <div class="login-divider">OR</div>
 
- <label>Mobile Number</label>
-<div style="display:flex; gap:8px;">
-  <span style="padding:13px; background:#eaf1f8; border-radius:10px; font-weight:bold;">
-    +91
-  </span>
-  <input
-    type="tel"
-    id="loginMobile"
-    placeholder="Enter 10-digit mobile number"
-    maxlength="10"
-    inputmode="numeric"
-  >
-</div>
+    <label>Mobile Number</label>
+    <div style="display:flex; gap:8px;">
+      <span style="padding:13px; background:#eaf1f8; border-radius:10px; font-weight:bold;">
+        +91
+      </span>
+      <input
+        type="tel"
+        id="loginMobile"
+        placeholder="Enter 10-digit mobile number"
+        maxlength="10"
+        inputmode="numeric"
+      >
+    </div>
+
     <label>Password</label>
-    <input type="password" id="loginPassword"
-      placeholder="Enter your password">
+    <input
+      type="password"
+      id="loginPassword"
+      placeholder="Enter your password"
+    >
 
     <div id="confirmPasswordGroup" style="display:none;">
-  <label>Confirm Password</label>
-  <input
-    type="password"
-    id="confirmPassword"
-    placeholder="Re-enter your password"
-  >
-</div>
+      <label>Confirm Password</label>
+      <input
+        type="password"
+        id="confirmPassword"
+        placeholder="Re-enter your password"
+      >
+    </div>
 
     <button onclick="signInWithEmail()">SIGN IN</button>
 
@@ -59,6 +64,7 @@
 
   </div>
 </div>
+
   
 <header>
   <div class="brand">
