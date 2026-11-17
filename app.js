@@ -1252,52 +1252,50 @@ function moveHeaderActionsToMenu() {
   }
 }
 
-/* ==================================
-   MENU ICONS
-================================== */
 
 function addMenuIcons() {
-  const icons = [
-    ["Dashboard", "🏠"],
-    ["New Transaction", "➕"],
-    ["Cash In / Cash Out", "💸"],
-    ["Customer Ledger", "👥"],
-    ["Services", "🖨️"],
-    ["Wallet Management", "👛"],
-    ["History & Calendar", "📅"],
-    ["Daily Closing", "📋"],
-    ["Reports", "📊"],
-    ["Expenses", "🧾"],
-    ["Backup & Restore", "💾"],
-    ["Settings", "⚙️"],
-    ["Dark Mode", "🌙"],
-    ["Light Mode", "☀️"],
-    ["Link Google Account", "🔗"],
-    ["Sign Out", "🚪"]
-  ];
+  const iconMap = {
+    "Dashboard": "🏠",
+    "Opening Balances": "💰",
+    "New Transaction": "➕",
+    "Services": "🖨️",
+    "Wallet Management": "👛",
+    "Daily Closing": "📋",
+    "History & Calendar": "📅",
+    "Customer Ledger": "👥",
+    "Cash In / Cash Out": "💸",
+    "Expenses": "🧾",
+    "Reports": "📊",
+    "Settings": "⚙️",
+    "LIGHT MODE": "☀️",
+    "DARK MODE": "🌙",
+    "LINK GOOGLE ACCOUNT": "🔗",
+    "SIGN OUT": "🚪"
+  };
 
-  const elements = document.querySelectorAll(
-    ".drawer-nav a, .drawer-actions button"
-  );
+  const menu = document.querySelector(".side-drawer");
 
-  elements.forEach(element => {
-    if (element.querySelector(".menu-icon")) return;
+  if (!menu) return;
 
-    const label = element.textContent.trim().toLowerCase();
+  menu.querySelectorAll("a, button").forEach(element => {
+    const label = element.textContent.trim().replace(/\s+/g, " ").toUpperCase();
 
-    const match = icons.find(([name]) =>
-      label.includes(name.toLowerCase())
+    const matchedLabel = Object.keys(iconMap).find(
+      name => name.toUpperCase() === label
     );
 
-    if (!match) return;
+    if (!matchedLabel) return;
+
+    if (element.querySelector(".menu-icon")) return;
 
     const icon = document.createElement("span");
     icon.className = "menu-icon";
-    icon.textContent = match[1];
+    icon.textContent = iconMap[matchedLabel];
 
     element.prepend(icon);
   });
-}
+ }
+
 
 /* ==================================
    LOAD USER BUSINESS DATA
