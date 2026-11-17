@@ -803,4 +803,13 @@ refreshDashboard();
   showHistory,
   exportData
  });
+document.addEventListener("wheel", function (event) {
+  if (
+    document.activeElement &&
+    document.activeElement.tagName === "INPUT" &&
+    document.activeElement.type === "number"
+  ) {
+    document.activeElement.blur();
+  }
+}, { passive: true });
   
