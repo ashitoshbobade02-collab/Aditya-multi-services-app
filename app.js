@@ -951,10 +951,6 @@ function closeCustomPopup() {
   document.getElementById("customPopup").style.display = "none";
 }
 
-showCustomPopup(
-  "Welcome!",
-  "Your custom popup is working perfectly."
-);
 updateTransactionFields();
 updateServiceFields();
 updateServicePaymentFields();
