@@ -366,12 +366,121 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <div id="historyList"></div>
   </div>
 
+  
   <!-- CUSTOMER LEDGER -->
   <h3 class="section-title" id="customerLedgerSection">Customer Ledger</h3>
-  <div class="card">
-    <p>Customer Ledger will be implemented in the next development step.</p>
-    <p>It will track customer dues, shop dues, partial payments, settlements and complete payment history.</p>
+
+  <div class="wallets customer-ledger-summary">
+    <div class="card">
+      <p>Customers Owe Us</p>
+      <h2 class="green" id="customerOwesTotal">₹0.00</h2>
+      <small>Total outstanding from customers</small>
+    </div>
+
+    <div class="card">
+      <p>We Owe Customers</p>
+      <h2 id="shopOwesTotal">₹0.00</h2>
+      <small>Total outstanding payable to customers</small>
+    </div>
   </div>
+
+  <div class="card">
+    <h3>Customer Accounts</h3>
+
+    <input
+      type="search"
+      id="customerSearch"
+      placeholder="Search customer by name or mobile number"
+    >
+
+    <button type="button" onclick="showAddCustomerForm()">
+      + ADD NEW CUSTOMER
+    </button>
+
+    <div id="customerFormSection" style="display:none;margin-top:18px;">
+      <h3>Add New Customer</h3>
+
+      <label>Customer Name</label>
+      <input type="text" id="customerName" placeholder="Enter customer name">
+
+      <label>Mobile Number (Optional)</label>
+      <input type="tel" id="customerMobile" placeholder="Enter mobile number">
+
+      <button type="button" onclick="addLedgerCustomer()">SAVE CUSTOMER</button>
+      <button type="button" onclick="hideAddCustomerForm()">CANCEL</button>
+    </div>
+
+    <div id="customerList" style="margin-top:18px;">
+      <p>No customers added yet.</p>
+    </div>
+  </div>
+
+  <!-- INDIVIDUAL CUSTOMER ACCOUNT -->
+  <div class="card" id="customerAccountSection" style="display:none;">
+    <h3 id="customerAccountName">Customer Account</h3>
+    <p id="customerAccountMobile"></p>
+
+    <div class="wallets">
+      <div class="card">
+        <p>Total Due</p>
+        <h2 id="customerTotalDue">₹0.00</h2>
+      </div>
+
+      <div class="card">
+        <p>Payment Received</p>
+        <h2 id="customerPaymentReceived">₹0.00</h2>
+      </div>
+
+      <div class="card">
+        <p>Remaining Balance</p>
+        <h2 id="customerRemainingBalance">₹0.00</h2>
+      </div>
+
+      <div class="card">
+        <p>Amount We Owe</p>
+        <h2 id="customerShopOwes">₹0.00</h2>
+      </div>
+    </div>
+
+    <button type="button" onclick="showCustomerPaymentForm('received')">
+      PAYMENT RECEIVED
+    </button>
+
+    <button type="button" onclick="showCustomerPaymentForm('given')">
+      PAYMENT GIVEN
+    </button>
+
+    <div id="customerPaymentForm" style="display:none;margin-top:18px;">
+      <h3 id="customerPaymentFormTitle">Record Payment</h3>
+
+      <label>Payment Amount (₹)</label>
+      <input type="number" id="customerPaymentAmount" min="0.01" step="0.01" placeholder="Enter amount">
+
+      <label>Payment Date</label>
+      <input type="date" id="customerPaymentDate">
+
+      <label>Note (Optional)</label>
+      <input type="text" id="customerPaymentNote" placeholder="Enter payment details">
+
+      <button type="button" onclick="saveCustomerPayment()">SAVE PAYMENT</button>
+      <button type="button" onclick="hideCustomerPaymentForm()">CANCEL</button>
+    </div>
+
+    <h3>Complete Payment History</h3>
+    <div id="customerPaymentHistory">
+      <p>No payment history yet.</p>
+    </div>
+
+    <button type="button" onclick="closeCustomerAccount()">BACK TO CUSTOMERS</button>
+  </div>
+
+  <div class="card">
+    <h3>Outstanding Customer Report</h3>
+    <div id="customerOutstandingReport">
+      <p>No outstanding balances yet.</p>
+    </div>
+  </div>
+  
 
   <!-- CASH IN / CASH OUT -->
   <h3 class="section-title" id="cashMovementSection">Cash In / Cash Out</h3>
