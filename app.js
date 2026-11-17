@@ -407,7 +407,16 @@ function addServiceTransaction() {
 
   refreshDashboard();
 
-  alert("Service saved successfully!");
+  showCustomPopup(
+  "Service Saved!",
+  "Your service entry has been recorded successfully.",
+  "success",
+  `<div style="padding:12px;background:#f1f6fc;border-radius:10px;">
+    <strong>Service:</strong> ${serviceName}
+    <br>
+    <strong>Amount:</strong> ${money(amount)}
+  </div>`
+);
 }
 
 /* ==================================
@@ -554,7 +563,16 @@ function addBusinessTransaction() {
   calculateChargePreview();
   refreshDashboard();
 
-  alert("Transaction saved successfully!");
+  showCustomPopup(
+  "Transaction Successful!",
+  "Your transaction has been saved successfully.",
+  "success",
+  `<div style="padding:12px;background:#f1f6fc;border-radius:10px;">
+    <strong>Amount:</strong> ${money(amount)}
+    <br>
+    <strong>Customer Charge:</strong> ${money(charge)}
+  </div>`
+);
 }
 
 function addOnlineWithdrawal() {
@@ -610,7 +628,16 @@ function addOnlineWithdrawal() {
 
   refreshDashboard();
 
-  alert("Online balance withdrawal saved successfully!");
+  showCustomPopup(
+  "Withdrawal Successful!",
+  "Your online balance withdrawal has been saved.",
+  "success",
+  `<div style="padding:12px;background:#f1f6fc;border-radius:10px;">
+    <strong>Software:</strong> ${platform}
+    <br>
+    <strong>Amount:</strong> ${money(amount)}
+  </div>`
+);
     }
 
 /* ==================================
