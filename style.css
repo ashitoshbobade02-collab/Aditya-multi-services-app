@@ -719,3 +719,20 @@ th {
     transition-duration: .01ms !important;
   }
   }
+
+.menu-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  margin-right: 10px;
+  font-size: 17px;
+  vertical-align: middle;
+}
+
+.drawer-nav a,
+.drawer-actions button {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
