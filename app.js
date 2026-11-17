@@ -14,7 +14,12 @@ import {
 
 const KEY = "aditya_multi_services_v3";
 const THEME_KEY = "aditya_multi_services_theme_v1";
-const emptyData = () => ({ days: [], currentDay: null, walletCarryForward: null });
+const emptyData = () => ({
+  days: [],
+  currentDay: null,
+  walletCarryForward: null,
+  customers: []
+});
 let data = emptyData();
 let currentUser = null;
 let activeStorageKey = null;
@@ -25,6 +30,7 @@ let selectedHistoryDate = today();
 function normalizeData(value) {
   const clean = value && typeof value === "object" ? value : emptyData();
   if (!Array.isArray(clean.days)) clean.days = [];
+  if (!Array.isArray(clean.customers)) clean.customers = [];
   if (!Object.prototype.hasOwnProperty.call(clean, "currentDay")) clean.currentDay = null;
   if (!Object.prototype.hasOwnProperty.call(clean, "walletCarryForward")) clean.walletCarryForward = null;
   return clean;
@@ -1017,6 +1023,342 @@ function exportData() {
 }
 
 /* ==================================
+   CUSTOMER LEDGER
+================================== */
+
+let activeCustomerId = null;
+let customerPaymentMode = null;
+
+function escapeLedgerHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+}
+
+function getCustomer(id) {
+  return data.customers.find(customer => customer.id === id);
+}
+
+function customerBalance(customer) {
+  return Math.max(0, Number(customer.totalDue || 0) - Number(customer.received || 0));
+}
+
+function shopOwesBalance(customer) {
+  return Math.max(0, Number(customer.totalShopOwes || 0) - Number(customer.given || 0));
+}
+
+function initializeCustomerLedger() {
+  data.customers.forEach(customer => {
+    if (!Array.isArray(customer.history)) customer.history = [];
+    if (!Number.isFinite(Number(customer.totalDue))) customer.totalDue = 0;
+    if (!Number.isFinite(Number(customer.received))) customer.received = 0;
+    if (!Number.isFinite(Number(customer.totalShopOwes))) customer.totalShopOwes = 0;
+    if (!Number.isFinite(Number(customer.given))) customer.given = 0;
+  });
+
+  const account = document.getElementById("customerAccountSection");
+
+  if (account && !document.getElementById("addCustomerDueButton")) {
+    const firstButton = account.querySelector('button[onclick*="showCustomerPaymentForm"]');
+
+    if (firstButton) {
+      firstButton.insertAdjacentHTML("beforebegin", `
+        <button type="button" id="addCustomerDueButton"
+          onclick="showCustomerPaymentForm('addDue')">
+          ADD AMOUNT DUE
+        </button>
+
+        <button type="button" id="addShopOwesButton"
+          onclick="showCustomerPaymentForm('addOwe')">
+          ADD AMOUNT WE OWE
+        </button>
+      `);
+    }
+  }
+
+  const search = document.getElementById("customerSearch");
+
+  if (search && !search.dataset.ledgerReady) {
+    search.addEventListener("input", renderCustomerLedger);
+    search.dataset.ledgerReady = "true";
+  }
+
+  renderCustomerLedger();
+}
+
+function showAddCustomerForm() {
+  document.getElementById("customerFormSection").style.display = "block";
+  document.getElementById("customerName").focus();
+}
+
+function hideAddCustomerForm() {
+  document.getElementById("customerFormSection").style.display = "none";
+  document.getElementById("customerName").value = "";
+  document.getElementById("customerMobile").value = "";
+}
+
+function addLedgerCustomer() {
+  const name = document.getElementById("customerName").value.trim();
+  const mobile = document.getElementById("customerMobile").value.trim();
+
+  if (!name) {
+    showCustomPopup("Customer Name Required", "Please enter the customer's name.", "error");
+    return;
+  }
+
+  const duplicate = data.customers.some(customer =>
+    mobile && customer.mobile && customer.mobile === mobile
+  );
+
+  if (duplicate) {
+    showCustomPopup("Customer Already Exists", "A customer with this mobile number already exists.", "error");
+    return;
+  }
+
+  const customer = {
+    id: "customer_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
+    name,
+    mobile,
+    totalDue: 0,
+    received: 0,
+    totalShopOwes: 0,
+    given: 0,
+    history: [],
+    createdAt: new Date().toISOString()
+  };
+
+  data.customers.push(customer);
+
+  persist();
+  hideAddCustomerForm();
+  renderCustomerLedger();
+
+  showCustomPopup("Customer Added", name + " has been added successfully.", "success");
+}
+
+function renderCustomerLedger() {
+  const list = document.getElementById("customerList");
+  const owesTotal = document.getElementById("customerOwesTotal");
+  const shopOwesTotal = document.getElementById("shopOwesTotal");
+  const report = document.getElementById("customerOutstandingReport");
+
+  if (!list || !owesTotal || !shopOwesTotal || !report) return;
+
+  const customers = data.customers || [];
+
+  const totalCustomerOwes = customers.reduce(
+    (sum, customer) => sum + customerBalance(customer), 0
+  );
+
+  const totalShopOwes = customers.reduce(
+    (sum, customer) => sum + shopOwesBalance(customer), 0
+  );
+
+  owesTotal.textContent = money(totalCustomerOwes);
+  shopOwesTotal.textContent = money(totalShopOwes);
+
+  const search = (document.getElementById("customerSearch")?.value || "")
+    .trim().toLowerCase();
+
+  const filtered = customers.filter(customer =>
+    customer.name.toLowerCase().includes(search) ||
+    String(customer.mobile || "").toLowerCase().includes(search)
+  );
+
+  if (!filtered.length) {
+    list.innerHTML = customers.length
+      ? "<p>No matching customers found.</p>"
+      : "<p>No customers added yet.</p>";
+  } else {
+    list.innerHTML = filtered.map(customer => {
+      const due = customerBalance(customer);
+      const payable = shopOwesBalance(customer);
+
+      return `
+        <div class="customer-ledger-card"
+          style="padding:15px 0;border-bottom:1px solid var(--line);">
+
+          <strong>${escapeLedgerHTML(customer.name)}</strong>
+          <p>${escapeLedgerHTML(customer.mobile || "No mobile number")}</p>
+
+          <p>Remaining customer due:
+            <strong>${money(due)}</strong>
+          </p>
+
+          <p>Remaining amount we owe:
+            <strong>${money(payable)}</strong>
+          </p>
+
+          <button type="button"
+            onclick="openCustomerAccount('${escapeLedgerHTML(customer.id)}')">
+            VIEW ACCOUNT &amp; HISTORY
+          </button>
+        </div>
+      `;
+    }).join("");
+  }
+
+  const outstanding = customers.filter(customer =>
+    customerBalance(customer) > 0 || shopOwesBalance(customer) > 0
+  );
+
+  report.innerHTML = outstanding.length
+    ? outstanding.map(customer => `
+        <div style="padding:12px 0;border-bottom:1px solid var(--line);">
+          <strong>${escapeLedgerHTML(customer.name)}</strong>
+          <p>Customer owes us: ${money(customerBalance(customer))}</p>
+          <p>We owe customer: ${money(shopOwesBalance(customer))}</p>
+        </div>
+      `).join("")
+    : "<p>No outstanding balances yet.</p>";
+}
+
+function openCustomerAccount(id) {
+  const customer = getCustomer(id);
+
+  if (!customer) return;
+
+  activeCustomerId = id;
+
+  document.getElementById("customerAccountSection").style.display = "block";
+  document.getElementById("customerAccountName").textContent = customer.name;
+  document.getElementById("customerAccountMobile").textContent =
+    customer.mobile || "No mobile number added";
+
+  document.getElementById("customerTotalDue").textContent = money(customer.totalDue);
+  document.getElementById("customerPaymentReceived").textContent = money(customer.received);
+  document.getElementById("customerRemainingBalance").textContent =
+    money(customerBalance(customer));
+  document.getElementById("customerShopOwes").textContent =
+    money(shopOwesBalance(customer));
+
+  const history = document.getElementById("customerPaymentHistory");
+
+  if (!customer.history.length) {
+    history.innerHTML = "<p>No payment history yet.</p>";
+  } else {
+    history.innerHTML = [...customer.history].reverse().map(entry => `
+      <div style="padding:12px 0;border-bottom:1px solid var(--line);">
+        <strong>${escapeLedgerHTML(entry.label)}</strong>
+        <p>Amount: ${money(entry.amount)}</p>
+        <p>Date: ${escapeLedgerHTML(entry.date)}</p>
+        <p>Time: ${escapeLedgerHTML(entry.time)}</p>
+        <p>Note: ${escapeLedgerHTML(entry.note || "No note")}</p>
+      </div>
+    `).join("");
+  }
+
+  document.getElementById("customerPaymentForm").style.display = "none";
+  document.getElementById("customerAccountSection").scrollIntoView({ behavior: "smooth" });
+}
+
+function closeCustomerAccount() {
+  document.getElementById("customerAccountSection").style.display = "none";
+  document.getElementById("customerPaymentForm").style.display = "none";
+  activeCustomerId = null;
+  customerPaymentMode = null;
+}
+
+function showCustomerPaymentForm(mode) {
+  if (!activeCustomerId) return;
+
+  customerPaymentMode = mode;
+
+  const titles = {
+    received: "Record Payment Received",
+    given: "Record Payment Given",
+    addDue: "Add Amount Customer Owes Us",
+    addOwe: "Add Amount We Owe Customer"
+  };
+
+  document.getElementById("customerPaymentFormTitle").textContent = titles[mode];
+  document.getElementById("customerPaymentForm").style.display = "block";
+  document.getElementById("customerPaymentDate").value = today();
+  document.getElementById("customerPaymentAmount").value = "";
+  document.getElementById("customerPaymentNote").value = "";
+  document.getElementById("customerPaymentAmount").focus();
+}
+
+function hideCustomerPaymentForm() {
+  document.getElementById("customerPaymentForm").style.display = "none";
+  customerPaymentMode = null;
+}
+
+function saveCustomerPayment() {
+  const customer = getCustomer(activeCustomerId);
+
+  if (!customer || !customerPaymentMode) return;
+
+  const amount = Number(document.getElementById("customerPaymentAmount").value);
+  const date = document.getElementById("customerPaymentDate").value;
+  const note = document.getElementById("customerPaymentNote").value.trim();
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    showCustomPopup("Invalid Amount", "Enter a valid amount greater than zero.", "error");
+    return;
+  }
+
+  if (!date) {
+    showCustomPopup("Date Required", "Please select the payment date.", "error");
+    return;
+  }
+
+  const mode = customerPaymentMode;
+
+  if (mode === "received" && amount > customerBalance(customer)) {
+    showCustomPopup("Amount Too High", "Payment received cannot exceed the remaining customer due.", "error");
+    return;
+  }
+
+  if (mode === "given" && amount > shopOwesBalance(customer)) {
+    showCustomPopup("Amount Too High", "Payment given cannot exceed the amount we still owe this customer.", "error");
+    return;
+  }
+
+  const changes = {
+    addDue: () => {
+      customer.totalDue += amount;
+      return "New Customer Due";
+    },
+    received: () => {
+      customer.received += amount;
+      return "Payment Received";
+    },
+    addOwe: () => {
+      customer.totalShopOwes += amount;
+      return "New Amount We Owe";
+    },
+    given: () => {
+      customer.given += amount;
+      return "Payment Given";
+    }
+  };
+
+  const label = changes[mode]();
+
+  customer.history.push({
+    id: "ledger_" + Date.now(),
+    type: mode,
+    label,
+    amount,
+    date,
+    time: new Date().toLocaleTimeString("en-IN"),
+    note
+  });
+
+  persist();
+  hideCustomerPaymentForm();
+  openCustomerAccount(customer.id);
+  renderCustomerLedger();
+
+  showCustomPopup("Ledger Updated", label + " has been recorded successfully.", "success");
+}
+  
+/* ==================================
    FIREBASE LOGIN
 ================================== */
 
@@ -1416,6 +1758,7 @@ addMenuIcons();
 updateTransactionFields();
 updateServiceFields();
 updateServicePaymentFields();
+initializeCustomerLedger();
 refreshDashboard();
 
 Object.assign(window, {
@@ -1444,5 +1787,14 @@ Object.assign(window, {
   createAccount,
   resetPassword,
   showLoginMessage,
-  logoutUser
+  logoutUser,
+  showAddCustomerForm,
+  hideAddCustomerForm,
+  addLedgerCustomer,
+  renderCustomerLedger,
+  openCustomerAccount,
+  closeCustomerAccount,
+  showCustomerPaymentForm,
+  hideCustomerPaymentForm,
+  saveCustomerPayment,
 });
