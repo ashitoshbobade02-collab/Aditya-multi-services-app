@@ -933,6 +933,77 @@ function exportData() {
 
   URL.revokeObjectURL(url);
 }
+/* ==================================
+   FIREBASE LOGIN
+================================== */
+
+function showLoginMessage(message, isError = true) {
+  const element = document.getElementById("loginMessage");
+  element.textContent = message;
+  element.style.color = isError ? "#dc2626" : "#16a34a";
+}
+
+async function signInWithGoogle() {
+  try {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+  } catch (error) {
+    showLoginMessage(error.message);
+  }
+}
+
+async function signInWithEmail() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  if (!email || !password) {
+    showLoginMessage("Please enter your email and password.");
+    return;
+  }
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    showLoginMessage(error.message);
+  }
+}
+
+async function createAccount() {
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value;
+
+  if (!email || !password) {
+    showLoginMessage("Please enter your email and password.");
+    return;
+  }
+
+  if (password.length < 6) {
+    showLoginMessage("Password must be at least 6 characters.");
+    return;
+  }
+
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+  } catch (error) {
+    showLoginMessage(error.message);
+  }
+}
+
+async function resetPassword() {
+  const email = document.getElementById("loginEmail").value.trim();
+
+  if (!email) {
+    showLoginMessage("Please enter your email address first.");
+    return;
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    showLoginMessage("Password reset email sent. Check your inbox.", false);
+  } catch (error) {
+    showLoginMessage(error.message);
+  }
+}
 
 /* ==================================
    APP STARTUP
@@ -961,6 +1032,25 @@ function showCustomPopup(title, message, type = "success", details = "") {
 function closeCustomPopup() {
   document.getElementById("customPopup").style.display = "none";
 }
+/* ==================================
+   CHECK LOGIN STATUS
+================================== */
+
+onAuthStateChanged(auth, (user) => {
+  const loginScreen = document.getElementById("loginScreen");
+  const header = document.querySelector("header");
+  const main = document.querySelector("main");
+
+  if (user) {
+    loginScreen.style.display = "none";
+    header.style.display = "";
+    main.style.display = "";
+  } else {
+    loginScreen.style.display = "flex";
+    header.style.display = "none";
+    main.style.display = "none";
+  }
+});
 
 updateTransactionFields();
 updateServiceFields();
@@ -983,4 +1073,9 @@ refreshDashboard();
   exportData,
   showCustomPopup,
   closeCustomPopup,
+  signInWithGoogle,
+  signInWithEmail,
+  createAccount,
+  resetPassword,
+  showLoginMessage,
  });
