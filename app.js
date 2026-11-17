@@ -1,5 +1,15 @@
 import { db, auth } from "./firebase.js";
 
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+
 const KEY = "aditya_multi_services_v3";
 
 let data = JSON.parse(
