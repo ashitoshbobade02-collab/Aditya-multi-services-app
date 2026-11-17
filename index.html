@@ -51,7 +51,15 @@
       <small>Today's AEPS</small>
       <p id="finoCollection">₹0.00</p>
     </div>
+
+    <div class="wallet">
+      <small>SBI Wallet</small>
+      <h2 id="sbiBalance">₹0.00</h2>
+      <small>Today's AEPS</small>
+      <p id="sbiCollection">₹0.00</p>
+    </div>
   </div>
+  
 
   <h3 class="section-title">Today's Overview</h3>
   <div class="wallets">
@@ -94,6 +102,10 @@
     <label>Fino Opening Wallet (₹)</label>
     <input type="number" id="openingFino" placeholder="Enter Fino balance">
 
+    
+    <label>SBI Opening Wallet (₹)</label>
+    <input type="number" id="openingSbi" placeholder="Enter SBI balance">
+    
     <button class="gold" id="startDayBtn" onclick="startBusinessDay()">
       START BUSINESS DAY
     </button>
@@ -119,6 +131,7 @@
         <option value="Roinet">Roinet</option>
         <option value="Tez">Tez</option>
         <option value="Fino">Fino</option>
+        <option value="SBI">SBI</option>
       </select>
     </div>
 
