@@ -936,6 +936,15 @@ function exportData() {
 /* ==================================
    FIREBASE LOGIN
 ================================== */
+function getMobileLoginEmail() {
+  const mobile = document.getElementById("loginMobile").value.trim();
+
+  if (!/^[6-9]\d{9}$/.test(mobile)) {
+    throw new Error("Please enter a valid 10-digit Indian mobile number.");
+  }
+
+  return `91${mobile}@mobile.aditya-multi-services.invalid`;
+}
 
 function showLoginMessage(message, isError = true) {
   const element = document.getElementById("loginMessage");
