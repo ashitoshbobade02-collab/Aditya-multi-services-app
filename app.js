@@ -879,7 +879,35 @@ function exportData() {
 /* ==================================
    APP STARTUP
 ================================== */
+function showCustomPopup(title, message, type = "success", details = "") {
+  const popup = document.getElementById("customPopup");
+  const icon = document.getElementById("popupIcon");
 
+  document.getElementById("popupTitle").textContent = title;
+  document.getElementById("popupMessage").textContent = message;
+  document.getElementById("popupDetails").innerHTML = details;
+
+  if (type === "error") {
+    icon.textContent = "!";
+    icon.style.background = "#fee2e2";
+    icon.style.color = "#dc2626";
+  } else {
+    icon.textContent = "✓";
+    icon.style.background = "#e6f8ed";
+    icon.style.color = "#16a34a";
+  }
+
+  popup.style.display = "flex";
+}
+
+function closeCustomPopup() {
+  document.getElementById("customPopup").style.display = "none";
+}
+
+showCustomPopup(
+  "Welcome!",
+  "Your custom popup is working perfectly."
+);
 updateTransactionFields();
 updateServiceFields();
 updateServicePaymentFields();
@@ -898,5 +926,7 @@ refreshDashboard();
   previewClosing,
   saveBusinessDay,
   showHistory,
-  exportData
+  exportData,
+  showCustomPopup,
+  closeCustomPopup,
  });
