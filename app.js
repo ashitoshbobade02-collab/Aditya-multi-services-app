@@ -717,10 +717,11 @@ function saveBusinessDay() {
   day.closed = true;
 
   data.walletCarryForward = {
-    biznext: totals.biznext,
-    roinet: totals.roinet,
-    tez: totals.tez,
-    fino: totals.fino
+   biznext: totals.biznext,
+   roinet: totals.roinet,
+   tez: totals.tez,
+   fino: totals.fino,
+   sbi: totals.sbi
   };
 
   data.days.push(day);
