@@ -1,317 +1,509 @@
 
-
 :root {
   --navy: #003b7a;
   --blue: #0875c9;
   --light-blue: #eaf4ff;
   --gold: #f5b400;
   --background: #f4f7fb;
-  --white: #ffffff;
+  --white: #fff;
   --text: #183451;
-  --muted: #71849a;
-  --border: #e2eaf2;
-  --green: #168653;
-  --red: #d94343;
+  --muted: #64748b;
+  --line: #dce6f0;
+  --green: #16834a;
+  --shadow: 0 4px 16px rgba(0,35,75,.07);
+}
+
+:root[data-theme="dark"] {
+  --navy: #071b32;
+  --blue: #368fdf;
+  --light-blue: #152d46;
+  --gold: #f5b400;
+  --background: #0d1724;
+  --white: #152334;
+  --text: #e8f0fa;
+  --muted: #a6b5c8;
+  --line: #2b4058;
+  --green: #4ade80;
+  --shadow: 0 4px 18px rgba(0,0,0,.22);
 }
 
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
 body {
-  font-family: Arial, sans-serif;
+  margin: 0;
   background: var(--background);
   color: var(--text);
-  min-height: 100vh;
+  font: 15px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
 }
 
 header {
-  background: linear-gradient(135deg, #003b7a, #0875c9);
-  color: white;
-  padding: 28px 22px;
-  border-radius: 0 0 22px 22px;
+  background: linear-gradient(120deg, var(--navy), #075ca8);
+  color: #fff;
+  padding: 18px 4%;
+  box-shadow: var(--shadow);
 }
 
-header h2 {
-  font-size: 21px;
-  letter-spacing: .5px;
+.brand {
+  max-width: 1180px;
+  margin: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
 }
 
-header p {
-  color: #d6eaff;
+.brand h2 {
+  margin: 0;
+  font-size: clamp(18px, 3vw, 25px);
+  letter-spacing: .4px;
+}
+
+.brand p {
+  margin: 2px 0 0;
+  color: #dcecff;
   font-size: 13px;
-  margin-top: 8px;
+}
+
+.date {
+  font-weight: 700;
 }
 
 main {
-  max-width: 850px;
+  max-width: 1180px;
   margin: auto;
-  padding: 20px;
+  padding: 18px 16px 36px;
 }
 
 .section-title {
   font-size: 17px;
-  font-weight: 700;
-  margin: 25px 0 14px;
+  color: var(--navy);
+  margin: 25px 0 12px;
+  font-weight: 800;
+}
+
+:root[data-theme="dark"] .section-title {
+  color: #8ec8ff;
 }
 
 .wallets {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 13px;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+  gap: 12px;
 }
 
-.wallet, .card {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 15px;
-  padding: 19px;
-  box-shadow: 0 4px 15px #003b7a0a;
+.wallet,
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  min-width: 0;
 }
 
 .wallet {
-  border-top: 3px solid var(--blue);
+  border-top: 4px solid var(--blue);
 }
 
 .wallet small {
   color: var(--muted);
-  font-size: 12px;
+  font-weight: 650;
 }
 
-.wallet h2 {
-  font-size: 21px;
-  margin-top: 12px;
-  color: var(--navy);
+.wallet h2,
+.card h2 {
+  margin: 7px 0;
+  font-size: 22px;
+  overflow-wrap: anywhere;
 }
 
-.card {
-  margin-bottom: 14px;
+.wallet p {
+  margin: 3px 0;
+  color: var(--green);
+  font-weight: 750;
 }
 
 .card p {
-  font-size: 13px;
+  margin: 4px 0;
   color: var(--muted);
-}
-
-.card h2 {
-  font-size: 25px;
-  margin-top: 9px;
-}
-
-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  margin-top: 14px;
-}
-
-input, select {
-  width: 100%;
-  padding: 14px;
-  margin-top: 8px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: #f9fbfe;
-  color: var(--text);
-  font-size: 15px;
-}
-
-input:focus, select:focus {
-  border-color: var(--blue);
-  outline: none;
-  background: white;
-}
-
-button {
-  width: 100%;
-  padding: 14px;
-  margin-top: 14px;
-  border: none;
-  border-radius: 10px;
-  background: var(--navy);
-  color: white;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-button:hover {
-  background: var(--blue);
-}
-
-button.gold {
-  background: var(--gold);
-  color: var(--navy);
 }
 
 .green {
   color: var(--green);
 }
 
-.red {
-  color: var(--red);
+label {
+  display: block;
+  font-weight: 700;
+  margin: 13px 0 6px;
+  color: var(--text);
 }
 
-@media (max-width: 380px) {
-  main { padding: 14px; }
-  .wallet { padding: 14px; }
-  .wallet h2 { font-size: 18px; }
-}
-
-/* Remove number input spinner arrows */
-
-input[type="number"] {
-  appearance: textfield;
-  -moz-appearance: textfield;
-}
-
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-/* CUSTOM PROFESSIONAL POPUP */
-
-.popup-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  padding: 20px;
-}
-
-.popup-box {
-  background: #ffffff;
+input,
+select,
+textarea {
   width: 100%;
-  max-width: 350px;
-  padding: 28px 22px;
-  border-radius: 20px;
-  text-align: center;
-  box-shadow: 0 15px 45px rgba(0,0,0,0.2);
-  animation: popupShow 0.25s ease;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--white);
+  color: var(--text);
+  font: inherit;
+  outline: none;
 }
 
-.popup-icon {
-  width: 65px;
-  height: 65px;
-  margin: 0 auto 15px;
-  border-radius: 50%;
-  background: #e6f8ed;
-  color: #16a34a;
-  font-size: 38px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 16%, transparent);
 }
 
-.popup-box h2 {
-  color: #003b7a;
-  margin-bottom: 10px;
+input[readonly] {
+  background: var(--background);
 }
 
-.popup-box p {
-  color: #64748b;
-  line-height: 1.5;
+button {
+  border: 0;
+  border-radius: 9px;
+  background: var(--navy);
+  color: #fff;
+  padding: 12px 16px;
+  margin: 12px 7px 0 0;
+  font-weight: 800;
+  cursor: pointer;
+  transition: filter .15s, transform .15s;
 }
 
-.popup-box button {
+button:hover {
+  filter: brightness(1.12);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+button.gold,
+.gold {
+  background: var(--gold);
+  color: #1d2a3a;
+}
+
+.card button {
+  max-width: 100%;
+}
+
+#openingSection {
+  max-width: 100%;
+}
+
+#openingSection input {
+  margin-bottom: 3px;
+}
+
+#startDayBtn {
   width: 100%;
-  margin-top: 20px;
-  padding: 14px;
-  border: none;
-  border-radius: 12px;
-  background: #0875c9;
-  color: white;
-  font-weight: bold;
-  font-size: 15px;
+  margin-top: 18px;
 }
 
-#popupDetails {
-  margin-top: 15px;
-  text-align: left;
+.login-box {
+  width: min(440px, calc(100% - 28px));
+  margin: 5vh auto;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 26px;
+  box-shadow: var(--shadow);
 }
-
-@keyframes popupShow {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-/* LOGIN SCREEN */
 
 #loginScreen {
   position: fixed;
   inset: 0;
-  z-index: 10000;
-  background: linear-gradient(135deg, #003b7a, #0875c9);
-  display: flex;
-  align-items: center;
+  z-index: 20;
+  overflow: auto;
+  background: var(--background);
+  align-items: flex-start;
   justify-content: center;
-  padding: 20px;
+  padding: 18px 0;
 }
 
-.login-box {
-  background: #ffffff;
-  width: 100%;
-  max-width: 380px;
-  padding: 30px 24px;
-  border-radius: 20px;
-  box-shadow: 0 15px 45px rgba(0,0,0,0.2);
-}
-
-.login-box h2 {
-  color: #003b7a;
+#loginScreen .login-box h2 {
+  color: var(--navy);
   text-align: center;
-  font-size: 23px;
-  margin-bottom: 8px;
+  margin: 4px 0;
 }
 
-.login-box p {
+#loginScreen .login-box > p {
   text-align: center;
-  color: #64748b;
+  color: var(--muted);
 }
 
-.login-box label {
-  display: block;
-  margin-top: 16px;
-  font-weight: bold;
-}
-
-.login-box input {
+#loginScreen button {
   width: 100%;
-  box-sizing: border-box;
-  padding: 13px;
-  margin-top: 7px;
-  border: 1px solid #dbe3ed;
-  border-radius: 10px;
-  font-size: 15px;
+  margin: 8px 0 0;
 }
 
-.login-box button {
-  width: 100%;
-  padding: 14px;
-  margin-top: 14px;
-  border: none;
-  border-radius: 10px;
-  background: #0875c9;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
+#loginScreen button:first-of-type {
+  background: #fff;
+  color: #24364a;
+  border: 1px solid var(--line);
 }
 
 .login-divider {
   text-align: center;
-  margin: 20px 0;
-  color: #94a3b8;
+  color: var(--muted);
+  margin: 14px 0;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+#loginMessage {
+  min-height: 22px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+#confirmPasswordGroup {
+  margin-top: 8px;
+}
+
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(4,18,35,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.popup-box {
+  width: min(420px, 100%);
+  background: var(--white);
+  color: var(--text);
+  border-radius: 18px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 15px 50px #0003;
+}
+
+.popup-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 10px;
+  font-size: 25px;
+  font-weight: 900;
+  background: #e6f8ed;
+  color: #16834a;
+}
+
+.popup-box h2 {
+  margin: 8px 0;
+}
+
+.popup-box p {
+  color: var(--muted);
+}
+
+#popupDetails {
+  text-align: left;
+}
+
+footer {
+  text-align: center;
+  padding: 28px 10px 10px;
+  color: var(--muted);
+}
+
+footer p {
+  font-weight: 900;
+  color: var(--navy);
+  margin-bottom: 0;
+}
+
+details summary {
+  color: var(--navy);
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 18px 0 12px;
+}
+
+.calendar-header strong {
+  font-size: 17px;
+}
+
+.calendar-nav {
+  margin: 0;
+  width: 40px;
+  height: 38px;
+  padding: 0;
+  font-size: 24px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.calendar-weekdays span {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 7px 0;
+}
+
+.calendar-day,
+.calendar-empty {
+  margin: 0;
+  min-height: 40px;
+  padding: 6px 2px;
+  border-radius: 9px;
+  background: var(--background);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+.calendar-day.has-record {
+  border-color: var(--blue);
+  background: var(--light-blue);
+  font-weight: 900;
+}
+
+.calendar-day.selected {
+  outline: 2px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.calendar-legend {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 12px 0;
+}
+
+.calendar-legend span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+
+.history-summary {
+  border-top: 1px solid var(--line);
+  margin-top: 14px;
+  padding-top: 12px;
+}
+
+.history-summary h4 {
+  margin: 18px 0 8px;
+}
+
+.record-tag {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: #e6f8ed;
+  color: #16834a;
+}
+
+.active-tag {
+  background: #fff3cd;
+  color: #8a6200;
+}
+
+.history-transaction {
+  border-bottom: 1px solid var(--line);
+  padding: 10px 0;
+}
+
+.history-transaction span {
+  float: right;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.history-transaction p {
+  margin: 4px 0;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+#transactionList > div,
+#withdrawalList > div {
+  border-bottom: 1px solid var(--line);
+}
+
+@media (max-width: 600px) {
+  header {
+    padding: 14px;
+  }
+
+  .brand {
+    align-items: flex-start;
+  }
+
+  .brand > div:last-child {
+    max-width: 48%;
+  }
+
+  .brand button {
+    font-size: 11px;
+    padding: 7px 9px;
+  }
+
+  main {
+    padding: 12px 11px 28px;
+  }
+
+  .wallets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .wallet,
+  .card {
+    padding: 13px;
+  }
+
+  .wallet h2,
+  .card h2 {
+    font-size: 19px;
+  }
+
+  .section-title {
+    font-size: 16px;
+    margin-top: 22px;
+  }
+
+  .calendar-grid {
+    gap: 3px;
+  }
+
+  .calendar-day,
+  .calendar-empty {
+    min-height: 36px;
+    font-size: 13px;
+    padding: 4px 1px;
+  }
+
+  .login-box {
+    padding: 21px;
+  }
 }
