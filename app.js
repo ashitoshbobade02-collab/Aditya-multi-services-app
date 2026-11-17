@@ -961,21 +961,28 @@ async function signInWithGoogle() {
   }
 }
 
-async function signInWithEmail() {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value;
 
-  if (!email || !password) {
-    showLoginMessage("Please enter your email and password.");
+async function signInWithEmail() {
+  const password = document.getElementById("loginPassword").value;
+  const confirmGroup = document.getElementById("confirmPasswordGroup");
+
+  if (confirmGroup) {
+    confirmGroup.style.display = "none";
+  }
+
+  if (!password) {
+    showLoginMessage("Please enter your password.");
     return;
   }
 
   try {
-    await signInWithEmailAndPassword(auth, email, password);
+    const loginEmail = getMobileLoginEmail();
+    await signInWithEmailAndPassword(auth, loginEmail, password);
   } catch (error) {
-    showLoginMessage(error.message);
+    showLoginMessage("Sign-in failed. Check your mobile number and password.");
   }
 }
+
 
 
 async function createAccount() {
