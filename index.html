@@ -9,12 +9,10 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <!-- LOGIN SCREEN -->
-
 <div id="loginScreen" style="display:none;">
-
   <div class="login-box">
-
     <h2>ADITYA MULTI SERVICES</h2>
     <p>Business Management System</p>
 
@@ -24,48 +22,41 @@
 
     <div class="login-divider">OR</div>
 
-    <label>Mobile Number</label>
-    <div style="display:flex; gap:8px;">
-      <span style="padding:13px; background:#eaf1f8; border-radius:10px; font-weight:bold;">
-        +91
-      </span>
-      <input
-        type="tel"
-        id="loginMobile"
-        placeholder="Enter 10-digit mobile number"
-        maxlength="10"
-        inputmode="numeric"
-      >
-    </div>
+    <label for="loginEmail">Email Address</label>
+    <input
+      type="email"
+      id="loginEmail"
+      placeholder="Enter your email address"
+      autocomplete="email"
+    >
 
-    <label>Password</label>
+    <label for="loginPassword">Password</label>
     <input
       type="password"
       id="loginPassword"
       placeholder="Enter your password"
+      autocomplete="current-password"
     >
 
     <div id="confirmPasswordGroup" style="display:none;">
-      <label>Confirm Password</label>
+      <label for="confirmPassword">Confirm Password</label>
       <input
         type="password"
         id="confirmPassword"
         placeholder="Re-enter your password"
+        autocomplete="new-password"
       >
     </div>
 
     <button onclick="signInWithEmail()">SIGN IN</button>
-
     <button onclick="createAccount()">CREATE ACCOUNT</button>
-
     <button onclick="resetPassword()">FORGOT PASSWORD?</button>
 
     <p id="loginMessage"></p>
-
   </div>
 </div>
 
-  
+<!-- HEADER -->
 <header>
   <div class="brand">
     <div>
@@ -76,18 +67,25 @@
     <div style="text-align:right;">
       <div class="date" id="todayDate"></div>
 
+      <button id="themeToggle" onclick="toggleTheme()">
+        DARK MODE
+      </button>
+
       <button
         onclick="logoutUser()"
-        style="margin-top:8px; padding:8px 14px; background:#dc2626; color:white; border:none; border-radius:6px; cursor:pointer;"
+        style="margin-top:8px;padding:8px 14px;background:#dc2626;color:white;border:none;border-radius:6px;cursor:pointer;"
       >
         SIGN OUT
       </button>
     </div>
   </div>
 </header>
+
 <main>
 
+  <!-- WALLET OVERVIEW -->
   <h3 class="section-title">Wallet Overview</h3>
+
   <div class="wallets">
     <div class="wallet">
       <small>Biznext Wallet</small>
@@ -123,30 +121,42 @@
       <small>Today's AEPS</small>
       <p id="sbiCollection">₹0.00</p>
     </div>
-  </div>
-  
 
+    <div class="wallet">
+      <small>Biznext + Roinet Collection</small>
+      <h2 id="combinedCollection">₹0.00</h2>
+      <small>Combined AEPS transactions today</small>
+    </div>
+  </div>
+
+  <!-- TODAY'S OVERVIEW -->
   <h3 class="section-title">Today's Overview</h3>
+
   <div class="wallets">
     <div class="card">
       <p>Cash Balance</p>
       <h2 id="cashBalance">₹0.00</h2>
     </div>
+
     <div class="card">
       <p>Online Balance</p>
       <h2 id="onlineBalance">₹0.00</h2>
     </div>
+
     <div class="card">
       <p>Today's Business</p>
       <h2 id="totalBusiness">₹0.00</h2>
     </div>
+
     <div class="card">
       <p>Today's Profit</p>
       <h2 class="green" id="dailyProfit">₹0.00</h2>
     </div>
   </div>
 
+  <!-- OPENING BALANCES -->
   <h3 class="section-title">Opening Balances</h3>
+
   <div class="card" id="openingSection">
 
     <label>Opening Cash (₹)</label>
@@ -169,13 +179,15 @@
 
     <label>SBI Opening Wallet (₹)</label>
     <input type="number" id="openingSbi" placeholder="Enter SBI balance">
-    
+
     <button class="gold" id="startDayBtn" onclick="startBusinessDay()">
       START BUSINESS DAY
     </button>
   </div>
 
+  <!-- NEW TRANSACTION -->
   <h3 class="section-title">New Transaction</h3>
+
   <div class="card">
 
     <label>Transaction Type</label>
@@ -196,12 +208,23 @@
       </select>
     </div>
 
-    <input type="number" id="transactionAmount" min="0" step="10"
-  placeholder="Enter amount" oninput="calculateChargePreview()">
+    <label>Transaction Amount (₹)</label>
+    <input
+      type="number"
+      id="transactionAmount"
+      min="0"
+      step="10"
+      placeholder="Enter amount"
+      oninput="calculateChargePreview()"
+    >
 
     <label>Customer Charge (₹)</label>
-    <input type="number" id="customerCharge" readonly
-      placeholder="Automatic calculation">
+    <input
+      type="number"
+      id="customerCharge"
+      readonly
+      placeholder="Automatic calculation"
+    >
 
     <p id="chargePreview">Customer charge will appear here.</p>
 
@@ -222,7 +245,7 @@
 
       <label>Select Service</label>
       <select id="serviceType" onchange="updateServiceFields()">
-        <option value="BW_PRINT">Black & White Print</option>
+        <option value="BW_PRINT">Black &amp; White Print</option>
         <option value="COLOR_PRINT">Colour Print</option>
         <option value="XEROX">Xerox</option>
         <option value="PASSPORT_PHOTO">Passport Photo</option>
@@ -240,8 +263,14 @@
 
       <div id="serviceQuantitySection">
         <label id="serviceQuantityLabel">Number of Pages</label>
-        <input type="number" id="serviceQuantity" min="1" step="1"
-          value="1" oninput="calculateServiceTotal()">
+        <input
+          type="number"
+          id="serviceQuantity"
+          min="1"
+          step="1"
+          value="1"
+          oninput="calculateServiceTotal()"
+        >
       </div>
 
       <div id="idLaminationSection" style="display:none">
@@ -254,15 +283,23 @@
 
       <div id="otherServiceSection" style="display:none">
         <label>Service Description</label>
-        <input type="text" id="otherServiceDescription"
-          placeholder="Enter service name">
+        <input
+          type="text"
+          id="otherServiceDescription"
+          placeholder="Enter service name"
+        >
       </div>
 
       <div id="directAmountSection" style="display:none">
         <label>Total Amount Collected (₹)</label>
-        <input type="number" id="serviceDirectAmount" min="0"
-          step="1" placeholder="Enter amount"
-          oninput="calculateServiceTotal()">
+        <input
+          type="number"
+          id="serviceDirectAmount"
+          min="0"
+          step="1"
+          placeholder="Enter amount"
+          oninput="calculateServiceTotal()"
+        >
       </div>
 
       <label>Total Service Amount</label>
@@ -278,14 +315,24 @@
 
       <div id="serviceSplitSection" style="display:none">
         <label>Cash Received (₹)</label>
-        <input type="number" id="serviceCashAmount" min="0"
-          step="0.01" placeholder="Cash amount"
-          oninput="calculateServiceSplit()">
+        <input
+          type="number"
+          id="serviceCashAmount"
+          min="0"
+          step="0.01"
+          placeholder="Cash amount"
+          oninput="calculateServiceSplit()"
+        >
 
         <label>Online Received (₹)</label>
-        <input type="number" id="serviceOnlineAmount" min="0"
-          step="0.01" placeholder="Online amount"
-          oninput="calculateServiceSplit()">
+        <input
+          type="number"
+          id="serviceOnlineAmount"
+          min="0"
+          step="0.01"
+          placeholder="Online amount"
+          oninput="calculateServiceSplit()"
+        >
 
         <p id="serviceSplitPreview">
           Cash and Online must equal the total.
@@ -301,6 +348,7 @@
 
   <!-- ONLINE BALANCE WITHDRAWAL -->
   <h3 class="section-title">Online Balance Withdrawal</h3>
+
   <div class="card">
 
     <label>Select Software</label>
@@ -313,12 +361,20 @@
     </select>
 
     <label>Withdrawal Amount (₹)</label>
-    <input type="number" id="withdrawalAmount"
-      min="1" step="1" placeholder="Enter amount">
+    <input
+      type="number"
+      id="withdrawalAmount"
+      min="1"
+      step="1"
+      placeholder="Enter amount"
+    >
 
     <label>Note (Optional)</label>
-    <input type="text" id="withdrawalNote"
-      placeholder="Enter customer or payment details">
+    <input
+      type="text"
+      id="withdrawalNote"
+      placeholder="Enter customer or payment details"
+    >
 
     <button onclick="addOnlineWithdrawal()">
       SAVE WITHDRAWAL
@@ -327,19 +383,26 @@
     <div id="withdrawalList">
       <p>No withdrawals recorded yet.</p>
     </div>
-
   </div>
-  
+
+  <!-- TODAY'S TRANSACTIONS -->
   <h3 class="section-title">Today's Transactions</h3>
+
   <div class="card" id="transactionList">
     <p>No transactions recorded yet.</p>
   </div>
 
+  <!-- DAILY CLOSING -->
   <h3 class="section-title">Daily Closing</h3>
+
   <div class="card">
 
     <label>Actual Cash Available (₹)</label>
-    <input type="number" id="actualCash" placeholder="Enter actual cash">
+    <input
+      type="number"
+      id="actualCash"
+      placeholder="Enter actual cash"
+    >
 
     <button onclick="previewClosing()">
       CHECK CASH DIFFERENCE
@@ -352,9 +415,11 @@
     </button>
   </div>
 
+  <!-- BUSINESS RECORDS -->
   <h3 class="section-title">Business Records</h3>
+
   <div class="card">
-    <button onclick="showHistory()">MONTHLY HISTORY</button>
+    <button onclick="showHistory()">OPEN CALENDAR HISTORY</button>
     <button onclick="exportData()">EXPORT BACKUP</button>
     <div id="historyList"></div>
   </div>
@@ -365,6 +430,7 @@
   </footer>
 
 </main>
+
 <!-- CUSTOM POPUP -->
 <div id="customPopup" class="popup-overlay" style="display:none;">
   <div class="popup-box">
@@ -372,7 +438,9 @@
 
     <h2 id="popupTitle">Success!</h2>
 
-    <p id="popupMessage">Your action was completed successfully.</p>
+    <p id="popupMessage">
+      Your action was completed successfully.
+    </p>
 
     <div id="popupDetails"></div>
 
@@ -381,7 +449,7 @@
     </button>
   </div>
 </div>
-  
+
 <script type="module" src="app.js"></script>
 </body>
 </html>
