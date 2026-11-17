@@ -434,7 +434,9 @@ function calculateTotals(day) {
     const amount = Number(t.amount) || 0;
     const charge = Number(t.charge) || 0;
 
-    totals.business += amount;
+    if (t.type !== "ONLINE_WITHDRAWAL") {
+  totals.business += amount;
+    }
 
     if (t.type === "AEPS") {
       totals.aeps += amount;
@@ -448,6 +450,14 @@ function calculateTotals(day) {
       totals.cash -= amount;
     }
 
+    if (t.type === "ONLINE_WITHDRAWAL") {
+      if (t.platform === "Biznext") totals.biznext -= amount;
+      if (t.platform === "Roinet") totals.roinet -= amount;
+      if (t.platform === "Tez") totals.tez -= amount;
+      if (t.platform === "Fino") totals.fino -= amount;
+      if (t.platform === "SBI") totals.sbi -= amount;
+     }
+    
     if (t.type === "C+") {
       totals.cash += amount;
       totals.online -= amount;
@@ -547,6 +557,62 @@ function addBusinessTransaction() {
   alert("Transaction saved successfully!");
 }
 
+function addOnlineWithdrawal() {
+  const day = currentDay();
+
+  if (!day || day.closed) {
+    alert("Start a business day first.");
+    return;
+  }
+
+  const platform =
+    document.getElementById("withdrawalPlatform").value;
+
+  const amount =
+    Number(document.getElementById("withdrawalAmount").value);
+
+  const note =
+    document.getElementById("withdrawalNote").value.trim();
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    alert("Enter a valid withdrawal amount.");
+    return;
+  }
+
+  const totals = calculateTotals(day);
+
+  const walletBalances = {
+    Biznext: totals.biznext,
+    Roinet: totals.roinet,
+    Tez: totals.tez,
+    Fino: totals.fino,
+    SBI: totals.sbi
+  };
+
+  if (amount > walletBalances[platform]) {
+    alert("Insufficient " + platform + " wallet balance.");
+    return;
+  }
+
+  day.transactions.push({
+    id: Date.now(),
+    time: new Date().toLocaleTimeString("en-IN"),
+    type: "ONLINE_WITHDRAWAL",
+    platform,
+    amount,
+    note
+  });
+
+  persist();
+
+  document.getElementById("withdrawalAmount").value = "";
+  document.getElementById("withdrawalNote").value = "";
+
+  refreshDashboard();
+
+  alert("Online balance withdrawal saved successfully!");
+    }
+
 /* ==================================
    DASHBOARD
 ================================== */
@@ -581,6 +647,8 @@ function refreshDashboard() {
     document.getElementById("transactionList").innerHTML =
       "<p>No active business day. Enter opening balances to begin.</p>";
 
+    document.getElementById("withdrawalList").innerHTML =
+  "<p>No withdrawals recorded yet.</p>";
     return;
   }
 
@@ -613,6 +681,24 @@ function refreshDashboard() {
   document.getElementById("dailyProfit").textContent = money(t.profit);
 
   document.getElementById("openingSection").style.display = "none";
+    const withdrawalList = document.getElementById("withdrawalList");
+
+  const withdrawals = day.transactions.filter(
+    t => t.type === "ONLINE_WITHDRAWAL"
+  );
+
+  if (withdrawals.length === 0) {
+    withdrawalList.innerHTML = "<p>No withdrawals recorded yet.</p>";
+  } else {
+    withdrawalList.innerHTML = withdrawals.map(t => `
+      <div style="padding:12px 0;border-bottom:1px solid #e2eaf2">
+        <strong>${t.platform} Withdrawal</strong>
+        <p>${t.time}</p>
+        <p>Amount: ${money(t.amount)}</p>
+        <p>Note: ${t.note || "No note"}</p>
+      </div>
+    `).join("");
+  }
 
   const list = document.getElementById("transactionList");
 
@@ -620,6 +706,16 @@ function refreshDashboard() {
     list.innerHTML = "<p>No transactions recorded yet.</p>";
   } else {
     list.innerHTML = day.transactions.map(t => {
+           if (t.type === "ONLINE_WITHDRAWAL") {
+        return `
+          <div style="padding:12px 0;border-bottom:1px solid #e2eaf2">
+            <strong>Online Balance Withdrawal · ${t.platform}</strong>
+            <p>${t.time}</p>
+            <p>Amount: ${money(t.amount)}</p>
+            <p>Note: ${t.note || "No note"}</p>
+          </div>
+        `;
+           }
       if (t.type === "SERVICE") {
         const quantityText = t.quantity
           ? "Quantity: " + t.quantity
@@ -793,6 +889,7 @@ refreshDashboard();
   updateTransactionFields,
   calculateChargePreview,
   addBusinessTransaction,
+  addOnlineWithdrawal,
   updateServiceFields,
   calculateServiceTotal,
   updateServicePaymentFields,
