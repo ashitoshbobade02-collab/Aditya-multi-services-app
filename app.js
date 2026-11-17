@@ -1,3 +1,4 @@
+import { db, auth } from "./firebase.js";
 
 const KEY = "aditya_multi_services_v3";
 
