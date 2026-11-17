@@ -1005,6 +1005,14 @@ async function resetPassword() {
   }
 }
 
+async function logoutUser() {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    showCustomPopup("Sign Out Failed", error.message, "error");
+  }
+}
+
 /* ==================================
    APP STARTUP
 ================================== */
@@ -1078,4 +1086,5 @@ refreshDashboard();
   createAccount,
   resetPassword,
   showLoginMessage,
+  logoutUser,
  });
