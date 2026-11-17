@@ -237,6 +237,37 @@
     </div>
   </details>
 
+  <!-- ONLINE BALANCE WITHDRAWAL -->
+  <h3 class="section-title">Online Balance Withdrawal</h3>
+  <div class="card">
+
+    <label>Select Software</label>
+    <select id="withdrawalPlatform">
+      <option value="Biznext">Biznext</option>
+      <option value="Roinet">Roinet</option>
+      <option value="Tez">Tez</option>
+      <option value="Fino">Fino</option>
+      <option value="SBI">SBI</option>
+    </select>
+
+    <label>Withdrawal Amount (₹)</label>
+    <input type="number" id="withdrawalAmount"
+      min="1" step="1" placeholder="Enter amount">
+
+    <label>Note (Optional)</label>
+    <input type="text" id="withdrawalNote"
+      placeholder="Enter customer or payment details">
+
+    <button onclick="addOnlineWithdrawal()">
+      SAVE WITHDRAWAL
+    </button>
+
+    <div id="withdrawalList">
+      <p>No withdrawals recorded yet.</p>
+    </div>
+
+  </div>
+  
   <h3 class="section-title">Today's Transactions</h3>
   <div class="card" id="transactionList">
     <p>No transactions recorded yet.</p>
