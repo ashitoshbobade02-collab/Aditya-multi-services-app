@@ -724,15 +724,22 @@ th {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 27px;
+  width: 28px;
+  min-width: 28px;
   margin-right: 10px;
-  font-size: 17px;
-  vertical-align: middle;
+  font-size: 18px;
+  line-height: 1;
 }
 
-.drawer-nav a,
-.drawer-actions button {
+.side-drawer a,
+.side-drawer button {
   display: flex;
   align-items: center;
-  gap: 2px;
+  text-align: left;
+  gap: 4px;
 }
+
+.side-drawer .sign-out-button {
+  color: #ffffff;
+}
+
