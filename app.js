@@ -1022,20 +1022,11 @@ async function createAccount() {
 
 
 async function resetPassword() {
-  const email = document.getElementById("loginEmail").value.trim();
-
-  if (!email) {
-    showLoginMessage("Please enter your email address first.");
-    return;
-  }
-
-  try {
-    await sendPasswordResetEmail(auth, email);
-    showLoginMessage("Password reset email sent. Check your inbox.", false);
-  } catch (error) {
-    showLoginMessage(error.message);
-  }
+  showLoginMessage(
+    "Password recovery is not available for mobile-only accounts. Please keep your password safe."
+  );
 }
+
 
 async function logoutUser() {
   try {
