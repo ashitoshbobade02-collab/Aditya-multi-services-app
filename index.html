@@ -9,7 +9,39 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" style="display:none;">
 
+  <div class="login-box">
+
+    <h2>ADITYA MULTI SERVICES</h2>
+    <p>Business Management System</p>
+
+    <button onclick="signInWithGoogle()">
+      CONTINUE WITH GOOGLE
+    </button>
+
+    <div class="login-divider">OR</div>
+
+    <label>Email Address</label>
+    <input type="email" id="loginEmail"
+      placeholder="Enter your email">
+
+    <label>Password</label>
+    <input type="password" id="loginPassword"
+      placeholder="Enter your password">
+
+    <button onclick="signInWithEmail()">SIGN IN</button>
+
+    <button onclick="createAccount()">CREATE ACCOUNT</button>
+
+    <button onclick="resetPassword()">FORGOT PASSWORD?</button>
+
+    <p id="loginMessage"></p>
+
+  </div>
+</div>
+  
 <header>
   <div class="brand">
     <div>
