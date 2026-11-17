@@ -936,6 +936,7 @@ function exportData() {
 /* ==================================
    FIREBASE LOGIN
 ================================== */
+
 function getMobileLoginEmail() {
   const mobile = document.getElementById("loginMobile").value.trim();
 
