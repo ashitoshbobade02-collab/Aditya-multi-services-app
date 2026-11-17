@@ -1,4 +1,5 @@
 import { db, auth } from "./firebase.js";
+import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
 
 import {
   GoogleAuthProvider,
@@ -7,17 +8,26 @@ import {
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
   onAuthStateChanged,
-  signOut
+  signOut,
+  linkWithPopup
 } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
 
 const KEY = "aditya_multi_services_v3";
+const THEME_KEY = "aditya_multi_services_theme_v1";
+const emptyData = () => ({ days: [], currentDay: null, walletCarryForward: null });
+let data = emptyData();
+let currentUser = null;
+let activeStorageKey = null;
+let cloudWriteQueue = Promise.resolve();
+let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let selectedHistoryDate = today();
 
-let data = JSON.parse(
-  localStorage.getItem(KEY) || '{"days":[],"currentDay":null}'
-);
-
-if (!data.walletCarryForward) {
-  data.walletCarryForward = null;
+function normalizeData(value) {
+  const clean = value && typeof value === "object" ? value : emptyData();
+  if (!Array.isArray(clean.days)) clean.days = [];
+  if (!Object.prototype.hasOwnProperty.call(clean, "currentDay")) clean.currentDay = null;
+  if (!Object.prototype.hasOwnProperty.call(clean, "walletCarryForward")) clean.walletCarryForward = null;
+  return clean;
 }
 
 function money(value) {
@@ -35,7 +45,19 @@ function today() {
 }
 
 function persist() {
-  localStorage.setItem(KEY, JSON.stringify(data));
+  if (!currentUser || !activeStorageKey) return;
+  const snapshot = JSON.stringify(data);
+  localStorage.setItem(activeStorageKey, snapshot);
+  const userId = currentUser.uid;
+  cloudWriteQueue = cloudWriteQueue
+    .then(() => setDoc(doc(db, "users", userId, "appData", "main"), {
+      data: JSON.parse(snapshot),
+      updatedAt: serverTimestamp()
+    }))
+    .catch(error => {
+      console.error("Cloud save failed:", error);
+      showLoginMessage("Saved on this device. Cloud sync failed: " + (error.message || "Please check your connection."));
+    });
 }
 
 function syncOpeningWalletFields() {
@@ -455,7 +477,7 @@ function calculateTotals(day) {
     const charge = Number(t.charge) || 0;
 
     if (t.type !== "ONLINE_WITHDRAWAL") {
-  totals.business += amount;
+      totals.business += amount;
     }
 
     if (t.type === "AEPS") {
@@ -476,8 +498,8 @@ function calculateTotals(day) {
       if (t.platform === "Tez") totals.tez -= amount;
       if (t.platform === "Fino") totals.fino -= amount;
       if (t.platform === "SBI") totals.sbi -= amount;
-     }
-    
+    }
+
     if (t.type === "C+") {
       totals.cash += amount;
       totals.online -= amount;
@@ -660,16 +682,16 @@ function addOnlineWithdrawal() {
   refreshDashboard();
 
   showCustomPopup(
-  "Withdrawal Successful!",
-  "Your online balance withdrawal has been saved.",
-  "success",
-  `<div style="padding:12px;background:#f1f6fc;border-radius:10px;">
-    <strong>Software:</strong> ${platform}
-    <br>
-    <strong>Amount:</strong> ${money(amount)}
-  </div>`
-);
-    }
+    "Withdrawal Successful!",
+    "Your online balance withdrawal has been saved.",
+    "success",
+    `<div style="padding:12px;background:#f1f6fc;border-radius:10px;">
+      <strong>Software:</strong> ${platform}
+      <br>
+      <strong>Amount:</strong> ${money(amount)}
+    </div>`
+  );
+}
 
 /* ==================================
    DASHBOARD
@@ -686,12 +708,12 @@ function refreshDashboard() {
     });
 
   const walletIds = [
-   "biznextBalance", "roinetBalance", "tezBalance", "finoBalance",
-   "sbiBalance",
-   "biznextCollection", "roinetCollection", "tezCollection",
-   "finoCollection", "sbiCollection",
-   "cashBalance", "onlineBalance",
-   "totalBusiness", "dailyProfit"
+    "biznextBalance", "roinetBalance", "tezBalance", "finoBalance",
+    "sbiBalance", "combinedCollection",
+    "biznextCollection", "roinetCollection", "tezCollection",
+    "finoCollection", "sbiCollection",
+    "cashBalance", "onlineBalance",
+    "totalBusiness", "dailyProfit"
   ];
 
   if (!day) {
@@ -706,7 +728,7 @@ function refreshDashboard() {
       "<p>No active business day. Enter opening balances to begin.</p>";
 
     document.getElementById("withdrawalList").innerHTML =
-  "<p>No withdrawals recorded yet.</p>";
+      "<p>No withdrawals recorded yet.</p>";
     return;
   }
 
@@ -731,7 +753,14 @@ function refreshDashboard() {
     money(t.fino - day.opening.fino);
 
   document.getElementById("sbiCollection").textContent =
-  money(t.sbi - day.opening.sbi);
+    money(t.sbi - day.opening.sbi);
+
+  const combinedBiznextRoinet = day.transactions
+    .filter(transaction => transaction.type === "AEPS" && ["Biznext", "Roinet"].includes(transaction.platform))
+    .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
+
+  document.getElementById("combinedCollection").textContent =
+    money(combinedBiznextRoinet);
 
   document.getElementById("cashBalance").textContent = money(t.cash);
   document.getElementById("onlineBalance").textContent = money(t.online);
@@ -739,7 +768,8 @@ function refreshDashboard() {
   document.getElementById("dailyProfit").textContent = money(t.profit);
 
   document.getElementById("openingSection").style.display = "none";
-    const withdrawalList = document.getElementById("withdrawalList");
+
+  const withdrawalList = document.getElementById("withdrawalList");
 
   const withdrawals = day.transactions.filter(
     t => t.type === "ONLINE_WITHDRAWAL"
@@ -764,7 +794,7 @@ function refreshDashboard() {
     list.innerHTML = "<p>No transactions recorded yet.</p>";
   } else {
     list.innerHTML = day.transactions.map(t => {
-           if (t.type === "ONLINE_WITHDRAWAL") {
+      if (t.type === "ONLINE_WITHDRAWAL") {
         return `
           <div style="padding:12px 0;border-bottom:1px solid #e2eaf2">
             <strong>Online Balance Withdrawal · ${t.platform}</strong>
@@ -773,7 +803,8 @@ function refreshDashboard() {
             <p>Note: ${t.note || "No note"}</p>
           </div>
         `;
-           }
+      }
+
       if (t.type === "SERVICE") {
         const quantityText = t.quantity
           ? "Quantity: " + t.quantity
@@ -871,11 +902,11 @@ function saveBusinessDay() {
   day.closed = true;
 
   data.walletCarryForward = {
-   biznext: totals.biznext,
-   roinet: totals.roinet,
-   tez: totals.tez,
-   fino: totals.fino,
-   sbi: totals.sbi
+    biznext: totals.biznext,
+    roinet: totals.roinet,
+    tez: totals.tez,
+    fino: totals.fino,
+    sbi: totals.sbi
   };
 
   data.days.push(day);
@@ -897,25 +928,76 @@ function saveBusinessDay() {
 ================================== */
 
 function showHistory() {
+  renderCalendar();
+}
+
+function changeCalendarMonth(offset) {
+  calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + offset, 1);
+  renderCalendar();
+}
+
+function selectHistoryDate(date) {
+  selectedHistoryDate = date;
+  renderCalendar();
+}
+
+function renderCalendar() {
   const history = document.getElementById("historyList");
+  if (!history) return;
 
-  const days = data.days.filter(d =>
-    d.date.startsWith(today().slice(0, 7))
-  );
+  const year = calendarMonth.getFullYear();
+  const month = calendarMonth.getMonth();
 
-  if (!days.length) {
-    history.innerHTML = "<p>No saved records this month.</p>";
-    return;
+  const monthLabel = calendarMonth.toLocaleDateString("en-IN", {
+    month: "long",
+    year: "numeric"
+  });
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const saved = new Map(data.days.map(day => [day.date, day]));
+
+  if (data.currentDay) {
+    saved.set(data.currentDay.date, data.currentDay);
   }
 
-  history.innerHTML = days.map(d => `
-    <div style="padding:12px 0;border-bottom:1px solid #e2eaf2">
-      <strong>${d.date}</strong>
-      <p>Business: ${money(d.closing.business)}</p>
-      <p>Profit: ${money(d.closing.profit)}</p>
-      <p>Cash difference: ${money(d.closing.difference)}</p>
-    </div>
-  `).join("");
+  const cells = [];
+
+  for (let i = 0; i < firstDay; i++) {
+    cells.push('<span class="calendar-empty"></span>');
+  }
+
+  for (let dayNumber = 1; dayNumber <= daysInMonth; dayNumber++) {
+    const date = `${year}-${String(month + 1).padStart(2, "0")}-${String(dayNumber).padStart(2, "0")}`;
+    const hasRecord = saved.has(date);
+    const selected = date === selectedHistoryDate ? " selected" : "";
+
+    cells.push(`<button type="button" class="calendar-day${hasRecord ? " has-record" : ""}${selected}" onclick="selectHistoryDate('${date}')">${dayNumber}</button>`);
+  }
+
+  const selectedDay = saved.get(selectedHistoryDate);
+
+  let detail = '<p class="muted">No business record for this date.</p>';
+
+  if (selectedDay) {
+    const closing = selectedDay.closing || calculateTotals(selectedDay);
+    const transactions = selectedDay.transactions || [];
+
+    detail = `<div class="history-summary">
+      <p><strong>${selectedHistoryDate}</strong> ${selectedDay.closed ? '<span class="record-tag">Closed</span>' : '<span class="record-tag active-tag">In progress</span>'}</p>
+      <p>Business: <strong>${money(closing.business)}</strong></p>
+      <p>Profit: <strong>${money(closing.profit)}</strong></p>
+      <p>Cash difference: <strong>${selectedDay.closing ? money(selectedDay.closing.difference) : 'Not closed'}</strong></p>
+      <h4>Transactions (${transactions.length})</h4>
+      ${transactions.length ? transactions.map(t => `<div class="history-transaction"><strong>${t.type === "SERVICE" ? (t.serviceName || "Service") : (t.type === "ONLINE_WITHDRAWAL" ? `${t.platform} Withdrawal` : `${t.type} ${t.platform ? "· " + t.platform : ""}`)}</strong><span>${t.time || ""}</span><p>Amount: ${money(t.amount)}</p>${t.type === "SERVICE" ? `<p>Payment: ${t.paymentMethod || ""}</p>` : `<p>Charge: ${money(t.charge)}</p>`}</div>`).join("") : '<p>No transactions recorded.</p>'}
+    </div>`;
+  }
+
+  history.innerHTML = `<div class="calendar-header"><button type="button" class="calendar-nav" onclick="changeCalendarMonth(-1)" aria-label="Previous month">‹</button><strong>${monthLabel}</strong><button type="button" class="calendar-nav" onclick="changeCalendarMonth(1)" aria-label="Next month">›</button></div>
+    <div class="calendar-grid calendar-weekdays">${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(x => `<span>${x}</span>`).join("")}</div>
+    <div class="calendar-grid">${cells.join("")}</div>
+    <p class="calendar-legend"><span></span> Dates with saved business records</p>${detail}`;
 }
 
 function exportData() {
@@ -933,58 +1015,65 @@ function exportData() {
 
   URL.revokeObjectURL(url);
 }
+
 /* ==================================
    FIREBASE LOGIN
 ================================== */
 
-function getMobileLoginEmail() {
-  const mobile = document.getElementById("loginMobile").value.trim();
+function getLoginEmail() {
+  const email = document.getElementById("loginEmail").value.trim().toLowerCase();
 
-  if (!/^[6-9]\d{9}$/.test(mobile)) {
-    throw new Error("Please enter a valid 10-digit Indian mobile number.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new Error("Enter a valid email address.");
   }
 
-  return `91${mobile}@mobile.aditya-multi-services.invalid`;
+  return email;
 }
 
 function showLoginMessage(message, isError = true) {
   const element = document.getElementById("loginMessage");
+
+  if (!element) return;
+
   element.textContent = message;
-  element.style.color = isError ? "#dc2626" : "#16a34a";
+  element.style.color = isError ? "#dc2626" : "#16834a";
 }
 
 async function signInWithGoogle() {
   try {
     const provider = new GoogleAuthProvider();
+
+    if (auth.currentUser) {
+      await linkWithPopup(auth.currentUser, provider);
+      showLoginMessage("Google Sign-In has been linked to this account.", false);
+      return;
+    }
+
     await signInWithPopup(auth, provider);
+
   } catch (error) {
-    showLoginMessage(error.message);
+    if (error.code === "auth/account-exists-with-different-credential") {
+      showLoginMessage("This email already has a password account. Sign in with that email and password first, then click CONTINUE WITH GOOGLE again to link both methods.");
+    } else {
+      showLoginMessage(error.message || "Google sign-in failed.");
+    }
   }
 }
-
 
 async function signInWithEmail() {
   const password = document.getElementById("loginPassword").value;
-  const confirmGroup = document.getElementById("confirmPasswordGroup");
-
-  if (confirmGroup) {
-    confirmGroup.style.display = "none";
-  }
 
   if (!password) {
-    showLoginMessage("Please enter your password.");
-    return;
+    return showLoginMessage("Please enter your password.");
   }
 
   try {
-    const loginEmail = getMobileLoginEmail();
-    await signInWithEmailAndPassword(auth, loginEmail, password);
+    await signInWithEmailAndPassword(auth, getLoginEmail(), password);
+    document.getElementById("confirmPasswordGroup").style.display = "none";
   } catch (error) {
-    showLoginMessage("Sign-in failed. Check your mobile number and password.");
+    showLoginMessage("Sign-in failed. Check your email and password.");
   }
 }
-
-
 
 async function createAccount() {
   const password = document.getElementById("loginPassword").value;
@@ -993,41 +1082,46 @@ async function createAccount() {
 
   if (confirmGroup.style.display === "none") {
     confirmGroup.style.display = "block";
-    showLoginMessage("Please confirm your password, then click CREATE ACCOUNT again.", false);
+    showLoginMessage("Enter your password again to confirm, then click CREATE ACCOUNT.", false);
     confirmPassword.focus();
     return;
   }
 
   if (!password || !confirmPassword.value) {
-    showLoginMessage("Please enter and confirm your password.");
-    return;
+    return showLoginMessage("Please enter and confirm your password.");
   }
 
   if (password.length < 6) {
-    showLoginMessage("Password must be at least 6 characters.");
-    return;
+    return showLoginMessage("Password must be at least 6 characters.");
   }
 
   if (password !== confirmPassword.value) {
-    showLoginMessage("Passwords do not match.");
-    return;
+    return showLoginMessage("Passwords do not match.");
   }
 
   try {
-    const loginEmail = getMobileLoginEmail();
-    await createUserWithEmailAndPassword(auth, loginEmail, password);
+    await createUserWithEmailAndPassword(auth, getLoginEmail(), password);
   } catch (error) {
-    showLoginMessage(error.message);
+    showLoginMessage(
+      error.code === "auth/email-already-in-use"
+        ? "This email already has an account. Please sign in instead."
+        : (error.message || "Account creation failed.")
+    );
   }
 }
 
-
 async function resetPassword() {
-  showLoginMessage(
-    "Password recovery is not available for mobile-only accounts. Please keep your password safe."
-  );
+  try {
+    await sendPasswordResetEmail(auth, getLoginEmail());
+    showLoginMessage("Password reset email sent. Check your inbox and spam folder.", false);
+  } catch (error) {
+    showLoginMessage(
+      error.code === "auth/user-not-found"
+        ? "No account was found for this email."
+        : (error.message || "Could not send the reset email.")
+    );
+  }
 }
-
 
 async function logoutUser() {
   try {
@@ -1040,6 +1134,7 @@ async function logoutUser() {
 /* ==================================
    APP STARTUP
 ================================== */
+
 function showCustomPopup(title, message, type = "success", details = "") {
   const popup = document.getElementById("customPopup");
   const icon = document.getElementById("popupIcon");
@@ -1064,11 +1159,67 @@ function showCustomPopup(title, message, type = "success", details = "") {
 function closeCustomPopup() {
   document.getElementById("customPopup").style.display = "none";
 }
+
+/* ==================================
+   LOAD USER BUSINESS DATA
+================================== */
+
+async function loadUserBusinessData(user) {
+  currentUser = user;
+  activeStorageKey = `${KEY}_${user.uid}`;
+
+  const localCopy = localStorage.getItem(activeStorageKey);
+
+  try {
+    const snapshot = await getDoc(
+      doc(db, "users", user.uid, "appData", "main")
+    );
+
+    if (snapshot.exists() && snapshot.data().data) {
+      data = normalizeData(snapshot.data().data);
+      localStorage.setItem(activeStorageKey, JSON.stringify(data));
+
+    } else if (localCopy) {
+      data = normalizeData(JSON.parse(localCopy));
+
+      // Restore only this account's own local copy.
+      // The old shared localStorage data is never imported.
+      await setDoc(
+        doc(db, "users", user.uid, "appData", "main"),
+        {
+          data,
+          updatedAt: serverTimestamp()
+        }
+      );
+
+    } else {
+      data = emptyData();
+    }
+
+  } catch (error) {
+    console.error("Cloud load failed:", error);
+
+    data = localCopy
+      ? normalizeData(JSON.parse(localCopy))
+      : emptyData();
+
+    showLoginMessage(
+      "Cloud connection unavailable. Showing this account's device copy."
+    );
+  }
+
+  updateTransactionFields();
+  updateServiceFields();
+  updateServicePaymentFields();
+  refreshDashboard();
+  renderCalendar();
+}
+
 /* ==================================
    CHECK LOGIN STATUS
 ================================== */
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   const loginScreen = document.getElementById("loginScreen");
   const header = document.querySelector("header");
   const main = document.querySelector("main");
@@ -1077,18 +1228,58 @@ onAuthStateChanged(auth, (user) => {
     loginScreen.style.display = "none";
     header.style.display = "";
     main.style.display = "";
+
+    await loadUserBusinessData(user);
+
   } else {
+    currentUser = null;
+    activeStorageKey = null;
+    data = emptyData();
+
     loginScreen.style.display = "flex";
     header.style.display = "none";
     main.style.display = "none";
   }
 });
 
+/* ==================================
+   DARK / LIGHT THEME
+================================== */
+
+function applyTheme(theme) {
+  const selected = theme === "dark" ? "dark" : "light";
+
+  document.documentElement.dataset.theme = selected;
+
+  const button = document.getElementById("themeToggle");
+
+  if (button) {
+    button.textContent = selected === "dark" ? "LIGHT MODE" : "DARK MODE";
+  }
+
+  localStorage.setItem(THEME_KEY, selected);
+}
+
+function toggleTheme() {
+  applyTheme(
+    document.documentElement.dataset.theme === "dark"
+      ? "light"
+      : "dark"
+  );
+}
+
+applyTheme(localStorage.getItem(THEME_KEY) || "light");
+
+/* ==================================
+   INITIALIZE APP
+================================== */
+
 updateTransactionFields();
 updateServiceFields();
 updateServicePaymentFields();
 refreshDashboard();
- Object.assign(window, {
+
+Object.assign(window, {
   startBusinessDay,
   updateTransactionFields,
   calculateChargePreview,
@@ -1102,6 +1293,10 @@ refreshDashboard();
   previewClosing,
   saveBusinessDay,
   showHistory,
+  changeCalendarMonth,
+  selectHistoryDate,
+  renderCalendar,
+  toggleTheme,
   exportData,
   showCustomPopup,
   closeCustomPopup,
@@ -1110,5 +1305,5 @@ refreshDashboard();
   createAccount,
   resetPassword,
   showLoginMessage,
-  logoutUser,
- });
+  logoutUser
+});
