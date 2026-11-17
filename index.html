@@ -7,6 +7,22 @@
 <meta name="theme-color" content="#003b7a">
 <title>Aditya Multi Services</title>
 <link rel="stylesheet" href="style.css">
+
+<style>
+.menu-toggle{margin:0;padding:8px 12px;background:#f5b400;color:#1d2a3a}
+.drawer-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40}
+.side-drawer{position:fixed;top:0;left:0;bottom:0;width:min(320px,86vw);padding:18px;background:var(--white);color:var(--text);z-index:41;transform:translateX(-105%);transition:transform .2s ease;overflow-y:auto;box-shadow:var(--shadow)}
+.side-drawer.open{transform:translateX(0)}
+.drawer-backdrop.open{display:block}
+.drawer-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.drawer-heading strong{color:var(--navy)}
+.drawer-close{margin:0;padding:4px 12px;font-size:24px}
+.drawer-nav{display:grid;gap:6px;margin-top:16px}
+.drawer-nav a{display:block;padding:11px 12px;border-radius:9px;background:var(--background);color:var(--text);text-decoration:none;font-weight:700}
+.drawer-nav a:hover{background:var(--light-blue)}
+.drawer-note{font-size:12px;color:var(--muted);margin-top:18px}
+html{scroll-behavior:smooth;scroll-padding-top:16px}
+</style>
 </head>
 <body>
 
@@ -16,36 +32,19 @@
     <h2>ADITYA MULTI SERVICES</h2>
     <p>Business Management System</p>
 
-    <button onclick="signInWithGoogle()">
-      CONTINUE WITH GOOGLE
-    </button>
+    <button onclick="signInWithGoogle()">CONTINUE WITH GOOGLE</button>
 
     <div class="login-divider">OR</div>
 
     <label for="loginEmail">Email Address</label>
-    <input
-      type="email"
-      id="loginEmail"
-      placeholder="Enter your email address"
-      autocomplete="email"
-    >
+    <input type="email" id="loginEmail" placeholder="Enter your email address" autocomplete="email">
 
     <label for="loginPassword">Password</label>
-    <input
-      type="password"
-      id="loginPassword"
-      placeholder="Enter your password"
-      autocomplete="current-password"
-    >
+    <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
 
     <div id="confirmPasswordGroup" style="display:none;">
       <label for="confirmPassword">Confirm Password</label>
-      <input
-        type="password"
-        id="confirmPassword"
-        placeholder="Re-enter your password"
-        autocomplete="new-password"
-      >
+      <input type="password" id="confirmPassword" placeholder="Re-enter your password" autocomplete="new-password">
     </div>
 
     <button onclick="signInWithEmail()">SIGN IN</button>
@@ -57,7 +56,6 @@
 </div>
 
 <!-- HEADER -->
-
 <header>
   <div class="brand">
     <div>
@@ -65,103 +63,124 @@
       <p>Business Management System</p>
     </div>
 
-    <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+    <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+      <button type="button" class="menu-toggle" onclick="toggleDrawer()">☰ MENU</button>
       <div class="date" id="todayDate"></div>
 
-      <button id="themeToggle" onclick="toggleTheme()">
-        DARK MODE
-      </button>
-
-      <button onclick="linkGoogleAccount()">
-        LINK GOOGLE
-      </button>
-
-      <button onclick="logoutUser()" style="background:#dc2626;">
-        SIGN OUT
-      </button>
+      <button id="themeToggle" onclick="toggleTheme()">DARK MODE</button>
+      <button onclick="linkGoogleAccount()">LINK GOOGLE</button>
+      <button onclick="logoutUser()" style="background:#dc2626;">SIGN OUT</button>
     </div>
   </div>
 </header>
 
+<!-- SIDE NAVIGATION DRAWER -->
+<div id="drawerBackdrop" class="drawer-backdrop" onclick="closeDrawer()"></div>
+
+<aside id="sideDrawer" class="side-drawer" aria-label="Main navigation">
+  <div class="drawer-heading">
+    <strong>ADITYA MULTI SERVICES</strong>
+    <button type="button" class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+
+  <nav class="drawer-nav">
+    <a href="#dashboardSection" onclick="closeDrawer()">Dashboard</a>
+    <a href="#openingSection" onclick="closeDrawer()">Opening Balances</a>
+    <a href="#transactionSection" onclick="closeDrawer()">New Transaction</a>
+    <a href="#servicesSection" onclick="closeDrawer()">Services</a>
+    <a href="#walletManagementSection" onclick="closeDrawer()">Wallet Management</a>
+    <a href="#dailyClosingSection" onclick="closeDrawer()">Daily Closing</a>
+    <a href="#historySection" onclick="closeDrawer()">History &amp; Calendar</a>
+    <a href="#customerLedgerSection" onclick="closeDrawer()">Customer Ledger</a>
+    <a href="#cashMovementSection" onclick="closeDrawer()">Cash In / Cash Out</a>
+    <a href="#expensesSection" onclick="closeDrawer()">Expenses</a>
+    <a href="#reportsSection" onclick="closeDrawer()">Reports</a>
+    <a href="#settingsSection" onclick="closeDrawer()">Settings</a>
+  </nav>
+
+  <p class="drawer-note">Additional sections will be activated as we implement their features.</p>
+</aside>
 
 <main>
 
-  <!-- WALLET OVERVIEW -->
-  <h3 class="section-title">Wallet Overview</h3>
+  <!-- DASHBOARD -->
+  <div id="dashboardSection">
 
-  <div class="wallets">
-    <div class="wallet">
-      <small>Biznext Wallet</small>
-      <h2 id="biznextBalance">₹0.00</h2>
-      <small>Today's AEPS</small>
-      <p id="biznextCollection">₹0.00</p>
+    <h3 class="section-title">Wallet Overview</h3>
+
+    <div class="wallets">
+      <div class="wallet">
+        <small>Biznext Wallet</small>
+        <h2 id="biznextBalance">₹0.00</h2>
+        <small>Today's AEPS</small>
+        <p id="biznextCollection">₹0.00</p>
+      </div>
+
+      <div class="wallet">
+        <small>Roinet Wallet</small>
+        <h2 id="roinetBalance">₹0.00</h2>
+        <small>Today's AEPS</small>
+        <p id="roinetCollection">₹0.00</p>
+      </div>
+
+      <div class="wallet">
+        <small>Tez Wallet</small>
+        <h2 id="tezBalance">₹0.00</h2>
+        <small>Today's AEPS</small>
+        <p id="tezCollection">₹0.00</p>
+      </div>
+
+      <div class="wallet">
+        <small>Fino Wallet</small>
+        <h2 id="finoBalance">₹0.00</h2>
+        <small>Today's AEPS</small>
+        <p id="finoCollection">₹0.00</p>
+      </div>
+
+      <div class="wallet">
+        <small>SBI Wallet</small>
+        <h2 id="sbiBalance">₹0.00</h2>
+        <small>Today's AEPS</small>
+        <p id="sbiCollection">₹0.00</p>
+      </div>
+
+      <div class="wallet">
+        <small>Biznext + Roinet Collection</small>
+        <h2 id="combinedCollection">₹0.00</h2>
+        <small>Combined AEPS transactions today</small>
+      </div>
     </div>
 
-    <div class="wallet">
-      <small>Roinet Wallet</small>
-      <h2 id="roinetBalance">₹0.00</h2>
-      <small>Today's AEPS</small>
-      <p id="roinetCollection">₹0.00</p>
+    <h3 class="section-title">Today's Overview</h3>
+
+    <div class="wallets">
+      <div class="card">
+        <p>Cash Balance</p>
+        <h2 id="cashBalance">₹0.00</h2>
+      </div>
+
+      <div class="card">
+        <p>Online Balance</p>
+        <h2 id="onlineBalance">₹0.00</h2>
+      </div>
+
+      <div class="card">
+        <p>Today's Business</p>
+        <h2 id="totalBusiness">₹0.00</h2>
+      </div>
+
+      <div class="card">
+        <p>Today's Profit</p>
+        <h2 class="green" id="dailyProfit">₹0.00</h2>
+      </div>
     </div>
 
-    <div class="wallet">
-      <small>Tez Wallet</small>
-      <h2 id="tezBalance">₹0.00</h2>
-      <small>Today's AEPS</small>
-      <p id="tezCollection">₹0.00</p>
-    </div>
-
-    <div class="wallet">
-      <small>Fino Wallet</small>
-      <h2 id="finoBalance">₹0.00</h2>
-      <small>Today's AEPS</small>
-      <p id="finoCollection">₹0.00</p>
-    </div>
-
-    <div class="wallet">
-      <small>SBI Wallet</small>
-      <h2 id="sbiBalance">₹0.00</h2>
-      <small>Today's AEPS</small>
-      <p id="sbiCollection">₹0.00</p>
-    </div>
-
-    <div class="wallet">
-      <small>Biznext + Roinet Collection</small>
-      <h2 id="combinedCollection">₹0.00</h2>
-      <small>Combined AEPS transactions today</small>
-    </div>
-  </div>
-
-  <!-- TODAY'S OVERVIEW -->
-  <h3 class="section-title">Today's Overview</h3>
-
-  <div class="wallets">
-    <div class="card">
-      <p>Cash Balance</p>
-      <h2 id="cashBalance">₹0.00</h2>
-    </div>
-
-    <div class="card">
-      <p>Online Balance</p>
-      <h2 id="onlineBalance">₹0.00</h2>
-    </div>
-
-    <div class="card">
-      <p>Today's Business</p>
-      <h2 id="totalBusiness">₹0.00</h2>
-    </div>
-
-    <div class="card">
-      <p>Today's Profit</p>
-      <h2 class="green" id="dailyProfit">₹0.00</h2>
-    </div>
   </div>
 
   <!-- OPENING BALANCES -->
   <h3 class="section-title">Opening Balances</h3>
 
   <div class="card" id="openingSection">
-
     <label>Opening Cash (₹)</label>
     <input type="number" id="openingCash" placeholder="Enter cash balance">
 
@@ -183,16 +202,13 @@
     <label>SBI Opening Wallet (₹)</label>
     <input type="number" id="openingSbi" placeholder="Enter SBI balance">
 
-    <button class="gold" id="startDayBtn" onclick="startBusinessDay()">
-      START BUSINESS DAY
-    </button>
+    <button class="gold" id="startDayBtn" onclick="startBusinessDay()">START BUSINESS DAY</button>
   </div>
 
   <!-- NEW TRANSACTION -->
-  <h3 class="section-title">New Transaction</h3>
+  <h3 class="section-title" id="transactionSection">New Transaction</h3>
 
   <div class="card">
-
     <label>Transaction Type</label>
     <select id="transactionType" onchange="updateTransactionFields()">
       <option value="AEPS">AEPS</option>
@@ -212,40 +228,23 @@
     </div>
 
     <label>Transaction Amount (₹)</label>
-    <input
-      type="number"
-      id="transactionAmount"
-      min="0"
-      step="10"
-      placeholder="Enter amount"
-      oninput="calculateChargePreview()"
-    >
+    <input type="number" id="transactionAmount" min="0" step="10" placeholder="Enter amount" oninput="calculateChargePreview()">
 
     <label>Customer Charge (₹)</label>
-    <input
-      type="number"
-      id="customerCharge"
-      readonly
-      placeholder="Automatic calculation"
-    >
+    <input type="number" id="customerCharge" readonly placeholder="Automatic calculation">
 
     <p id="chargePreview">Customer charge will appear here.</p>
 
-    <button onclick="addBusinessTransaction()">
-      SAVE TRANSACTION
-    </button>
+    <button onclick="addBusinessTransaction()">SAVE TRANSACTION</button>
   </div>
 
   <!-- SERVICES MANAGEMENT -->
-  <h3 class="section-title">Services Management</h3>
+  <h3 class="section-title" id="servicesSection">Services Management</h3>
 
   <details class="card" id="servicesDrawer">
-    <summary style="cursor:pointer;font-weight:bold;padding:8px 0">
-      + Add New Service
-    </summary>
+    <summary style="cursor:pointer;font-weight:bold;padding:8px 0">+ Add New Service</summary>
 
     <div style="margin-top:18px">
-
       <label>Select Service</label>
       <select id="serviceType" onchange="updateServiceFields()">
         <option value="BW_PRINT">Black &amp; White Print</option>
@@ -266,14 +265,7 @@
 
       <div id="serviceQuantitySection">
         <label id="serviceQuantityLabel">Number of Pages</label>
-        <input
-          type="number"
-          id="serviceQuantity"
-          min="1"
-          step="1"
-          value="1"
-          oninput="calculateServiceTotal()"
-        >
+        <input type="number" id="serviceQuantity" min="1" step="1" value="1" oninput="calculateServiceTotal()">
       </div>
 
       <div id="idLaminationSection" style="display:none">
@@ -286,23 +278,12 @@
 
       <div id="otherServiceSection" style="display:none">
         <label>Service Description</label>
-        <input
-          type="text"
-          id="otherServiceDescription"
-          placeholder="Enter service name"
-        >
+        <input type="text" id="otherServiceDescription" placeholder="Enter service name">
       </div>
 
       <div id="directAmountSection" style="display:none">
         <label>Total Amount Collected (₹)</label>
-        <input
-          type="number"
-          id="serviceDirectAmount"
-          min="0"
-          step="1"
-          placeholder="Enter amount"
-          oninput="calculateServiceTotal()"
-        >
+        <input type="number" id="serviceDirectAmount" min="0" step="1" placeholder="Enter amount" oninput="calculateServiceTotal()">
       </div>
 
       <label>Total Service Amount</label>
@@ -318,42 +299,22 @@
 
       <div id="serviceSplitSection" style="display:none">
         <label>Cash Received (₹)</label>
-        <input
-          type="number"
-          id="serviceCashAmount"
-          min="0"
-          step="0.01"
-          placeholder="Cash amount"
-          oninput="calculateServiceSplit()"
-        >
+        <input type="number" id="serviceCashAmount" min="0" step="0.01" placeholder="Cash amount" oninput="calculateServiceSplit()">
 
         <label>Online Received (₹)</label>
-        <input
-          type="number"
-          id="serviceOnlineAmount"
-          min="0"
-          step="0.01"
-          placeholder="Online amount"
-          oninput="calculateServiceSplit()"
-        >
+        <input type="number" id="serviceOnlineAmount" min="0" step="0.01" placeholder="Online amount" oninput="calculateServiceSplit()">
 
-        <p id="serviceSplitPreview">
-          Cash and Online must equal the total.
-        </p>
+        <p id="serviceSplitPreview">Cash and Online must equal the total.</p>
       </div>
 
-      <button onclick="addServiceTransaction()">
-        SAVE SERVICE
-      </button>
-
+      <button onclick="addServiceTransaction()">SAVE SERVICE</button>
     </div>
   </details>
 
-  <!-- ONLINE BALANCE WITHDRAWAL -->
-  <h3 class="section-title">Online Balance Withdrawal</h3>
+  <!-- WALLET MANAGEMENT -->
+  <h3 class="section-title" id="walletManagementSection">Wallet Management / Online Withdrawal</h3>
 
   <div class="card">
-
     <label>Select Software</label>
     <select id="withdrawalPlatform">
       <option value="Biznext">Biznext</option>
@@ -364,24 +325,12 @@
     </select>
 
     <label>Withdrawal Amount (₹)</label>
-    <input
-      type="number"
-      id="withdrawalAmount"
-      min="1"
-      step="1"
-      placeholder="Enter amount"
-    >
+    <input type="number" id="withdrawalAmount" min="1" step="1" placeholder="Enter amount">
 
     <label>Note (Optional)</label>
-    <input
-      type="text"
-      id="withdrawalNote"
-      placeholder="Enter customer or payment details"
-    >
+    <input type="text" id="withdrawalNote" placeholder="Enter customer or payment details">
 
-    <button onclick="addOnlineWithdrawal()">
-      SAVE WITHDRAWAL
-    </button>
+    <button onclick="addOnlineWithdrawal()">SAVE WITHDRAWAL</button>
 
     <div id="withdrawalList">
       <p>No withdrawals recorded yet.</p>
@@ -396,35 +345,56 @@
   </div>
 
   <!-- DAILY CLOSING -->
-  <h3 class="section-title">Daily Closing</h3>
+  <h3 class="section-title" id="dailyClosingSection">Daily Closing</h3>
 
   <div class="card">
-
     <label>Actual Cash Available (₹)</label>
-    <input
-      type="number"
-      id="actualCash"
-      placeholder="Enter actual cash"
-    >
+    <input type="number" id="actualCash" placeholder="Enter actual cash">
 
-    <button onclick="previewClosing()">
-      CHECK CASH DIFFERENCE
-    </button>
-
+    <button onclick="previewClosing()">CHECK CASH DIFFERENCE</button>
     <div id="closingResult"></div>
 
-    <button class="gold" onclick="saveBusinessDay()">
-      SAVE DAY
-    </button>
+    <button class="gold" onclick="saveBusinessDay()">SAVE DAY</button>
   </div>
 
-  <!-- BUSINESS RECORDS -->
-  <h3 class="section-title">Business Records</h3>
+  <!-- HISTORY -->
+  <h3 class="section-title" id="historySection">History &amp; Calendar</h3>
 
   <div class="card">
     <button onclick="showHistory()">OPEN CALENDAR HISTORY</button>
     <button onclick="exportData()">EXPORT BACKUP</button>
     <div id="historyList"></div>
+  </div>
+
+  <!-- CUSTOMER LEDGER -->
+  <h3 class="section-title" id="customerLedgerSection">Customer Ledger</h3>
+  <div class="card">
+    <p>Customer Ledger will be implemented in the next development step.</p>
+    <p>It will track customer dues, shop dues, partial payments, settlements and complete payment history.</p>
+  </div>
+
+  <!-- CASH IN / CASH OUT -->
+  <h3 class="section-title" id="cashMovementSection">Cash In / Cash Out</h3>
+  <div class="card">
+    <p>Cash In and Cash Out features will be implemented in the next development step.</p>
+  </div>
+
+  <!-- EXPENSES -->
+  <h3 class="section-title" id="expensesSection">Expenses</h3>
+  <div class="card">
+    <p>Expense tracking will be implemented in the next development step.</p>
+  </div>
+
+  <!-- REPORTS -->
+  <h3 class="section-title" id="reportsSection">Reports</h3>
+  <div class="card">
+    <p>Excel reports and date-range selection will be implemented in the reports step. JSON backup remains available.</p>
+  </div>
+
+  <!-- SETTINGS -->
+  <h3 class="section-title" id="settingsSection">Settings</h3>
+  <div class="card">
+    <p>Opening balance corrections and device security settings will be implemented in the settings step.</p>
   </div>
 
   <footer>
@@ -438,20 +408,23 @@
 <div id="customPopup" class="popup-overlay" style="display:none;">
   <div class="popup-box">
     <div id="popupIcon" class="popup-icon">✓</div>
-
     <h2 id="popupTitle">Success!</h2>
-
-    <p id="popupMessage">
-      Your action was completed successfully.
-    </p>
-
+    <p id="popupMessage">Your action was completed successfully.</p>
     <div id="popupDetails"></div>
-
-    <button onclick="closeCustomPopup()">
-      OK, GOT IT
-    </button>
+    <button onclick="closeCustomPopup()">OK, GOT IT</button>
   </div>
 </div>
+
+<script>
+function toggleDrawer(){
+  document.getElementById("sideDrawer").classList.toggle("open");
+  document.getElementById("drawerBackdrop").classList.toggle("open");
+}
+function closeDrawer(){
+  document.getElementById("sideDrawer").classList.remove("open");
+  document.getElementById("drawerBackdrop").classList.remove("open");
+}
+</script>
 
 <script type="module" src="app.js"></script>
 </body>
