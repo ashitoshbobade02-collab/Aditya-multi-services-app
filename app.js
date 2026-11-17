@@ -803,13 +803,17 @@ refreshDashboard();
   showHistory,
   exportData
  });
+
 document.addEventListener("wheel", function (event) {
+  const active = document.activeElement;
+
   if (
-    document.activeElement &&
-    document.activeElement.tagName === "INPUT" &&
-    document.activeElement.type === "number"
+    active &&
+    active.tagName === "INPUT" &&
+    active.type === "number"
   ) {
-    document.activeElement.blur();
+    event.preventDefault();
+    active.blur();
   }
-}, { passive: true });
+}, { passive: false });
   
