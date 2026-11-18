@@ -282,6 +282,30 @@ button.gold,
   margin-top: 8px;
 }
 
+.password-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrap input {
+  width: 100%;
+  padding-right: 75px;
+}
+
+#loginScreen .password-toggle {
+  position: absolute;
+  right: 8px;
+  width: auto;
+  margin: 0;
+  padding: 7px 10px;
+  background: transparent;
+  color: var(--navy);
+  border: none;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
 /* SIDE MENU */
 
 .menu-toggle {
