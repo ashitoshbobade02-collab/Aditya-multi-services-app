@@ -534,14 +534,32 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
 
 </section>
 
-  <section class="app-screen" id="screen-cash-movement">
-  <!-- CASH IN / CASH OUT -->
+<section class="app-screen" id="screen-cash-movement">
   <h3 class="section-title" id="cashMovementSection">Cash In / Cash Out</h3>
+
   <div class="card">
-    <p>Cash In and Cash Out features will be implemented in the next development step.</p>
+    <label>Transaction Type</label>
+    <select id="cashMovementType">
+      <option value="IN">Cash In</option>
+      <option value="OUT">Cash Out</option>
+    </select>
+
+    <label>Amount (₹)</label>
+    <input type="number" id="cashMovementAmount" min="0.01" step="0.01" placeholder="Enter amount">
+
+    <label>Note</label>
+    <input type="text" id="cashMovementNote" placeholder="Enter reason or details">
+
+    <button onclick="saveCashMovement()">SAVE CASH ENTRY</button>
   </div>
 
-  </section>
+  <div class="card">
+    <h3>Today's Cash Entries</h3>
+    <div id="cashMovementList">
+      <p>No cash entries yet.</p>
+    </div>
+  </div>
+</section>
 
   <section class="app-screen" id="screen-expenses">
   <!-- EXPENSES -->
