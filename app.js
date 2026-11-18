@@ -2324,6 +2324,7 @@ renderNumberStepSettings();
 setupNumberWheelSteps();
 
 Object.assign(window, {
+  saveCashMovement,
   togglePasswordVisibility,
   startBusinessDay,
   updateTransactionFields,
