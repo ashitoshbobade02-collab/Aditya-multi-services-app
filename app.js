@@ -162,12 +162,6 @@ function setupNumberWheelSteps() {
   }, { passive: false });
 }
 
-  return "₹" + Number(value || 0).toLocaleString("en-IN", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-}
-
 function today() {
   const d = new Date();
   return d.getFullYear() + "-" +
