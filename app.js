@@ -32,7 +32,6 @@ const emptyData = () => ({
   }
 });
 
-});
 let data = emptyData();
 let currentUser = null;
 let activeStorageKey = null;
