@@ -1154,10 +1154,10 @@ function saveBusinessDay() {
     return;
   }
 
-  if (!confirm("Save and close this business day? This cannot be edited from the dashboard.")) {
-    return;
-  }
-
+if (!confirm("Save and close this business day? This cannot be edited from the dashboard.")) {
+  return;
+}
+  
   const totals = calculateTotals(day);
 
   day.closing = {
@@ -1873,6 +1873,9 @@ function closeCustomPopup() {
   document.getElementById("customPopup").style.display = "none";
 }
 
+window.alert = function(message) {
+  showCustomPopup("Aditya Multi Services", String(message), "success");
+};
 /* ==================================
    SIDE MENU ACTIONS
 ================================== */
