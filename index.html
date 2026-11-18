@@ -92,6 +92,7 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <a href="#dailyClosingSection" onclick="closeDrawer()">Daily Closing</a>
     <a href="#historySection" onclick="closeDrawer()">History &amp; Calendar</a>
     <a href="#customerLedgerSection" onclick="closeDrawer()">Customer Ledger</a>
+    <a href="#customerLedgerHistorySection" onclick="closeDrawer()">Customer Ledger History</a>
     <a href="#cashMovementSection" onclick="closeDrawer()">Cash In / Cash Out</a>
     <a href="#expensesSection" onclick="closeDrawer()">Expenses</a>
     <a href="#reportsSection" onclick="closeDrawer()">Reports</a>
@@ -480,7 +481,26 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
       <p>No outstanding balances yet.</p>
     </div>
   </div>
-  
+
+<!-- CUSTOMER LEDGER HISTORY -->
+<h3 class="section-title" id="customerLedgerHistorySection">
+  Customer Ledger History
+</h3>
+
+<div class="card">
+  <p>All customer ledger entries together. Business transactions remain in History &amp; Calendar.</p>
+
+  <input
+    type="search"
+    id="customerLedgerHistorySearch"
+    placeholder="Search customer, entry type or note"
+    oninput="renderCustomerLedgerHistory()"
+  >
+
+  <div id="customerLedgerHistoryList">
+    <p class="customer-ledger-empty">No customer ledger entries yet.</p>
+  </div>
+</div>
 
   <!-- CASH IN / CASH OUT -->
   <h3 class="section-title" id="cashMovementSection">Cash In / Cash Out</h3>
