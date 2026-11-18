@@ -1853,10 +1853,10 @@ function openAppScreen(screenName) {
   if (!selectedScreen) return;
 
   selectedScreen.classList.add("active");
-  if (screenName === "home") {
-  requestAnimationFrame(() => {
+if (screenName === "home") {
+  setTimeout(() => {
     drawBusinessPerformanceChart();
-  });
+  }, 300);
 }
 
   const footer = document.querySelector("footer");
