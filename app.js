@@ -1630,6 +1630,14 @@ function openAppScreen(screenName) {
   const menuButton = document.querySelector(".menu-toggle");
   const isOpening = screenName === "opening";
   const isPreStart = !data.currentDay || data.currentDay.closed;
+  // Hide Add New Customer until the business day starts
+const addCustomerButton = document.querySelector(
+  "#screen-customer-ledger button[onclick='showAddCustomerForm()']"
+);
+
+if (addCustomerButton) {
+  addCustomerButton.style.display = isPreStart ? "none" : "";
+}
 
   // Keep business name and date visible
   footer.style.display = isOpening ? "none" : "";
