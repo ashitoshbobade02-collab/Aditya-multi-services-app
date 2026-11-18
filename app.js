@@ -1612,6 +1612,27 @@ function closeCustomPopup() {
 /* ==================================
    SIDE MENU ACTIONS
 ================================== */
+function openAppScreen(screenName) {
+  const screens = document.querySelectorAll(".app-screen");
+
+  screens.forEach(screen => {
+    screen.classList.remove("active");
+  });
+
+  const selectedScreen = document.getElementById("screen-" + screenName);
+
+  if (!selectedScreen) return;
+
+  selectedScreen.classList.add("active");
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  if (typeof closeDrawer === "function") {
+    closeDrawer();
+  }
+}
+
+window.openAppScreen = openAppScreen;
 
 function moveHeaderActionsToMenu() {
   const drawer = document.getElementById("sideDrawer");
