@@ -1309,6 +1309,11 @@ function previewClosing() {
 
   document.getElementById("closingResult").innerHTML = `
     <div style="margin-top:15px;padding:15px;background:#eaf4ff;border-radius:12px">
+      <h3>Daily Profit Summary</h3>
+      <p>Total Profit: <strong>${money(calculateTotals(day).profit)}</strong></p>
+      <p>Total Expenses: <strong>${money(calculateTotals(day).expenses)}</strong></p>
+      <p>Net Profit: <strong style="color:#168653">${money(calculateTotals(day).netProfit)}</strong></p>
+      <hr>
       <p>Expected cash: <strong>${money(expected)}</strong></p>
       <p>Actual cash: <strong>${money(actual)}</strong></p>
       <p>Difference: <strong style="color:${difference < 0 ? '#d94343' : '#168653'}">${money(difference)}</strong></p>
