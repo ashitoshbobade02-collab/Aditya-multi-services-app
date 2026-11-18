@@ -1195,14 +1195,22 @@ function renderCashMovements() {
     return;
   }
 
-  list.innerHTML = entries.slice().reverse().map(entry => `
+list.innerHTML = entries.slice().reverse().map(entry => {
+  const account = entry.account || "CASH";
+
+  const label = account === "ONLINE"
+    ? (entry.type === "IN" ? "Online Money In" : "Online Money Out")
+    : (entry.type === "IN" ? "Cash In" : "Cash Out");
+
+  return `
     <div style="padding:12px 0;border-bottom:1px solid #e2eaf2">
-      <strong>${entry.type === "IN" ? "Cash In" : "Cash Out"}</strong>
+      <strong>${label}</strong>
       <p>${entry.time}</p>
       <p>Amount: ${money(entry.amount)}</p>
       <p>Note: ${entry.note || "No note"}</p>
     </div>
-  `).join("");
+  `;
+}).join("");
 }
 
 /* ==================================
