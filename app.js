@@ -1190,9 +1190,9 @@ showCustomConfirm(
   refreshDashboard();
 
   alert("Business day saved! Portal balances are ready for the next day.");
+  }
+);
 }
-    }
-  );
 
 /* ==================================
    HISTORY AND BACKUP
