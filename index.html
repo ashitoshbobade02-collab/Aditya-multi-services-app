@@ -635,10 +635,31 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
   
  <section class="app-screen" id="screen-reports">
   <!-- REPORTS -->
-  <h3 class="section-title" id="reportsSection">Reports</h3>
-  <div class="card">
-    <p>Excel reports and date-range selection will be implemented in the reports step. JSON backup remains available.</p>
-  </div>
+    <div class="card">
+    <h3>Generate Business Reports</h3>
+
+    <label>Report Type</label>
+    <select id="reportType" onchange="toggleCustomReportDates()">
+      <option value="daily">Daily Report</option>
+      <option value="weekly">Weekly Report</option>
+      <option value="monthly">Monthly Report</option>
+      <option value="custom">Custom Date Range</option>
+    </select>
+
+    <div id="customReportDates" style="display:none;">
+      <label>From Date</label>
+      <input type="date" id="reportStartDate">
+
+      <label>To Date</label>
+      <input type="date" id="reportEndDate">
+    </div>
+
+    <button type="button" onclick="generateReport()">
+      GENERATE REPORT
+    </button>
+
+    <div id="reportResult"></div>
+    </div>
 
  </section>
  
