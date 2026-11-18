@@ -149,12 +149,15 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
         <p id="sbiCollection">₹0.00</p>
       </div>
 
-      <div class="wallet">
-        <small>Biznext + Roinet Collection</small>
-        <h2 id="combinedCollection">₹0.00</h2>
-        <small>Combined AEPS transactions today</small>
-      </div>
-    </div>
+    <div class="wallet performance-card">
+  <h3>7-Day Business Performance</h3>
+  <canvas id="businessPerformanceChart"></canvas>
+  <div class="chart-legend">
+    <span>● Business</span>
+    <span>● Profit</span>
+  </div>
+  <span id="combinedCollection" style="display:none;">₹0.00</span>
+</div>
 
     <h3 class="section-title">Today's Overview</h3>
 
