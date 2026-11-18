@@ -410,7 +410,12 @@ function addServiceTransaction() {
 
   const transaction = {
     id: Date.now(),
-    time: new Date().toLocaleTimeString("en-IN"),
+    time: new Date().toLocaleTimeString("en-IN", {
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit"
+}),
+timestamp: new Date().toISOString(),
     type: "SERVICE",
     serviceType: type,
     serviceName,
@@ -1357,7 +1362,73 @@ function saveCustomerPayment() {
 
   showCustomPopup("Ledger Updated", label + " has been recorded successfully.", "success");
 }
-  
+
+function renderCustomerLedgerHistory() {
+  const container = document.getElementById("customerLedgerHistoryList");
+  const searchInput = document.getElementById("customerLedgerHistorySearch");
+
+  if (!container) return;
+
+  const query = (searchInput?.value || "").trim().toLowerCase();
+  const entries = [];
+
+  (data.customers || []).forEach(customer => {
+    (customer.history || []).forEach(entry => {
+      entries.push({
+        ...entry,
+        customerName: customer.name || "Unnamed customer"
+      });
+    });
+  });
+
+  entries.sort((a, b) => {
+    const at = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+    const bt = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+
+    if (at && bt) return bt - at;
+    if (at) return -1;
+    if (bt) return 1;
+
+    return String(b.date || "").localeCompare(String(a.date || "")) ||
+      String(b.time || "").localeCompare(String(a.time || ""));
+  });
+
+  const filtered = entries.filter(entry =>
+    [entry.customerName, entry.label, entry.type, entry.note]
+      .some(value => String(value || "").toLowerCase().includes(query))
+  );
+
+  if (!filtered.length) {
+    container.innerHTML =
+      '<p class="customer-ledger-empty">No customer ledger entries found.</p>';
+    return;
+  }
+
+  const labels = {
+    addDue: "Amount Due Added",
+    received: "Payment Received",
+    addOwe: "Amount We Owe Added",
+    given: "Payment Given"
+  };
+
+  container.innerHTML = filtered.map(entry => {
+    const label = labels[entry.type] || entry.label || "Ledger Entry";
+
+    return `
+      <article class="ledger-history-entry">
+        <div class="ledger-history-heading">
+          <strong>${escapeLedgerHTML(entry.customerName)}</strong>
+          <strong>${escapeLedgerHTML(money(entry.amount))}</strong>
+        </div>
+        <p class="ledger-history-type">${escapeLedgerHTML(label)}</p>
+        <p><strong>Date:</strong> ${escapeLedgerHTML(entry.date || "Not available")}</p>
+        <p><strong>Time:</strong> ${escapeLedgerHTML(entry.time || "Time not available")}</p>
+        <p><strong>Note:</strong> ${escapeLedgerHTML(entry.note || "No note")}</p>
+      </article>
+    `;
+  }).join("");
+}
+
 /* ==================================
    FIREBASE LOGIN
 ================================== */
@@ -1759,6 +1830,7 @@ updateTransactionFields();
 updateServiceFields();
 updateServicePaymentFields();
 initializeCustomerLedger();
+renderCustomerLedgerHistory();
 refreshDashboard();
 
 Object.assign(window, {
@@ -1792,6 +1864,7 @@ Object.assign(window, {
   hideAddCustomerForm,
   addLedgerCustomer,
   renderCustomerLedger,
+  renderCustomerLedgerHistory,
   openCustomerAccount,
   closeCustomerAccount,
   showCustomerPaymentForm,
