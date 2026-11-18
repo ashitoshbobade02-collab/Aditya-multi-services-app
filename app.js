@@ -258,11 +258,12 @@ function startBusinessDay() {
     return;
   }
 
-  data.currentDay = {
+ data.currentDay = {
   date: today(),
   opening,
   transactions: [],
   cashMovements: [],
+  expenses: [],
   closed: false
 };
 
