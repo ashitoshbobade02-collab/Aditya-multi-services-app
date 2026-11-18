@@ -1255,6 +1255,20 @@ function saveExpense() {
     return;
   }
 
+ const currentTotals = calculateTotals(day);
+const availableBalance = paymentMethod === "ONLINE"
+  ? currentTotals.online
+  : currentTotals.cash;
+
+if (amount > availableBalance) {
+  showCustomPopup(
+    "Insufficient Balance",
+    `Available ${paymentMethod === "ONLINE" ? "Online" : "Cash"} balance: ${money(availableBalance)}`,
+    "error"
+  );
+  return;
+ }
+  
   if (!day.expenses) day.expenses = [];
 
   day.expenses.push({
