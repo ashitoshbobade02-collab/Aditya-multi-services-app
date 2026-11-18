@@ -67,15 +67,27 @@ function money(value) {
   });
 }
 
-renderNumberStepSettings()
-updateNumberStep(key, value)
-setupNumberWheelSteps()
+
+function renderNumberStepSettings() {
+  const steps = data.numberSteps || emptyData().numberSteps;
+
+  const fields = {
+    opening: "stepOpening",
+    wallet: "stepWallet",
+    transaction: "stepTransaction",
+    service: "stepService",
+    closing: "stepClosing",
+    withdrawal: "stepWithdrawal",
+    payment: "stepPayment",
+    ledger: "stepLedger"
+  };
 
   Object.entries(fields).forEach(([key, id]) => {
     const input = document.getElementById(id);
     if (input) input.value = steps[key];
   });
 }
+
 
 function updateNumberStep(key, value) {
   const amount = Number(value);
