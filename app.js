@@ -14,11 +14,24 @@ import {
 
 const KEY = "aditya_multi_services_v3";
 const THEME_KEY = "aditya_multi_services_theme_v1";
+
 const emptyData = () => ({
   days: [],
   currentDay: null,
   walletCarryForward: null,
-  customers: []
+  customers: [],
+  numberSteps: {
+    opening: 10,
+    wallet: 1,
+    transaction: 10,
+    service: 1,
+    closing: 1,
+    withdrawal: 1,
+    payment: 10,
+    ledger: 1
+  }
+});
+
 });
 let data = emptyData();
 let currentUser = null;
@@ -28,6 +41,12 @@ let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
 let selectedHistoryDate = today();
 
 function normalizeData(value) {
+  
+  const defaultSteps = emptyData().numberSteps;
+  clean.numberSteps = {
+    ...defaultSteps,
+    ...(clean.numberSteps || {})
+  };
   const clean = value && typeof value === "object" ? value : emptyData();
   if (!Array.isArray(clean.days)) clean.days = [];
   if (!Array.isArray(clean.customers)) clean.customers = [];
@@ -37,6 +56,100 @@ function normalizeData(value) {
 }
 
 function money(value) {
+function renderNumberStepSettings() {
+  const steps = data.numberSteps || emptyData().numberSteps;
+
+  const fields = {
+    opening: "stepOpening",
+    wallet: "stepWallet",
+    transaction: "stepTransaction",
+    service: "stepService",
+    closing: "stepClosing",
+    withdrawal: "stepWithdrawal",
+    payment: "stepPayment",
+    ledger: "stepLedger"
+  };
+
+  Object.entries(fields).forEach(([key, id]) => {
+    const input = document.getElementById(id);
+    if (input) input.value = steps[key];
+  });
+}
+
+function updateNumberStep(key, value) {
+  const amount = Number(value);
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    renderNumberStepSettings();
+    return;
+  }
+
+  data.numberSteps = data.numberSteps || emptyData().numberSteps;
+  data.numberSteps[key] = amount;
+  persist();
+
+  const message = document.getElementById("numberStepSaveMessage");
+  if (message) message.textContent = "Saved successfully.";
+}
+
+function setupNumberWheelSteps() {
+  const fieldSettings = {
+    openingCash: "opening",
+    openingOnline: "opening",
+    openingBiznext: "wallet",
+    openingRoinet: "wallet",
+    openingTez: "wallet",
+    openingFino: "wallet",
+    openingSbi: "wallet",
+    transactionAmount: "transaction",
+    serviceDirectAmount: "service",
+    serviceCashAmount: "service",
+    serviceOnlineAmount: "service",
+    actualCash: "closing",
+    withdrawalAmount: "withdrawal"
+  };
+
+  document.addEventListener("wheel", event => {
+    const input = event.target;
+
+    if (
+      !input ||
+      input.tagName !== "INPUT" ||
+      input.type !== "number" ||
+      document.activeElement !== input
+    ) return;
+
+    let key = fieldSettings[input.id];
+
+    if (input.id === "customerPaymentAmount") {
+      key = ["received", "given"].includes(customerPaymentMode)
+        ? "payment"
+        : "ledger";
+    }
+
+    if (!key) return;
+
+    const step = Number(data.numberSteps?.[key]) || 1;
+    if (input.readOnly || input.disabled) return;
+
+    event.preventDefault();
+
+    const direction = event.deltaY < 0 ? 1 : -1;
+    const current = Number(input.value) || 0;
+    const min = input.min === "" ? -Infinity : Number(input.min);
+    const max = input.max === "" ? Infinity : Number(input.max);
+
+    const next = Math.min(
+      max,
+      Math.max(min, current + direction * step)
+    );
+
+    input.value = String(Number(next.toFixed(2)));
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  }, { passive: false });
+}
+
   return "₹" + Number(value || 0).toLocaleString("en-IN", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
@@ -1266,7 +1379,10 @@ function closeCustomerAccount() {
   document.getElementById("customerAccountSection").style.display = "none";
   document.getElementById("customerPaymentForm").style.display = "none";
   activeCustomerId = null;
-  customerPaymentMode = null;
+  customerPaymentMode = null; const paymentAmountInput = document.getElementById("customerPaymentAmount");
+paymentAmountInput.step = ["received", "given"].includes(mode)
+  ? data.numberSteps.payment
+  : data.numberSteps.ledger;
 }
 
 function showCustomerPaymentForm(mode) {
@@ -1837,6 +1953,7 @@ async function loadUserBusinessData(user) {
   updateServiceFields();
   updateServicePaymentFields();
   renderCustomerLedgerHistory();
+  renderNumberStepSettings();
   refreshDashboard();
   renderCalendar();
 }
@@ -1914,6 +2031,8 @@ updateServicePaymentFields();
 initializeCustomerLedger();
 renderCustomerLedgerHistory();
 refreshDashboard();
+renderNumberStepSettings();
+setupNumberWheelSteps();
 
 Object.assign(window, {
   startBusinessDay,
