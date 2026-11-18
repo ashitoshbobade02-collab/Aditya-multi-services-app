@@ -1853,6 +1853,11 @@ function openAppScreen(screenName) {
   if (!selectedScreen) return;
 
   selectedScreen.classList.add("active");
+  if (screenName === "home") {
+  requestAnimationFrame(() => {
+    drawBusinessPerformanceChart();
+  });
+}
 
   const footer = document.querySelector("footer");
   const menuButton = document.querySelector(".menu-toggle");
