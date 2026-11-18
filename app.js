@@ -1381,9 +1381,14 @@ function saveBusinessDay() {
   const actualOnline = Number(document.getElementById("actualOnline").value);
 
   if (!Number.isFinite(actual) || actual < 0) {
-    alert("Enter actual cash and check the difference first.");
-    return;
-  }
+  alert("Enter valid actual cash.");
+  return;
+}
+
+  if (!Number.isFinite(actualOnline) || actualOnline < 0) {
+  alert("Enter valid actual online balance.");
+  return;
+}
 
 showCustomConfirm(
   "Close Business Day?",
