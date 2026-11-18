@@ -1629,6 +1629,7 @@ function openAppScreen(screenName) {
   const footer = document.querySelector("footer");
   const menuButton = document.querySelector(".menu-toggle");
   const isOpening = screenName === "opening";
+  const isPreStart = !data.currentDay || data.currentDay.closed;
 
   // Keep business name and date visible
   footer.style.display = isOpening ? "none" : "";
@@ -1655,7 +1656,7 @@ function openAppScreen(screenName) {
       action.includes("openAppScreen('" + name + "')")
     );
 
-    link.style.display = isOpening
+ link.style.display = isPreStart
       ? (isAllowed ? "" : "none")
       : "";
   });
@@ -1666,8 +1667,8 @@ function openAppScreen(screenName) {
   if (drawerActions) {
     drawerActions.querySelectorAll("button").forEach(button => {
       const action = button.getAttribute("onclick") || "";
-      button.style.display = action.includes("linkGoogleAccount")
-        ? (isOpening ? "none" : "")
+   button.style.display = action.includes("linkGoogleAccount")
+        ? (isPreStart ? "none" : "")
         : "";
     });
   }
