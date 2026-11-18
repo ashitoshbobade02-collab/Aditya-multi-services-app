@@ -684,7 +684,7 @@ function calculateTotals(day) {
   return totals;
 }
 
-function saveCashMovement() {
+function saveCashMovement(account = "CASH") {
   const day = currentDay();
 
   if (!day || day.closed) {
@@ -692,9 +692,19 @@ function saveCashMovement() {
     return;
   }
 
-  const type = document.getElementById("cashMovementType").value;
-  const amount = Number(document.getElementById("cashMovementAmount").value);
-  const note = document.getElementById("cashMovementNote").value.trim();
+  const isCash = account === "CASH";
+
+  const type = document.getElementById(
+    isCash ? "cashMovementType" : "onlineMovementType"
+  ).value;
+
+  const amount = Number(document.getElementById(
+    isCash ? "cashMovementAmount" : "onlineMovementAmount"
+  ).value);
+
+  const note = document.getElementById(
+    isCash ? "cashMovementNote" : "onlineMovementNote"
+  ).value.trim();
 
   if (!Number.isFinite(amount) || amount <= 0) {
     showCustomPopup("Invalid Amount", "Enter a valid amount.", "error");
@@ -702,9 +712,14 @@ function saveCashMovement() {
   }
 
   const totals = calculateTotals(day);
+  const available = isCash ? totals.cash : totals.online;
 
-  if (type === "OUT" && amount > totals.cash) {
-    showCustomPopup("Insufficient Cash", "You don't have enough cash.", "error");
+  if (type === "OUT" && amount > available) {
+    showCustomPopup(
+      "Insufficient Balance",
+      `You don't have enough ${isCash ? "cash" : "online"} balance.`,
+      "error"
+    );
     return;
   }
 
@@ -713,19 +728,30 @@ function saveCashMovement() {
   day.cashMovements.push({
     id: Date.now(),
     time: new Date().toLocaleTimeString("en-IN"),
+    account,
     type,
     amount,
     note
   });
 
-  document.getElementById("cashMovementAmount").value = "";
-  document.getElementById("cashMovementNote").value = "";
+  document.getElementById(
+    isCash ? "cashMovementAmount" : "onlineMovementAmount"
+  ).value = "";
+
+  document.getElementById(
+    isCash ? "cashMovementNote" : "onlineMovementNote"
+  ).value = "";
 
   persist();
   refreshDashboard();
 
-  showCustomPopup("Saved!", "Cash entry recorded successfully.", "success");
+  showCustomPopup(
+    "Saved!",
+    `${isCash ? "Cash" : "Online"} entry recorded successfully.`,
+    "success"
+  );
 }
+
 /* ==================================
    REGULAR TRANSACTIONS
 ================================== */
