@@ -869,7 +869,10 @@ function drawBusinessPerformanceChart() {
     const totals = day ? calculateTotals(day) : null;
 
     days.push({
-      label: date.getDate(),
+      label: date.toLocaleDateString("en-IN", {
+  day: "2-digit",
+  month: "short"
+}),
       business: totals ? totals.business : 0,
       profit: totals ? totals.profit : 0
     });
