@@ -1187,9 +1187,10 @@ showCustomConfirm(
   document.getElementById("closingResult").innerHTML = "";
   document.getElementById("actualCash").value = "";
 
-  refreshDashboard();
+refreshDashboard();
+openAppScreen("opening");
 
-  alert("Business day saved! Portal balances are ready for the next day.");
+alert("Business day saved! The shop is now closed.");
   }
 );
 }
@@ -1923,6 +1924,20 @@ window.alert = function(message) {
 ================================== */
 
 function openAppScreen(screenName) {
+    const isPreStart = !data.currentDay || data.currentDay.closed;
+
+  const allowedBeforeStart = [
+    "opening",
+    "history",
+    "customer-ledger",
+    "customer-history",
+    "reports",
+    "settings"
+  ];
+
+  if (isPreStart && !allowedBeforeStart.includes(screenName)) {
+    screenName = "opening";
+  }
   const screens = document.querySelectorAll(".app-screen");
 
   screens.forEach(screen => {
@@ -1942,7 +1957,6 @@ if (screenName === "home") {
   const footer = document.querySelector("footer");
   const menuButton = document.querySelector(".menu-toggle");
   const isOpening = screenName === "opening";
-  const isPreStart = !data.currentDay || data.currentDay.closed;
   // Hide Add New Customer until the business day starts
 const addCustomerButton = document.querySelector(
   "#screen-customer-ledger button[onclick='showAddCustomerForm()']"
