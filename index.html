@@ -105,6 +105,7 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
 <main>
 
   <!-- DASHBOARD -->
+<section class="app-screen" id="screen-home">  
   <div id="dashboardSection">
 
     <h3 class="section-title">Wallet Overview</h3>
@@ -177,7 +178,10 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     </div>
 
   </div>
+  
+</section>
 
+  <section class="app-screen" id="screen-opening">
   <!-- OPENING BALANCES -->
   <h3 class="section-title">Opening Balances</h3>
 
@@ -205,7 +209,10 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
 
     <button class="gold" id="startDayBtn" onclick="startBusinessDay()">START BUSINESS DAY</button>
   </div>
+   
+  </section>
 
+  <section class="app-screen" id="screen-transaction">
   <!-- NEW TRANSACTION -->
   <h3 class="section-title" id="transactionSection">New Transaction</h3>
 
@@ -239,6 +246,9 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <button onclick="addBusinessTransaction()">SAVE TRANSACTION</button>
   </div>
 
+    </section>
+  
+  <section class="app-screen" id="screen-services">
   <!-- SERVICES MANAGEMENT -->
   <h3 class="section-title" id="servicesSection">Services Management</h3>
 
@@ -311,7 +321,10 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
       <button onclick="addServiceTransaction()">SAVE SERVICE</button>
     </div>
   </details>
-
+    
+  </section>
+  
+<section class="app-screen" id="screen-wallet">
   <!-- WALLET MANAGEMENT -->
   <h3 class="section-title" id="walletManagementSection">Wallet Management / Online Withdrawal</h3>
 
@@ -345,6 +358,9 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <p>No transactions recorded yet.</p>
   </div>
 
+  </section>
+  
+  <section class="app-screen" id="screen-daily-closing">
   <!-- DAILY CLOSING -->
   <h3 class="section-title" id="dailyClosingSection">Daily Closing</h3>
 
@@ -358,6 +374,9 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <button class="gold" onclick="saveBusinessDay()">SAVE DAY</button>
   </div>
 
+  </section>
+  
+  <section class="app-screen" id="screen-history">
   <!-- HISTORY -->
   <h3 class="section-title" id="historySection">History &amp; Calendar</h3>
 
@@ -367,7 +386,9 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <div id="historyList"></div>
   </div>
 
-  
+  </section>
+
+  <section class="app-screen" id="screen-customer-ledger">
   <!-- CUSTOMER LEDGER -->
   <h3 class="section-title" id="customerLedgerSection">Customer Ledger</h3>
 
@@ -482,6 +503,9 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     </div>
   </div>
 
+  </section>
+
+<section class="app-screen" id="screen-customer-history">
 <!-- CUSTOMER LEDGER HISTORY -->
 <h3 class="section-title" id="customerLedgerHistorySection">
   Customer Ledger History
@@ -502,24 +526,36 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
   </div>
 </div>
 
+</section>
+
+  <section class="app-screen" id="screen-cash-movement">
   <!-- CASH IN / CASH OUT -->
   <h3 class="section-title" id="cashMovementSection">Cash In / Cash Out</h3>
   <div class="card">
     <p>Cash In and Cash Out features will be implemented in the next development step.</p>
   </div>
 
+  </section>
+
+  <section class="app-screen" id="screen-expenses">
   <!-- EXPENSES -->
   <h3 class="section-title" id="expensesSection">Expenses</h3>
   <div class="card">
     <p>Expense tracking will be implemented in the next development step.</p>
   </div>
 
+  </section>
+  
+ <section class="app-screen" id="screen-reports">
   <!-- REPORTS -->
   <h3 class="section-title" id="reportsSection">Reports</h3>
   <div class="card">
     <p>Excel reports and date-range selection will be implemented in the reports step. JSON backup remains available.</p>
   </div>
 
+ </section>
+ 
+  <section class="app-screen" id="screen-settings">
   <!-- SETTINGS -->
   <h3 class="section-title" id="settingsSection">Settings</h3>
   <div class="card">
@@ -529,6 +565,7 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
   <footer>
     <p>ADITYA MULTI SERVICES</p>
     <small>Business Management System</small>
+  </section>
   </footer>
 
 </main>
