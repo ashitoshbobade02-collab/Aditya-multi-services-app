@@ -259,11 +259,12 @@ function startBusinessDay() {
   }
 
   data.currentDay = {
-    date: today(),
-    opening,
-    transactions: [],
-    closed: false
-  };
+  date: today(),
+  opening,
+  transactions: [],
+  cashMovements: [],
+  closed: false
+};
 
   persist();
   refreshDashboard();
@@ -671,6 +672,13 @@ function calculateTotals(day) {
     totals.cash += charge;
     totals.charges += charge;
     totals.profit += charge;
+  });
+
+   (day.cashMovements || []).forEach(entry => {
+    const amount = Number(entry.amount) || 0;
+
+    if (entry.type === "IN") totals.cash += amount;
+    if (entry.type === "OUT") totals.cash -= amount;
   });
 
   return totals;
