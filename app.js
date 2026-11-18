@@ -40,35 +40,36 @@ let cloudWriteQueue = Promise.resolve();
 let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let selectedHistoryDate = today();
 
+
 function normalizeData(value) {
-  
+  const clean = value && typeof value === "object" ? value : emptyData();
+
+  if (!Array.isArray(clean.days)) clean.days = [];
+  if (!Array.isArray(clean.customers)) clean.customers = [];
+  if (!Object.prototype.hasOwnProperty.call(clean, "currentDay")) clean.currentDay = null;
+  if (!Object.prototype.hasOwnProperty.call(clean, "walletCarryForward")) clean.walletCarryForward = null;
+
   const defaultSteps = emptyData().numberSteps;
   clean.numberSteps = {
     ...defaultSteps,
     ...(clean.numberSteps || {})
   };
-  const clean = value && typeof value === "object" ? value : emptyData();
-  if (!Array.isArray(clean.days)) clean.days = [];
-  if (!Array.isArray(clean.customers)) clean.customers = [];
-  if (!Object.prototype.hasOwnProperty.call(clean, "currentDay")) clean.currentDay = null;
-  if (!Object.prototype.hasOwnProperty.call(clean, "walletCarryForward")) clean.walletCarryForward = null;
+
   return clean;
 }
 
-function money(value) {
-function renderNumberStepSettings() {
-  const steps = data.numberSteps || emptyData().numberSteps;
 
-  const fields = {
-    opening: "stepOpening",
-    wallet: "stepWallet",
-    transaction: "stepTransaction",
-    service: "stepService",
-    closing: "stepClosing",
-    withdrawal: "stepWithdrawal",
-    payment: "stepPayment",
-    ledger: "stepLedger"
-  };
+
+function money(value) {
+  return "₹" + Number(value || 0).toLocaleString("en-IN", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+renderNumberStepSettings()
+updateNumberStep(key, value)
+setupNumberWheelSteps()
 
   Object.entries(fields).forEach(([key, id]) => {
     const input = document.getElementById(id);
