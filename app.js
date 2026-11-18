@@ -135,6 +135,7 @@ function startBusinessDay() {
 
   persist();
   refreshDashboard();
+  openAppScreen("home");
   alert("Business day started successfully!");
 }
 
