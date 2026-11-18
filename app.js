@@ -674,12 +674,14 @@ function calculateTotals(day) {
     totals.profit += charge;
   });
 
-   (day.cashMovements || []).forEach(entry => {
-    const amount = Number(entry.amount) || 0;
+ (day.cashMovements || []).forEach(entry => {
+  const amount = Number(entry.amount) || 0;
+  const account = entry.account || "CASH";
+  const balanceKey = account === "ONLINE" ? "online" : "cash";
 
-    if (entry.type === "IN") totals.cash += amount;
-    if (entry.type === "OUT") totals.cash -= amount;
-  });
+  if (entry.type === "IN") totals[balanceKey] += amount;
+  if (entry.type === "OUT") totals[balanceKey] -= amount;
+});
 
   return totals;
 }
