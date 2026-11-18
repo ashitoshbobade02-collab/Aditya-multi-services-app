@@ -1953,7 +1953,9 @@ if (addCustomerButton) {
 }
 
   // Keep business name and date visible
+  if (footer) {
   footer.style.display = isOpening ? "none" : "";
+}
 
   // Make the menu button smaller on Opening Balances
   if (menuButton) {
