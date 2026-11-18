@@ -929,7 +929,7 @@ function drawBusinessPerformanceChart() {
     ctx.arc(x, y, 4, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.font = "9px Arial";
+    ctx.font = "11px Arial";
     ctx.textAlign = "center";
     ctx.fillStyle = color;
 
