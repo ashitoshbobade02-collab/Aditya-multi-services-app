@@ -39,8 +39,11 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <label for="loginEmail">Email Address</label>
     <input type="email" id="loginEmail" placeholder="Enter your email address" autocomplete="email">
 
-    <label for="loginPassword">Password</label>
-    <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
+  <label for="loginPassword">Password</label>
+<div class="password-input-wrap">
+  <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
+  <button type="button" class="password-toggle" onclick="togglePasswordVisibility()">SHOW</button>
+</div>
 
     <div id="confirmPasswordGroup" style="display:none;">
       <label for="confirmPassword">Confirm Password</label>
