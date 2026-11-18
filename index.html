@@ -557,19 +557,38 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
  
   <section class="app-screen" id="screen-settings">
   <!-- SETTINGS -->
-  <h3 class="section-title" id="settingsSection">Settings</h3>
-  <div class="card">
-    <p>Opening balance corrections and device security settings will be implemented in the settings step.</p>
-  </div>
 
-  </section>
-  
-  <footer>
-    <p>ADITYA MULTI SERVICES</p>
-    <small>Business Management System</small>
-  </footer>
+<div class="card">
+  <h3>Amount Wheel Increment Settings</h3>
+  <p>Choose how much an amount changes when you scroll the mouse wheel over its input field.</p>
 
-</main>
+  <label>Opening Cash and Online (₹)</label>
+  <input type="number" id="stepOpening" min="0.01" step="0.01" onchange="updateNumberStep('opening', this.value)">
+
+  <label>Opening Wallet Balances (₹)</label>
+  <input type="number" id="stepWallet" min="0.01" step="0.01" onchange="updateNumberStep('wallet', this.value)">
+
+  <label>Transactions (₹)</label>
+  <input type="number" id="stepTransaction" min="0.01" step="0.01" onchange="updateNumberStep('transaction', this.value)">
+
+  <label>Service Amounts, Cash and Online (₹)</label>
+  <input type="number" id="stepService" min="0.01" step="0.01" onchange="updateNumberStep('service', this.value)">
+
+  <label>Actual Cash at Closing (₹)</label>
+  <input type="number" id="stepClosing" min="0.01" step="0.01" onchange="updateNumberStep('closing', this.value)">
+
+  <label>Wallet Withdrawal (₹)</label>
+  <input type="number" id="stepWithdrawal" min="0.01" step="0.01" onchange="updateNumberStep('withdrawal', this.value)">
+
+  <label>Payment Received and Payment Given (₹)</label>
+  <input type="number" id="stepPayment" min="0.01" step="0.01" onchange="updateNumberStep('payment', this.value)">
+
+  <label>Customer Ledger Amount Due and Amount We Owe (₹)</label>
+  <input type="number" id="stepLedger" min="0.01" step="0.01" onchange="updateNumberStep('ledger', this.value)">
+
+  <p id="numberStepSaveMessage">Changes are saved automatically.</p>
+</div>
+
 
 <!-- CUSTOM POPUP -->
 <div id="customPopup" class="popup-overlay" style="display:none;">
