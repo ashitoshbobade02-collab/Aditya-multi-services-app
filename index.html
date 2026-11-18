@@ -83,21 +83,21 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <button type="button" class="drawer-close" onclick="closeDrawer()">×</button>
   </div>
 
-  <nav class="drawer-nav">
-    <a href="#dashboardSection" onclick="closeDrawer()">Dashboard</a>
-    <a href="#openingSection" onclick="closeDrawer()">Opening Balances</a>
-    <a href="#transactionSection" onclick="closeDrawer()">New Transaction</a>
-    <a href="#servicesSection" onclick="closeDrawer()">Services</a>
-    <a href="#walletManagementSection" onclick="closeDrawer()">Wallet Management</a>
-    <a href="#dailyClosingSection" onclick="closeDrawer()">Daily Closing</a>
-    <a href="#historySection" onclick="closeDrawer()">History &amp; Calendar</a>
-    <a href="#customerLedgerSection" onclick="closeDrawer()">Customer Ledger</a>
-    <a href="#customerLedgerHistorySection" onclick="closeDrawer()">Customer Ledger History</a>
-    <a href="#cashMovementSection" onclick="closeDrawer()">Cash In / Cash Out</a>
-    <a href="#expensesSection" onclick="closeDrawer()">Expenses</a>
-    <a href="#reportsSection" onclick="closeDrawer()">Reports</a>
-    <a href="#settingsSection" onclick="closeDrawer()">Settings</a>
-  </nav>
+ <nav class="drawer-nav">
+  <a href="#" onclick="openAppScreen('home'); return false;">Dashboard</a>
+  <a href="#" onclick="openAppScreen('opening'); return false;">Opening Balances</a>
+  <a href="#" onclick="openAppScreen('transaction'); return false;">New Transaction</a>
+  <a href="#" onclick="openAppScreen('services'); return false;">Services</a>
+  <a href="#" onclick="openAppScreen('wallet'); return false;">Wallet Management</a>
+  <a href="#" onclick="openAppScreen('daily-closing'); return false;">Daily Closing</a>
+  <a href="#" onclick="openAppScreen('history'); return false;">History &amp; Calendar</a>
+  <a href="#" onclick="openAppScreen('customer-ledger'); return false;">Customer Ledger</a>
+  <a href="#" onclick="openAppScreen('customer-history'); return false;">Customer Ledger History</a>
+  <a href="#" onclick="openAppScreen('cash-movement'); return false;">Cash In / Cash Out</a>
+  <a href="#" onclick="openAppScreen('expenses'); return false;">Expenses</a>
+  <a href="#" onclick="openAppScreen('reports'); return false;">Reports</a>
+  <a href="#" onclick="openAppScreen('settings'); return false;">Settings</a>
+</nav>
 
   <p class="drawer-note">Additional sections will be activated as we implement their features.</p>
 </aside>
