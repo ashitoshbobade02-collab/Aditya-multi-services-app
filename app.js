@@ -1339,8 +1339,12 @@ if (!Number.isFinite(actualOnline) || actualOnline < 0) {
   return;
 }
 
-  const expected = calculateTotals(day).cash;
+  const totals = calculateTotals(day);
+  const expected = totals.cash;
   const difference = actual - expected;
+
+  const expectedOnline = totals.online;
+  const onlineDifference = actualOnline - expectedOnline;
 
   document.getElementById("closingResult").innerHTML = `
     <div style="margin-top:15px;padding:15px;background:#eaf4ff;border-radius:12px">
