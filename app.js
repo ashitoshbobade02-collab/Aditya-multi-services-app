@@ -1612,6 +1612,7 @@ function closeCustomPopup() {
 /* ==================================
    SIDE MENU ACTIONS
 ================================== */
+
 function openAppScreen(screenName) {
   const screens = document.querySelectorAll(".app-screen");
 
@@ -1620,16 +1621,58 @@ function openAppScreen(screenName) {
   });
 
   const selectedScreen = document.getElementById("screen-" + screenName);
-
   if (!selectedScreen) return;
 
   selectedScreen.classList.add("active");
 
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  const footer = document.querySelector("footer");
+  const menuButton = document.querySelector(".menu-toggle");
+  const isOpening = screenName === "opening";
 
-  if (typeof closeDrawer === "function") {
-    closeDrawer();
+  // Keep business name and date visible
+  footer.style.display = isOpening ? "none" : "";
+
+  // Make the menu button smaller on Opening Balances
+  if (menuButton) {
+    menuButton.style.padding = isOpening ? "5px 9px" : "";
+    menuButton.style.fontSize = isOpening ? "12px" : "";
   }
+
+  // Show only useful menu options before starting the day
+  document.querySelectorAll(".drawer-nav a").forEach(link => {
+    const action = link.getAttribute("onclick") || "";
+
+    const allowedOnOpening = [
+      "history",
+      "customer-ledger",
+      "customer-history",
+      "reports",
+      "settings"
+    ];
+
+    const isAllowed = allowedOnOpening.some(name =>
+      action.includes("openAppScreen('" + name + "')")
+    );
+
+    link.style.display = isOpening
+      ? (isAllowed ? "" : "none")
+      : "";
+  });
+
+  // Keep Dark/Light Mode and Sign Out, hide Google linking
+  const drawerActions = document.querySelector(".drawer-actions");
+
+  if (drawerActions) {
+    drawerActions.querySelectorAll("button").forEach(button => {
+      const action = button.getAttribute("onclick") || "";
+      button.style.display = action.includes("linkGoogleAccount")
+        ? (isOpening ? "none" : "")
+        : "";
+    });
+  }
+
+  closeDrawer();
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 window.openAppScreen = openAppScreen;
