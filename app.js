@@ -15,6 +15,19 @@ import {
 const KEY = "aditya_multi_services_v3";
 const THEME_KEY = "aditya_multi_services_theme_v1";
 
+function togglePasswordVisibility() {
+  const passwordInput = document.getElementById("loginPassword");
+  const toggleButton = document.querySelector(".password-toggle");
+
+  if (passwordInput.type === "password") {
+    passwordInput.type = "text";
+    toggleButton.textContent = "HIDE";
+  } else {
+    passwordInput.type = "password";
+    toggleButton.textContent = "SHOW";
+  }
+}
+
 const emptyData = () => ({
   days: [],
   currentDay: null,
