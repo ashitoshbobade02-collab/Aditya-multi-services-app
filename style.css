@@ -306,6 +306,39 @@ button.gold,
   font-weight: 800;
   cursor: pointer;
 }
+
+.performance-card {
+  grid-column: 1 / -1;
+  padding: 18px;
+}
+
+.performance-card h3 {
+  margin: 0 0 15px;
+}
+
+#businessPerformanceChart {
+  width: 100%;
+  height: 260px;
+  display: block;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.chart-legend span:first-child {
+  color: #2563eb;
+}
+
+.chart-legend span:last-child {
+  color: #16a34a;
+}
+
 /* SIDE MENU */
 
 .menu-toggle {
