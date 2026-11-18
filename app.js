@@ -686,7 +686,19 @@ function calculateTotals(day) {
   if (entry.type === "OUT") totals[balanceKey] -= amount;
 });
 
-   totals.expenses = (day.expenses || []).reduce(
+  (day.expenses || []).forEach(expense => {
+  const amount = Number(expense.amount) || 0;
+
+  if (expense.paymentMethod === "CASH") {
+    totals.cash -= amount;
+  }
+
+  if (expense.paymentMethod === "ONLINE") {
+    totals.online -= amount;
+  }
+});
+  
+  totals.expenses = (day.expenses || []).reduce(
     (sum, expense) => sum + (Number(expense.amount) || 0),
     0
   );
