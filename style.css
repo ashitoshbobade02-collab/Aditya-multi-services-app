@@ -894,3 +894,34 @@ th {
   }
 }
 
+/* CUSTOMER LEDGER HISTORY */
+#customerLedgerHistorySearch {
+  margin-bottom: 12px;
+}
+
+.ledger-history-entry {
+  padding: 13px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.ledger-history-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ledger-history-heading strong:last-child {
+  color: var(--green);
+}
+
+.ledger-history-entry p {
+  margin: 5px 0;
+  overflow-wrap: anywhere;
+}
+
+.ledger-history-type {
+  color: var(--blue);
+  font-weight: 700;
+}
