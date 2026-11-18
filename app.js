@@ -840,6 +840,93 @@ function addOnlineWithdrawal() {
 /* ==================================
    DASHBOARD
 ================================== */
+function drawBusinessPerformanceChart() {
+  const canvas = document.getElementById("businessPerformanceChart");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  const width = canvas.clientWidth;
+  const height = 260;
+  const ratio = window.devicePixelRatio || 1;
+
+  canvas.width = width * ratio;
+  canvas.height = height * ratio;
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+  const days = [];
+
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+
+    const key = date.getFullYear() + "-" +
+      String(date.getMonth() + 1).padStart(2, "0") + "-" +
+      String(date.getDate()).padStart(2, "0");
+
+    const day = data.days.find(d => d.date === key) ||
+      (data.currentDay?.date === key ? data.currentDay : null);
+
+    const totals = day ? calculateTotals(day) : null;
+
+    days.push({
+      label: date.getDate(),
+      business: totals ? totals.business : 0,
+      profit: totals ? totals.profit : 0
+    });
+  }
+
+  const max = Math.max(1, ...days.map(d =>
+    Math.max(d.business, d.profit)
+  ));
+
+  const left = 48;
+  const right = width - 12;
+  const top = 20;
+  const bottom = height - 35;
+
+  ctx.clearRect(0, 0, width, height);
+
+  ctx.font = "11px Arial";
+  ctx.textAlign = "right";
+  ctx.fillStyle = "#888";
+
+  for (let i = 0; i <= 4; i++) {
+    const y = bottom - (bottom - top) * i / 4;
+    ctx.fillText(Math.round(max * i / 4).toLocaleString("en-IN"), left - 8, y + 4);
+    ctx.beginPath();
+    ctx.strokeStyle = "#e5e7eb";
+    ctx.moveTo(left, y);
+    ctx.lineTo(right, y);
+    ctx.stroke();
+  }
+
+  function drawLine(key, color) {
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 3;
+
+    days.forEach((d, i) => {
+      const x = left + (right - left) * i / 6;
+      const y = bottom - (d[key] / max) * (bottom - top);
+
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+
+    ctx.stroke();
+  }
+
+  drawLine("business", "#2563eb");
+  drawLine("profit", "#16a34a");
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#777";
+
+  days.forEach((d, i) => {
+    const x = left + (right - left) * i / 6;
+    ctx.fillText(d.label, x, height - 12);
+  });
+}
 
 function refreshDashboard() {
   const day = currentDay();
@@ -851,6 +938,8 @@ function refreshDashboard() {
       year: "numeric"
     });
 
+  drawBusinessPerformanceChart();
+  
   const walletIds = [
     "biznextBalance", "roinetBalance", "tezBalance", "finoBalance",
     "sbiBalance", "combinedCollection",
@@ -1978,6 +2067,7 @@ async function loadUserBusinessData(user) {
   renderCustomerLedgerHistory();
   renderNumberStepSettings();
   refreshDashboard();
+  drawBusinessPerformanceChart();
   renderCalendar();
 }
 
