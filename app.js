@@ -1122,6 +1122,7 @@ function refreshDashboard() {
   document.getElementById("onlineBalance").textContent = money(t.online);
   document.getElementById("totalBusiness").textContent = money(t.business);
   document.getElementById("dailyProfit").textContent = money(t.profit);
+  document.getElementById("netProfit").textContent = money(t.netProfit);
 
   document.getElementById("openingSection").style.display = "none";
 
