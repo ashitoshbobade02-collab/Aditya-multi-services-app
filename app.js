@@ -1845,8 +1845,13 @@ onAuthStateChanged(auth, async (user) => {
     header.style.display = "";
     main.style.display = "";
 
-    await loadUserBusinessData(user);
-    openAppScreen("home");
+       await loadUserBusinessData(user);
+
+    if (data.currentDay && !data.currentDay.closed) {
+      openAppScreen("home");
+    } else {
+      openAppScreen("opening");
+    }
 
   } else {
     currentUser = null;
