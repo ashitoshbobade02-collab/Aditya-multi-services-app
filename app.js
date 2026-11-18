@@ -1400,7 +1400,9 @@ showCustomConfirm(
   day.closing = {
     ...totals,
     actualCash: actual,
+    actualOnline: actualOnline,
     difference: actual - totals.cash,
+    onlineDifference: actualOnline - totals.online,
     closedAt: new Date().toISOString()
   };
 
@@ -1422,6 +1424,7 @@ showCustomConfirm(
   document.getElementById("openingSection").style.display = "block";
   document.getElementById("closingResult").innerHTML = "";
   document.getElementById("actualCash").value = "";
+  document.getElementById("actualOnline").value = "";
 
 refreshDashboard();
 openAppScreen("opening");
