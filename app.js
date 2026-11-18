@@ -1381,15 +1381,14 @@ function openCustomerAccount(id) {
   document.getElementById("customerAccountSection").scrollIntoView({ behavior: "smooth" });
 }
 
+
 function closeCustomerAccount() {
   document.getElementById("customerAccountSection").style.display = "none";
   document.getElementById("customerPaymentForm").style.display = "none";
   activeCustomerId = null;
-  customerPaymentMode = null; const paymentAmountInput = document.getElementById("customerPaymentAmount");
-paymentAmountInput.step = ["received", "given"].includes(mode)
-  ? data.numberSteps.payment
-  : data.numberSteps.ledger;
+  customerPaymentMode = null;
 }
+
 
 function showCustomerPaymentForm(mode) {
   if (!activeCustomerId) return;
