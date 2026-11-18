@@ -684,6 +684,48 @@ function calculateTotals(day) {
   return totals;
 }
 
+function saveCashMovement() {
+  const day = currentDay();
+
+  if (!day || day.closed) {
+    showCustomPopup("Shop Closed", "Start a business day first.", "error");
+    return;
+  }
+
+  const type = document.getElementById("cashMovementType").value;
+  const amount = Number(document.getElementById("cashMovementAmount").value);
+  const note = document.getElementById("cashMovementNote").value.trim();
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    showCustomPopup("Invalid Amount", "Enter a valid amount.", "error");
+    return;
+  }
+
+  const totals = calculateTotals(day);
+
+  if (type === "OUT" && amount > totals.cash) {
+    showCustomPopup("Insufficient Cash", "You don't have enough cash.", "error");
+    return;
+  }
+
+  if (!day.cashMovements) day.cashMovements = [];
+
+  day.cashMovements.push({
+    id: Date.now(),
+    time: new Date().toLocaleTimeString("en-IN"),
+    type,
+    amount,
+    note
+  });
+
+  document.getElementById("cashMovementAmount").value = "";
+  document.getElementById("cashMovementNote").value = "";
+
+  persist();
+  refreshDashboard();
+
+  showCustomPopup("Saved!", "Cash entry recorded successfully.", "success");
+}
 /* ==================================
    REGULAR TRANSACTIONS
 ================================== */
