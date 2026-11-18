@@ -1378,6 +1378,7 @@ function saveBusinessDay() {
   }
 
   const actual = Number(document.getElementById("actualCash").value);
+  const actualOnline = Number(document.getElementById("actualOnline").value);
 
   if (!Number.isFinite(actual) || actual < 0) {
     alert("Enter actual cash and check the difference first.");
