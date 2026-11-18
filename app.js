@@ -1802,6 +1802,7 @@ onAuthStateChanged(auth, async (user) => {
     main.style.display = "";
 
     await loadUserBusinessData(user);
+    openAppScreen("home");
 
   } else {
     currentUser = null;
