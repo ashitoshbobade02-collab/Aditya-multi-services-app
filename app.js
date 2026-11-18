@@ -2422,6 +2422,7 @@ setupNumberWheelSteps();
 
 Object.assign(window, {
   saveCashMovement,
+  saveExpense,
   togglePasswordVisibility,
   startBusinessDay,
   updateTransactionFields,
