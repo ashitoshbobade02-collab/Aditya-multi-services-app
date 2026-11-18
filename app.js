@@ -1150,6 +1150,31 @@ function refreshDashboard() {
       `;
     }).join("");
   }
+
+  renderCashMovements();
+}
+
+function renderCashMovements() {
+  const day = currentDay();
+  const list = document.getElementById("cashMovementList");
+
+  if (!list) return;
+
+  const entries = day ? (day.cashMovements || []) : [];
+
+  if (entries.length === 0) {
+    list.innerHTML = "<p>No cash entries yet.</p>";
+    return;
+  }
+
+  list.innerHTML = entries.slice().reverse().map(entry => `
+    <div style="padding:12px 0;border-bottom:1px solid #e2eaf2">
+      <strong>${entry.type === "IN" ? "Cash In" : "Cash Out"}</strong>
+      <p>${entry.time}</p>
+      <p>Amount: ${money(entry.amount)}</p>
+      <p>Note: ${entry.note || "No note"}</p>
+    </div>
+  `).join("");
 }
 
 /* ==================================
