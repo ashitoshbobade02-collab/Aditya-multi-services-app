@@ -600,20 +600,7 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
   </details>
 </div>
 
-<!-- CUSTOM POPUP -->
-<div id="customPopup" class="popup-overlay" style="display:none;">
-  <div class="popup-box">
-    <div id="popupIcon" class="popup-icon">✓</div>
-    <h2 id="popupTitle">Success!</h2>
-    <p id="popupMessage">Your action was completed successfully.</p>
-    <div id="popupDetails"></div>
-   <div class="popup-actions">
-  <button id="popupCancelButton" onclick="closeCustomPopup()" style="display:none;">CANCEL</button>
-  <button id="popupOkButton" onclick="closeCustomPopup()">OK, GOT IT</button>
 </div>
-  </div>
-</div>
-
 <script>
 function toggleDrawer(){
   document.getElementById("sideDrawer").classList.toggle("open");
@@ -626,5 +613,18 @@ function closeDrawer(){
 </script>
 
 <script type="module" src="app.js"></script>
-</body>
+
+    <!-- CUSTOM POPUP -->
+<div id="customPopup" class="popup-overlay" style="display:none;">
+  <div class="popup-box">
+    <div id="popupIcon" class="popup-icon">✓</div>
+    <h2 id="popupTitle">Success!</h2>
+    <p id="popupMessage">Your action was completed successfully.</p>
+    <div id="popupDetails"></div>
+   <div class="popup-actions">
+  <button id="popupCancelButton" onclick="closeCustomPopup()" style="display:none;">CANCEL</button>
+  <button id="popupOkButton" onclick="closeCustomPopup()">OK, GOT IT</button>
+</div>
+  </div>
+  </body>
 </html>
