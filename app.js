@@ -1154,10 +1154,11 @@ function saveBusinessDay() {
     return;
   }
 
-if (!confirm("Save and close this business day? This cannot be edited from the dashboard.")) {
-  return;
-}
-  
+showCustomConfirm(
+  "Close Business Day?",
+  "Save and close this business day? This cannot be edited from the dashboard.",
+  () => {
+    
   const totals = calculateTotals(day);
 
   day.closing = {
@@ -1190,6 +1191,8 @@ if (!confirm("Save and close this business day? This cannot be edited from the d
 
   alert("Business day saved! Portal balances are ready for the next day.");
 }
+    }
+  );
 
 /* ==================================
    HISTORY AND BACKUP
@@ -1871,6 +1874,45 @@ function showCustomPopup(title, message, type = "success", details = "") {
 
 function closeCustomPopup() {
   document.getElementById("customPopup").style.display = "none";
+
+  pendingPopupAction = null;
+
+  document.getElementById("popupCancelButton").style.display = "none";
+
+  const okButton = document.getElementById("popupOkButton");
+  okButton.textContent = "OK, GOT IT";
+  okButton.onclick = closeCustomPopup;
+}
+
+let pendingPopupAction = null;
+
+function showCustomConfirm(title, message, action) {
+  pendingPopupAction = action;
+
+  document.getElementById("popupTitle").textContent = title;
+  document.getElementById("popupMessage").textContent = message;
+
+  document.getElementById("popupCancelButton").style.display = "inline-block";
+
+  const okButton = document.getElementById("popupOkButton");
+  okButton.textContent = "CONFIRM";
+  okButton.onclick = confirmCustomPopup;
+
+  document.getElementById("customPopup").style.display = "flex";
+}
+
+function confirmCustomPopup() {
+  const action = pendingPopupAction;
+  pendingPopupAction = null;
+  closeCustomPopup();
+
+  document.getElementById("popupCancelButton").style.display = "none";
+
+  const okButton = document.getElementById("popupOkButton");
+  okButton.textContent = "OK, GOT IT";
+  okButton.onclick = closeCustomPopup;
+
+  if (action) action();
 }
 
 window.alert = function(message) {
