@@ -845,6 +845,11 @@ function drawBusinessPerformanceChart() {
   if (!canvas) return;
 
   const ctx = canvas.getContext("2d");
+
+  const chartStyles = getComputedStyle(document.documentElement);
+  const gridColor = chartStyles.getPropertyValue("--line").trim();
+  const mutedColor = chartStyles.getPropertyValue("--muted").trim();
+
   const width = canvas.clientWidth;
   const height = 260;
   const ratio = window.devicePixelRatio || 1;
@@ -891,13 +896,13 @@ function drawBusinessPerformanceChart() {
 
   ctx.font = "11px Arial";
   ctx.textAlign = "right";
-  ctx.fillStyle = "#888";
+  ctx.fillStyle = mutedColor;
 
   for (let i = 0; i <= 4; i++) {
     const y = bottom - (bottom - top) * i / 4;
     ctx.fillText(Math.round(max * i / 4).toLocaleString("en-IN"), left - 8, y + 4);
     ctx.beginPath();
-    ctx.strokeStyle = "#e5e7eb";
+    ctx.strokeStyle = gridColor;
     ctx.moveTo(left, y);
     ctx.lineTo(right, y);
     ctx.stroke();
@@ -950,7 +955,7 @@ function drawBusinessPerformanceChart() {
   drawLine("profit", "#16a34a");
 
   ctx.textAlign = "center";
-  ctx.fillStyle = "#777";
+  ctx.fillStyle = mutedColor;
 
   days.forEach((d, i) => {
     const x = left + (right - left) * i / 6;
