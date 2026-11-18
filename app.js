@@ -903,21 +903,48 @@ function drawBusinessPerformanceChart() {
     ctx.stroke();
   }
 
-  function drawLine(key, color) {
+ function drawLine(key, color) {
+  ctx.beginPath();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 3;
+
+  days.forEach((d, i) => {
+    const x = left + (right - left) * i / 6;
+    const y = bottom - (d[key] / max) * (bottom - top);
+
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  });
+
+  ctx.stroke();
+
+  days.forEach((d, i) => {
+    if (d[key] <= 0) return;
+
+    const x = left + (right - left) * i / 6;
+    const y = bottom - (d[key] / max) * (bottom - top);
+
     ctx.beginPath();
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 3;
+    ctx.fillStyle = color;
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
 
-    days.forEach((d, i) => {
-      const x = left + (right - left) * i / 6;
-      const y = bottom - (d[key] / max) * (bottom - top);
+    ctx.font = "9px Arial";
+    ctx.textAlign = "center";
+    ctx.fillStyle = color;
 
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    });
+    const amount = new Intl.NumberFormat("en-IN", {
+      notation: "compact",
+      maximumFractionDigits: 1
+    }).format(d[key]);
 
-    ctx.stroke();
-  }
+    ctx.fillText(
+      "₹" + amount,
+      x,
+      y + (key === "business" ? -10 : 15)
+    );
+  });
+}
 
   drawLine("business", "#2563eb");
   drawLine("profit", "#16a34a");
