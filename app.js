@@ -1069,7 +1069,7 @@ function refreshDashboard() {
     "biznextCollection", "roinetCollection", "tezCollection",
     "finoCollection", "sbiCollection",
     "cashBalance", "onlineBalance",
-    "totalBusiness", "dailyProfit"
+    "totalBusiness", "dailyProfit", "netProfit"
   ];
 
   if (!day) {
