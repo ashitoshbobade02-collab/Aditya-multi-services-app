@@ -613,6 +613,8 @@ function calculateTotals(day) {
     cash: day.opening.cash,
     online: day.opening.online,
     profit: 0,
+    expenses: 0,
+    netProfit: 0,
     business: 0,
     charges: 0,
     serviceIncome: 0
