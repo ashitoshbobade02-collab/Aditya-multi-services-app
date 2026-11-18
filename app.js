@@ -1214,6 +1214,66 @@ list.innerHTML = entries.slice().reverse().map(entry => {
 }).join("");
 }
 
+function saveExpense() {
+  const day = currentDay();
+
+  if (!day || day.closed) {
+    showCustomPopup("Shop Closed", "Start a business day first.", "error");
+    return;
+  }
+
+  const category = document.getElementById("expenseCategory").value;
+  const amount = Number(document.getElementById("expenseAmount").value);
+  const note = document.getElementById("expenseNote").value.trim();
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    showCustomPopup("Invalid Amount", "Enter a valid expense amount.", "error");
+    return;
+  }
+
+  if (!day.expenses) day.expenses = [];
+
+  day.expenses.push({
+    id: Date.now(),
+    time: new Date().toLocaleTimeString("en-IN"),
+    category,
+    amount,
+    note
+  });
+
+  document.getElementById("expenseAmount").value = "";
+  document.getElementById("expenseNote").value = "";
+
+  persist();
+  renderExpenseList();
+  refreshDashboard();
+
+  showCustomPopup("Saved!", "Expense recorded successfully.", "success");
+}
+
+function renderExpenseList() {
+  const day = currentDay();
+  const list = document.getElementById("expenseList");
+
+  if (!list) return;
+
+  const expenses = day ? (day.expenses || []) : [];
+
+  if (expenses.length === 0) {
+    list.innerHTML = "<p>No expenses yet.</p>";
+    return;
+  }
+
+  list.innerHTML = expenses.slice().reverse().map(expense => `
+    <div style="padding:12px 0;border-bottom:1px solid #e2eaf2">
+      <strong>${expense.category}</strong>
+      <p>${expense.time}</p>
+      <p>Amount: ${money(expense.amount)}</p>
+      <p>Note: ${expense.note || "No note"}</p>
+    </div>
+  `).join("");
+}
+
 /* ==================================
    DAILY CLOSING
 ================================== */
