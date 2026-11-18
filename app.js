@@ -686,6 +686,13 @@ function calculateTotals(day) {
   if (entry.type === "OUT") totals[balanceKey] -= amount;
 });
 
+   totals.expenses = (day.expenses || []).reduce(
+    (sum, expense) => sum + (Number(expense.amount) || 0),
+    0
+  );
+
+  totals.netProfit = totals.profit - totals.expenses;
+
   return totals;
 }
 
