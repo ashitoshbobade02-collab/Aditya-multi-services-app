@@ -1356,7 +1356,10 @@ if (!Number.isFinite(actualOnline) || actualOnline < 0) {
       <p>Expected cash: <strong>${money(expected)}</strong></p>
       <p>Actual cash: <strong>${money(actual)}</strong></p>
       <p>Difference: <strong style="color:${difference < 0 ? '#d94343' : '#168653'}">${money(difference)}</strong></p>
-      <p>${difference === 0 ? "Cash matched" : difference < 0 ? "Cash shortage" : "Cash excess"}</p>
+      <p>${difference === 0 ? "Cash matched" : difference < 0 ? "Cash shortage" : "Cash excess"}</p><p>Expected Online: <strong>${money(expectedOnline)}</strong></p>
+      <p>Actual Online: <strong>${money(actualOnline)}</strong></p>
+      <p>Online Difference: <strong style="color:${onlineDifference < 0 ? '#d94343' : '#168653'}">${money(onlineDifference)}</strong></p>
+      <p>${onlineDifference === 0 ? "Online balance matched" : onlineDifference < 0 ? "Online shortage" : "Online excess"}</p>
     </div>
   `;
 }
