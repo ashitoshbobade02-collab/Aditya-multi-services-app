@@ -1234,6 +1234,7 @@ function saveExpense() {
   }
 
   const category = document.getElementById("expenseCategory").value;
+  const paymentMethod = document.getElementById("expensePaymentMethod").value;
   const amount = Number(document.getElementById("expenseAmount").value);
   const note = document.getElementById("expenseNote").value.trim();
 
@@ -1248,6 +1249,7 @@ function saveExpense() {
     id: Date.now(),
     time: new Date().toLocaleTimeString("en-IN"),
     category,
+    paymentMethod,
     amount,
     note
   });
