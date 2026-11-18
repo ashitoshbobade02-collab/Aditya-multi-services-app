@@ -925,3 +925,12 @@ th {
   color: var(--blue);
   font-weight: 700;
 }
+
+/* APP SCREEN NAVIGATION */
+.app-screen {
+  display: none;
+}
+
+.app-screen.active {
+  display: block;
+}
