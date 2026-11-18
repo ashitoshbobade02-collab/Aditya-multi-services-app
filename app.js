@@ -1652,13 +1652,14 @@ if (addCustomerButton) {
   document.querySelectorAll(".drawer-nav a").forEach(link => {
     const action = link.getAttribute("onclick") || "";
 
-    const allowedOnOpening = [
-      "history",
-      "customer-ledger",
-      "customer-history",
-      "reports",
-      "settings"
-    ];
+  const allowedOnOpening = [
+  "opening",
+  "history",
+  "customer-ledger",
+  "customer-history",
+  "reports",
+  "settings"
+];
 
     const isAllowed = allowedOnOpening.some(name =>
       action.includes("openAppScreen('" + name + "')")
