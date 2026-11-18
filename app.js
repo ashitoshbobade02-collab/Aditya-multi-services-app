@@ -1308,6 +1308,7 @@ function renderExpenseList() {
       <strong>${expense.category}</strong>
       <p>${expense.time}</p>
       <p>Amount: ${money(expense.amount)}</p>
+      <p>Paid By: ${expense.paymentMethod === "CASH" ? "Cash" : expense.paymentMethod === "ONLINE" ? "Online" : "Not recorded"}</p>
       <p>Note: ${expense.note || "No note"}</p>
     </div>
   `).join("");
