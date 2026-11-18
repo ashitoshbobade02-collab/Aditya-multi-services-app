@@ -1394,6 +1394,11 @@ function showCustomerPaymentForm(mode) {
   if (!activeCustomerId) return;
 
   customerPaymentMode = mode;
+  
+const paymentAmountInput = document.getElementById("customerPaymentAmount");
+paymentAmountInput.step = ["received", "given"].includes(mode)
+  ? data.numberSteps.payment
+  : data.numberSteps.ledger;
 
   const titles = {
     received: "Record Payment Received",
