@@ -1761,6 +1761,7 @@ async function loadUserBusinessData(user) {
   updateTransactionFields();
   updateServiceFields();
   updateServicePaymentFields();
+  renderCustomerLedgerHistory();
   refreshDashboard();
   renderCalendar();
 }
