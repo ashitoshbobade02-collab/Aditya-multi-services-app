@@ -1330,9 +1330,14 @@ function previewClosing() {
   const actualOnline = Number(document.getElementById("actualOnline").value);
 
   if (!Number.isFinite(actual) || actual < 0) {
-    alert("Enter actual cash available.");
-    return;
-  }
+  alert("Enter valid actual cash available.");
+  return;
+}
+
+if (!Number.isFinite(actualOnline) || actualOnline < 0) {
+  alert("Enter valid actual online balance.");
+  return;
+}
 
   const expected = calculateTotals(day).cash;
   const difference = actual - expected;
