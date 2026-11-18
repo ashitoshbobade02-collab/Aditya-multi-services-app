@@ -1053,6 +1053,7 @@ function drawBusinessPerformanceChart() {
 
 function refreshDashboard() {
   const day = currentDay();
+  renderExpenseList();
 
   document.getElementById("todayDate").textContent =
     new Date().toLocaleDateString("en-IN", {
