@@ -322,6 +322,9 @@ function generateReport() {
       </table>
     </div>
   `;
+    document.getElementById("reportPopupPeriod").textContent =
+    `${startDate} to ${endDate}`;
+  document.getElementById("reportPopup").style.display = "flex";
 }
 
 
