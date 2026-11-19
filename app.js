@@ -3068,7 +3068,17 @@ async function loadUserBusinessData(user) {
       if (!currentUser || currentUser.uid !== user.uid) return;
 
       if (snapshot.exists() && snapshot.data().data) {
-        data = normalizeData(snapshot.data().data);
+        const wasPreStart = !data.currentDay || data.currentDay.closed;
+
+data = normalizeData(snapshot.data().data);
+
+const isPreStart = !data.currentDay || data.currentDay.closed;
+
+if (wasPreStart && !isPreStart) {
+  openAppScreen("home");
+} else if (!wasPreStart && isPreStart) {
+  openAppScreen("opening");
+}
 
         localStorage.setItem(
           activeStorageKey,
