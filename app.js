@@ -42,6 +42,23 @@ const emptyData = () => ({
     withdrawal: 1,
     payment: 10,
     ledger: 1
+  },
+  dashboardVisibility: {
+    biznext: true,
+    roinet: true,
+    tez: true,
+    fino: true,
+    sbi: true,
+    cashBalance: true,
+    onlineBalance: true,
+    todayBusiness: true,
+    todayTransactions: true,
+    todayServices: true,
+    todayWithdrawals: true,
+    cashNetProfit: true,
+    onlineNetProfit: true,
+    totalNetProfit: true,
+    businessChart: true
   }
 });
 
@@ -61,12 +78,17 @@ function normalizeData(value) {
   if (!Object.prototype.hasOwnProperty.call(clean, "currentDay")) clean.currentDay = null;
   if (!Object.prototype.hasOwnProperty.call(clean, "walletCarryForward")) clean.walletCarryForward = null;
 
-  const defaultSteps = emptyData().numberSteps;
+  const defaults = emptyData();
+
   clean.numberSteps = {
-    ...defaultSteps,
+    ...defaults.numberSteps,
     ...(clean.numberSteps || {})
   };
 
+  clean.dashboardVisibility = {
+    ...defaults.dashboardVisibility,
+    ...(clean.dashboardVisibility || {})
+   };
   return clean;
 }
 
@@ -100,6 +122,67 @@ function renderNumberStepSettings() {
   });
 }
 
+
+const dashboardVisibilityItems = {
+  wallet: [
+    ["biznext", "sectionBiznext", "Biznext Wallet"],
+    ["roinet", "sectionRoinet", "Roinet Wallet"],
+    ["tez", "sectionTez", "Tez Wallet"],
+    ["fino", "sectionFino", "Fino Wallet"],
+    ["sbi", "sectionSbi", "SBI Wallet"]
+  ],
+  today: [
+    ["cashBalance", "sectionCashBalance", "Cash Balance"],
+    ["onlineBalance", "sectionOnlineBalance", "Online Balance"],
+    ["todayBusiness", "sectionTodayBusiness", "Today's Business"],
+    ["todayTransactions", "sectionTodayTransactions", "Today's Total Transactions"],
+    ["todayServices", "sectionTodayServices", "Today's Total Services"],
+    ["todayWithdrawals", "sectionTodayWithdrawals", "Today's Total Withdrawals"],
+    ["cashNetProfit", "sectionCashNetProfit", "Cash Net Profit"],
+    ["onlineNetProfit", "sectionOnlineNetProfit", "Online Net Profit"],
+    ["totalNetProfit", "sectionTotalNetProfit", "Total Net Profit"],
+    ["businessChart", "sectionBusinessChart", "7-Day Business Performance"]
+  ]
+};
+
+function renderDashboardVisibilitySettings() {
+  const visibility = data.dashboardVisibility || {};
+  
+  const renderItems = (items) => items.map(([key, id, label]) => `
+    <label style="display:flex;align-items:center;gap:10px;margin:10px 0;">
+      <input type="checkbox"
+        ${visibility[key] !== false ? "checked" : ""}
+        onchange="updateDashboardVisibility('${key}', this.checked)">
+      ${label}
+    </label>
+  `).join("");
+
+  document.getElementById("walletVisibilitySettings").innerHTML =
+    renderItems(dashboardVisibilityItems.wallet);
+
+  document.getElementById("todayVisibilitySettings").innerHTML =
+    renderItems(dashboardVisibilityItems.today);
+}
+
+function applyDashboardVisibility() {
+  const visibility = data.dashboardVisibility || {};
+
+  Object.values(dashboardVisibilityItems).flat().forEach(([key, id]) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.style.display = visibility[key] === false ? "none" : "";
+    }
+  });
+}
+
+function updateDashboardVisibility(key, visible) {
+  data.dashboardVisibility[key] = visible;
+  persist();
+  applyDashboardVisibility();
+
+  const message = document.getElementById("dashboardVisibilitySaveMessage");
+  if (message) message.textContent = "Saved successfully.";
+}
 
 function updateNumberStep(key, value) {
   const amount = Number(value);
@@ -3005,7 +3088,9 @@ async function loadUserBusinessData(user) {
   updateServicePaymentFields();
   renderCustomerLedgerHistory();
   renderNumberStepSettings();
+  renderDashboardVisibilitySettings();
   refreshDashboard();
+  applyDashboardVisibility();
   drawBusinessPerformanceChart();
   renderCalendar();
 }
@@ -3136,4 +3221,7 @@ Object.assign(window, {
   openTodayWithdrawals,
   closeDashboardHistory,
   showDashboardHistory,
+  renderDashboardVisibilitySettings,
+  applyDashboardVisibility,
+  updateDashboardVisibility,
 });
