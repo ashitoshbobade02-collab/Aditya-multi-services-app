@@ -94,6 +94,17 @@ function normalizeData(value) {
 }
 
 
+function getDaySessions(day) {
+  if (!day) return [];
+
+  // New format: one date containing multiple sessions
+  if (Array.isArray(day.sessions)) {
+    return day.sessions;
+  }
+
+  // Old format: preserve existing business-day records
+  return [day];
+}
 
 function money(value) {
   return "₹" + Number(value || 0).toLocaleString("en-IN", {
@@ -274,17 +285,30 @@ function toggleCustomReportDates() {
 }
 
 function getReportDays(startDate, endDate) {
-  const allDays = [...(data.days || [])];
+  const dailyRecords = new Map();
+
+  (data.days || []).forEach(day => {
+    dailyRecords.set(day.date, {
+      date: day.date,
+      sessions: [...getDaySessions(day)]
+    });
+  });
 
   if (data.currentDay) {
-    allDays.push(data.currentDay);
+    const date = data.currentDay.date;
+    const existing = dailyRecords.get(date);
+
+    if (existing) {
+      existing.sessions.push(data.currentDay);
+    } else {
+      dailyRecords.set(date, {
+        date,
+        sessions: [data.currentDay]
+      });
+    }
   }
 
-  const uniqueDays = new Map(
-    allDays.map(day => [day.date, day])
-  );
-
-  return [...uniqueDays.values()]
+  return [...dailyRecords.values()]
     .filter(day => day.date >= startDate && day.date <= endDate)
     .sort((a, b) => a.date.localeCompare(b.date));
 }
@@ -469,8 +493,11 @@ function exportExcel() {
     ["Date", "Biznext", "Roinet", "Tez", "Fino", "SBI"]
   ];
 
-  report.days.forEach(day => {
-    (day.transactions || []).forEach(t => {
+report.days.forEach(day => {
+  const sessions = getDaySessions(day);
+
+  sessions.forEach(session => {
+    (session.transactions || []).forEach(t => {
       transactions.push([
         day.date, t.time || "", t.type || "", t.amount || 0,
         t.charge || 0, t.chargePaymentMethod || "CASH",
@@ -478,29 +505,31 @@ function exportExcel() {
       ]);
     });
 
-    (day.expenses || []).forEach(e => {
+    (session.expenses || []).forEach(e => {
       expenses.push([
         day.date, e.time || "", e.category || "",
         e.paymentMethod || "CASH", e.amount || 0, e.note || ""
       ]);
     });
-
-    const t = calculateTotals(day);
-    const c = day.closing || {};
-
-    cashOnline.push([
-      day.date, t.cashProfit, t.onlineProfit, t.profit,
-      t.cashExpenses, t.onlineExpenses, t.cashNetProfit,
-      t.onlineNetProfit, t.netProfit, t.cash,
-      c.actualCash ?? "", c.difference ?? "",
-      t.online, c.actualOnline ?? "", c.onlineDifference ?? ""
-    ]);
-
-    wallets.push([
-      day.date, t.biznext, t.roinet, t.tez, t.fino, t.sbi
-    ]);
   });
 
+  const t = calculateDailyTotals(day);
+  const lastSession = sessions[sessions.length - 1];
+  const c = lastSession?.closing || {};
+
+  cashOnline.push([
+    day.date, t.cashProfit, t.onlineProfit, t.profit,
+    t.cashExpenses, t.onlineExpenses, t.cashNetProfit,
+    t.onlineNetProfit, t.netProfit, t.cash,
+    c.actualCash ?? "", c.difference ?? "",
+    t.online, c.actualOnline ?? "", c.onlineDifference ?? ""
+  ]);
+
+  wallets.push([
+    day.date, t.biznext, t.roinet, t.tez, t.fino, t.sbi
+  ]);
+});
+  
   addSheet("Summary", summary);
   addSheet("Transactions", transactions);
   addSheet("Expenses", expenses);
@@ -586,24 +615,24 @@ function exportPDF() {
   const expenseRows = [];
   const dailyRows = [];
   const walletRows = [];
+  
+report.days.forEach(day => {
+  const sessions = getDaySessions(day);
 
-  report.days.forEach(day => {
-    const t = calculateTotals(day);
-    const c = day.closing || {};
-
-    (day.transactions || []).forEach(item => {
+  sessions.forEach(session => {
+    (session.transactions || []).forEach(item => {
       transactionRows.push([
         day.date,
         item.time || "",
         item.type || "",
-       pdfMoney(item.amount || 0),
-       pdfMoney(item.charge || 0),
+        pdfMoney(item.amount || 0),
+        pdfMoney(item.charge || 0),
         item.chargePaymentMethod || "CASH",
         item.platform || ""
       ]);
     });
 
-    (day.expenses || []).forEach(item => {
+    (session.expenses || []).forEach(item => {
       expenseRows.push([
         day.date,
         item.time || "",
@@ -613,31 +642,36 @@ function exportPDF() {
         item.note || ""
       ]);
     });
-
-    dailyRows.push([
-      day.date,
-      pdfMoney(t.cashProfit),
-      pdfMoney(t.onlineProfit),
-      pdfMoney(t.profit),
-      pdfMoney(t.cashNetProfit),
-      pdfMoney(t.onlineNetProfit),
-      pdfMoney(t.netProfit)
-    ]);
-
-    walletRows.push([
-      day.date,
-      pdfMoney(t.biznext),
-      pdfMoney(t.roinet),
-      pdfMoney(t.tez),
-      pdfMoney(t.fino),
-      pdfMoney(t.sbi),
-      pdfMoney(t.cash),
-      pdfMoney(t.online),
-      c.actualCash == null ? "Not closed" : pdfMoney(c.actualCash),
-      c.actualOnline == null ? "Not closed" : pdfMoney(c.actualOnline)
-    ]);
   });
 
+  const t = calculateDailyTotals(day);
+  const lastSession = sessions[sessions.length - 1];
+  const c = lastSession?.closing || {};
+
+  dailyRows.push([
+    day.date,
+    pdfMoney(t.cashProfit),
+    pdfMoney(t.onlineProfit),
+    pdfMoney(t.profit),
+    pdfMoney(t.cashNetProfit),
+    pdfMoney(t.onlineNetProfit),
+    pdfMoney(t.netProfit)
+  ]);
+
+  walletRows.push([
+    day.date,
+    pdfMoney(t.biznext),
+    pdfMoney(t.roinet),
+    pdfMoney(t.tez),
+    pdfMoney(t.fino),
+    pdfMoney(t.sbi),
+    pdfMoney(t.cash),
+    pdfMoney(t.online),
+    c.actualCash == null ? "Not closed" : pdfMoney(c.actualCash),
+    c.actualOnline == null ? "Not closed" : pdfMoney(c.actualOnline)
+  ]);
+});
+  
   const addTable = (title, head, body) => {
     if (y > 265) {
       doc.addPage();
@@ -802,35 +836,42 @@ if (Object.values(opening).some(v => !Number.isFinite(v) || v < 0)) {
 
  const todayDate = today();
 
-const sameDateDays = (data.days || []).filter(
+const todayDate = today();
+
+const existingIndex = (data.days || []).findIndex(
   savedDay => savedDay.date === todayDate
 );
 
-if (sameDateDays.length > 0) {
-  const firstDay = sameDateDays[0];
+if (existingIndex !== -1) {
+  const existingRecord = data.days[existingIndex];
 
-  data.currentDay = {
-    ...firstDay,
+  // Preserve all previously closed sessions.
+  data.days[existingIndex] = {
     date: todayDate,
-    opening: firstDay.opening,
-    transactions: sameDateDays.flatMap(d => d.transactions || []),
-    cashMovements: sameDateDays.flatMap(d => d.cashMovements || []),
-    expenses: sameDateDays.flatMap(d => d.expenses || []),
-    closed: false,
-    closing: null
+    sessions: getDaySessions(existingRecord)
   };
 
-  data.days = (data.days || []).filter(
-    savedDay => savedDay.date !== todayDate
-  );
-} else {
+  // Start a fresh session with the newly entered balances.
   data.currentDay = {
     date: todayDate,
+    sessionNumber: data.days[existingIndex].sessions.length + 1,
     opening,
     transactions: [],
     cashMovements: [],
     expenses: [],
-    closed: false
+    closed: false,
+    closing: null
+  };
+} else {
+  data.currentDay = {
+    date: todayDate,
+    sessionNumber: 1,
+    opening,
+    transactions: [],
+    cashMovements: [],
+    expenses: [],
+    closed: false,
+    closing: null
   };
 }
 
@@ -1301,6 +1342,54 @@ totals.netProfit =
   totals.profit - totals.expenses;
 
   return totals;
+
+}
+
+function calculateDailyTotals(day) {
+  const sessions = getDaySessions(day);
+
+  if (!sessions.length) return calculateTotals(day);
+
+  const totals = calculateTotals(sessions[0]);
+
+  const sumFields = [
+    "aeps",
+    "business",
+    "profit",
+    "cashProfit",
+    "onlineProfit",
+    "cashExpenses",
+    "onlineExpenses",
+    "cashNetProfit",
+    "onlineNetProfit",
+    "expenses",
+    "netProfit",
+    "charges",
+    "serviceIncome"
+  ];
+
+  sumFields.forEach(field => {
+    totals[field] = 0;
+  });
+
+  sessions.forEach(session => {
+    const sessionTotals = calculateTotals(session);
+
+    sumFields.forEach(field => {
+      totals[field] += Number(sessionTotals[field]) || 0;
+    });
+  });
+
+  // Keep the final session's actual balances.
+  const lastSession = sessions[sessions.length - 1];
+  const lastTotals = calculateTotals(lastSession);
+
+  ["cash", "online", "biznext", "roinet", "tez", "fino", "sbi"]
+    .forEach(field => {
+      totals[field] = lastTotals[field];
+    });
+
+  return totals;
 }
 
 function saveCashMovement(account = "CASH") {
@@ -1571,10 +1660,22 @@ function drawBusinessPerformanceChart() {
       String(date.getMonth() + 1).padStart(2, "0") + "-" +
       String(date.getDate()).padStart(2, "0");
 
-    const day = data.days.find(d => d.date === key) ||
-      (data.currentDay?.date === key ? data.currentDay : null);
+    
+const savedDay = data.days.find(d => d.date === key);
 
-    const totals = day ? calculateTotals(day) : null;
+const chartDay = {
+  date: key,
+  sessions: savedDay ? [...getDaySessions(savedDay)] : []
+};
+
+if (data.currentDay?.date === key) {
+  chartDay.sessions.push(data.currentDay);
+}
+
+const totals = chartDay.sessions.length
+  ? calculateDailyTotals(chartDay)
+  : null;
+    
 
     days.push({
       label: date.toLocaleDateString("en-IN", {
@@ -2158,54 +2259,37 @@ showCustomConfirm(
     sbi: totals.sbi
   };
 
-  const sameDateDays = data.days.filter(
+const existingIndex = data.days.findIndex(
   savedDay => savedDay.date === day.date
 );
 
-const combinedDay = {
-  ...day,
-  opening: sameDateDays.length
-    ? sameDateDays[0].opening
-    : day.opening,
-  transactions: [
-    ...sameDateDays.flatMap(d => d.transactions || []),
-    ...(day.transactions || [])
-  ],
-  cashMovements: [
-    ...sameDateDays.flatMap(d => d.cashMovements || []),
-    ...(day.cashMovements || [])
-  ],
-  expenses: [
-    ...sameDateDays.flatMap(d => d.expenses || []),
-    ...(day.expenses || [])
-  ]
-};
+// Preserve this session separately.
+if (existingIndex === -1) {
+  data.days.push({
+    date: day.date,
+    sessions: [day]
+  });
+} else {
+  const existingRecord = data.days[existingIndex];
+  const previousSessions = getDaySessions(existingRecord);
 
-const combinedTotals = calculateTotals(combinedDay);
+  data.days[existingIndex] = {
+    date: day.date,
+    sessions: [...previousSessions, day]
+  };
+}
 
-combinedDay.closing = {
-  ...combinedTotals,
-  actualCash: actual,
-  actualOnline: actualOnline,
-  difference: actual - combinedTotals.cash,
-  onlineDifference: actualOnline - combinedTotals.online,
-  closedAt: new Date().toISOString()
-};
-
-combinedDay.closed = true;
-
-data.days = [
-  ...data.days.filter(savedDay => savedDay.date !== day.date),
-  combinedDay
-];
+// Carry forward wallets from the session just closed.
+const sessionTotals = calculateTotals(day);
 
 data.walletCarryForward = {
-  biznext: combinedTotals.biznext,
-  roinet: combinedTotals.roinet,
-  tez: combinedTotals.tez,
-  fino: combinedTotals.fino,
-  sbi: combinedTotals.sbi
+  biznext: sessionTotals.biznext,
+  roinet: sessionTotals.roinet,
+  tez: sessionTotals.tez,
+  fino: sessionTotals.fino,
+  sbi: sessionTotals.sbi
 };
+
   data.currentDay = null;
 
   persist();
@@ -2275,81 +2359,140 @@ function renderCalendar() {
 
     cells.push(`<button type="button" class="calendar-day${hasRecord ? " has-record" : ""}${selected}" onclick="selectHistoryDate('${date}')">${dayNumber}</button>`);
   }
-
-  const matchingDays = (data.days || []).filter(
+  
+const savedRecord = (data.days || []).find(
   day => day.date === selectedHistoryDate
 );
 
-if (data.currentDay && data.currentDay.date === selectedHistoryDate) {
-  matchingDays.push(data.currentDay);
+const selectedSessions = savedRecord
+  ? getDaySessions(savedRecord)
+  : [];
+
+if (
+  data.currentDay &&
+  data.currentDay.date === selectedHistoryDate
+) {
+  selectedSessions.push(data.currentDay);
 }
 
-const selectedDays = matchingDays.length
+const selectedDays = selectedSessions.length
   ? [{
-      ...matchingDays[0],
-      transactions: matchingDays.flatMap(d => d.transactions || []),
-      cashMovements: matchingDays.flatMap(d => d.cashMovements || []),
-      expenses: matchingDays.flatMap(d => d.expenses || []),
-      closed: matchingDays.some(d => d.closed),
-      closing: matchingDays.find(d => d.closed)?.closing || null
+      date: selectedHistoryDate,
+      sessions: selectedSessions
     }]
   : [];
 
   let detail = '<p class="muted">No business record for this date.</p>';
+  
+if (selectedDays.length) {
+  detail = selectedDays.map(selectedDay => {
+    const sessions = selectedDay.sessions;
+    const dailyTotals = calculateDailyTotals(selectedDay);
 
-  if (selectedDays.length) {
-    detail = selectedDays.map((selectedDay, index) => {
-      const closing = calculateTotals(selectedDay);
-      const transactions = selectedDay.transactions || [];
-      const status = selectedDay.closed
+    const title = sessions.length === 1
+      ? "Shop Opening"
+      : `Shop Opening • ${sessions.length} Sessions`;
+
+    const sessionDetails = sessions.map((session, index) => {
+      const totals = calculateTotals(session);
+      const transactions = session.transactions || [];
+      const expenses = session.expenses || [];
+      const movements = session.cashMovements || [];
+
+      const status = session.closed
         ? '<span class="record-tag">Closed</span>'
         : '<span class="record-tag active-tag">In progress</span>';
 
       return `
-        <details class="history-day">
-          <summary class="history-day-summary">
-            <span class="history-day-number">${index + 1}</span>
-            <span class="history-day-main">
-              <strong>Business Day ${index + 1} ${status}</strong>
-              <span class="history-day-amounts">
-                ${money(closing.business)} Business
-                <span>•</span>
-                ${money(closing.profit)} Profit
-              </span>
-            </span>
-            <span class="history-day-arrow">⌄</span>
-          </summary>
+        <div class="history-transaction">
+          <h4>Session ${index + 1} ${status}</h4>
 
-          <div class="history-day-details">
-            <p><strong>Date:</strong> ${selectedHistoryDate}</p>
-            <p><strong>Business:</strong> ${money(closing.business)}</p>
-            <p><strong>Profit:</strong> ${money(closing.profit)}</p>
-            <p><strong>Cash difference:</strong> ${selectedDay.closing ? money(selectedDay.closing.difference) : "Not closed"}</p>
-            <p><strong>Online difference:</strong> ${selectedDay.closing ? money(selectedDay.closing.onlineDifference || 0) : "Not closed"}</p>
+          <p><strong>Opening Cash:</strong> ${money(session.opening?.cash || 0)}</p>
+          <p><strong>Opening Online:</strong> ${money(session.opening?.online || 0)}</p>
 
-            <h4>Transactions (${transactions.length})</h4>
+          <p><strong>Business:</strong> ${money(totals.business)}</p>
+          <p><strong>Profit:</strong> ${money(totals.profit)}</p>
 
-            ${transactions.length
-              ? transactions.map(t => `
-                <div class="history-transaction">
-                  <strong>${t.type === "SERVICE"
-                    ? (t.serviceName || "Service")
-                    : (t.type === "ONLINE_WITHDRAWAL"
-                      ? `${t.platform} Withdrawal`
-                      : `${t.type} ${t.platform ? "· " + t.platform : ""}`)}</strong>
-                  <span>${t.time || ""}</span>
-                  <p>Amount: ${money(t.amount)}</p>
-                  ${t.type === "SERVICE"
-                    ? `<p>Payment: ${t.paymentMethod || ""}</p>`
-                    : `<p>Charge: ${money(t.charge)}</p>`}
-                </div>
-              `).join("")
-              : '<p class="muted">No transactions recorded.</p>'}
-          </div>
-        </details>
+          <p><strong>Cash difference:</strong>
+            ${session.closing ? money(session.closing.difference) : "Not closed"}
+          </p>
+
+          <p><strong>Online difference:</strong>
+            ${session.closing ? money(session.closing.onlineDifference || 0) : "Not closed"}
+          </p>
+
+          <h4>Transactions (${transactions.length})</h4>
+
+          ${transactions.length
+            ? transactions.map(t => `
+              <div class="history-transaction">
+                <strong>${t.type === "SERVICE"
+                  ? (t.serviceName || "Service")
+                  : (t.type === "ONLINE_WITHDRAWAL"
+                    ? `${t.platform} Withdrawal`
+                    : `${t.type} ${t.platform ? "· " + t.platform : ""}`)}</strong>
+                <span>${t.time || ""}</span>
+                <p>Amount: ${money(t.amount)}</p>
+                ${t.type === "SERVICE"
+                  ? `<p>Payment: ${t.paymentMethod || ""}</p>`
+                  : `<p>Charge: ${money(t.charge)}</p>`}
+              </div>
+            `).join("")
+            : '<p class="muted">No transactions recorded.</p>'   
+            <h4>Cash / Online Movements (${movements.length})</h4>
+
+${movements.length
+  ? movements.map(m => `
+    <div class="history-transaction">
+      <strong>${m.type || m.account || "Movement"}</strong>
+      <span>${m.time || ""}</span>
+      <p>Amount: ${money(m.amount)}</p>
+      <p>Account: ${m.account || "CASH"}</p>
+      ${m.note ? `<p>Note: ${m.note}</p>` : ""}
+    </div>
+  `).join("")
+  : '<p class="muted">No movements recorded.</p>'}
+  <h4>Expenses (${expenses.length})</h4>
+
+${expenses.length
+  ? expenses.map(e => `
+    <div class="history-transaction">
+      <strong>${e.category || "Expense"}</strong>
+      <span>${e.time || ""}</span>
+      <p>Amount: ${money(e.amount)}</p>
+      <p>Payment: ${e.paymentMethod || "CASH"}</p>
+      ${e.note ? `<p>Note: ${e.note}</p>` : ""}
+    </div>
+  `).join("")
+  : '<p class="muted">No expenses recorded.</p>'}
+        </div>
       `;
     }).join("");
-  }
+
+    return `
+      <details class="history-day" open>
+        <summary class="history-day-summary">
+          <span class="history-day-number">1</span>
+          <span class="history-day-main">
+            <strong>${title}</strong>
+            <span class="history-day-amounts">
+              ${money(dailyTotals.business)} Business
+              <span>•</span>
+              ${money(dailyTotals.profit)} Profit
+            </span>
+          </span>
+          <span class="history-day-arrow">⌄</span>
+        </summary>
+
+        <div class="history-day-details">
+          <p><strong>Date:</strong> ${selectedHistoryDate}</p>
+          ${sessionDetails}
+        </div>
+      </details>
+    `;
+  }).join("");
+}
+  
 
   history.innerHTML = `
     <div class="calendar-header">
