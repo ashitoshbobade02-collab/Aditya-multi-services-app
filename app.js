@@ -288,6 +288,12 @@ function generateReport() {
     `;
   }).join("");
 
+  window.currentReportData = {
+    startDate,
+    endDate,
+    days,
+    totals
+  };
   result.innerHTML = `
     <h3>Business Report</h3>
     <p>Period: ${startDate} to ${endDate}</p>
@@ -316,6 +322,102 @@ function generateReport() {
       </table>
     </div>
   `;
+}
+
+
+function exportExcel() {
+  const report = window.currentReportData;
+
+  if (!report || !report.days.length) {
+    showCustomPopup("No Report", "Generate a report first.", "error");
+    return;
+  }
+
+  if (typeof XLSX === "undefined") {
+    showCustomPopup("Excel Unavailable", "Excel library did not load. Check your internet connection.", "error");
+    return;
+  }
+
+  const wb = XLSX.utils.book_new();
+  const addSheet = (name, rows) => {
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, name);
+  };
+
+  const summary = [
+    ["ADITYA MULTI SERVICES - BUSINESS REPORT"],
+    ["From", report.startDate],
+    ["To", report.endDate],
+    [],
+    ["Profit Summary", "Amount"],
+    ["Cash Profit", report.totals.cashProfit],
+    ["Online Profit", report.totals.onlineProfit],
+    ["Total Profit", report.totals.profit],
+    ["Cash Net Profit", report.totals.cashNetProfit],
+    ["Online Net Profit", report.totals.onlineNetProfit],
+    ["Total Expenses", report.totals.expenses],
+    ["Total Net Profit", report.totals.netProfit]
+  ];
+
+  const transactions = [
+    ["Date", "Time", "Type", "Amount", "Charge", "Charge Payment", "Platform"]
+  ];
+
+  const expenses = [
+    ["Date", "Time", "Category", "Payment Method", "Amount", "Note"]
+  ];
+
+  const cashOnline = [
+    ["Date", "Cash Profit", "Online Profit", "Total Profit",
+     "Cash Expenses", "Online Expenses", "Cash Net Profit",
+     "Online Net Profit", "Total Net Profit", "Expected Cash",
+     "Actual Cash", "Cash Difference", "Expected Online",
+     "Actual Online", "Online Difference"]
+  ];
+
+  const wallets = [
+    ["Date", "Biznext", "Roinet", "Tez", "Fino", "SBI"]
+  ];
+
+  report.days.forEach(day => {
+    (day.transactions || []).forEach(t => {
+      transactions.push([
+        day.date, t.time || "", t.type || "", t.amount || 0,
+        t.charge || 0, t.chargePaymentMethod || "CASH",
+        t.platform || ""
+      ]);
+    });
+
+    (day.expenses || []).forEach(e => {
+      expenses.push([
+        day.date, e.time || "", e.category || "",
+        e.paymentMethod || "CASH", e.amount || 0, e.note || ""
+      ]);
+    });
+
+    const t = calculateTotals(day);
+    const c = day.closing || {};
+
+    cashOnline.push([
+      day.date, t.cashProfit, t.onlineProfit, t.profit,
+      t.cashExpenses, t.onlineExpenses, t.cashNetProfit,
+      t.onlineNetProfit, t.netProfit, t.cash,
+      c.actualCash ?? "", c.difference ?? "",
+      t.online, c.actualOnline ?? "", c.onlineDifference ?? ""
+    ]);
+
+    wallets.push([
+      day.date, t.biznext, t.roinet, t.tez, t.fino, t.sbi
+    ]);
+  });
+
+  addSheet("Summary", summary);
+  addSheet("Transactions", transactions);
+  addSheet("Expenses", expenses);
+  addSheet("Cash & Online", cashOnline);
+  addSheet("Wallet Balances", wallets);
+
+  XLSX.writeFile(wb, "Aditya-Multi-Services-Report.xlsx");
 }
 
 function persist() {
@@ -2666,7 +2768,9 @@ refreshDashboard();
 renderNumberStepSettings();
 setupNumberWheelSteps();
 
-Object.assign(window, {
+Object.assign(window, {  
+  toggleCustomReportDates,
+  generateReport,
   saveCashMovement,
   saveExpense,
   togglePasswordVisibility,
