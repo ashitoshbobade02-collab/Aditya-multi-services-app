@@ -327,6 +327,9 @@ function generateReport() {
   document.getElementById("reportPopup").style.display = "flex";
 }
 
+function closeReportPopup() {
+  document.getElementById("reportPopup").style.display = "none";
+}
 
 function exportExcel() {
   const report = window.currentReportData;
