@@ -887,9 +887,9 @@ function addBusinessTransaction() {
   }
 
   if (
-   type === "C-" &&
-   amount + (chargePaymentMethod === "CASH" ? charge : 0) > totals.cash
-  ) {
+    type === "C-" &&
+    amount - (chargePaymentMethod === "CASH" ? charge : 0) > totals.cash
+ ) {
     showCustomPopup(
       "Insufficient Balance",
       "You don't have enough cash for this transaction.",
