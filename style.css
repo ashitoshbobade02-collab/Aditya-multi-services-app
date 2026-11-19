@@ -999,6 +999,29 @@ th {
   gap: 16px;
   align-items: start;
 }
+/* REPORT POPUP */
+.report-popup-box {
+  position: relative;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.report-popup-close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 28px;
+  cursor: pointer;
+  padding: 2px 8px;
+}
+
+#reportPopupSummary {
+  text-align: left;
+  margin-top: 16px;
+}
 
 @media (max-width: 600px) {
   .cash-movement-columns {
