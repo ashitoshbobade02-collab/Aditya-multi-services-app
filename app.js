@@ -205,6 +205,115 @@ function getReportDays(startDate, endDate) {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
+function generateReport() {
+  const type = document.getElementById("reportType").value;
+  const todayDate = today();
+  let startDate = todayDate;
+  let endDate = todayDate;
+
+  if (type === "weekly") {
+    const date = new Date(todayDate + "T00:00:00");
+    const day = date.getDay();
+    date.setDate(date.getDate() - (day === 0 ? 6 : day - 1));
+    startDate = date.toISOString().slice(0, 10);
+
+    const end = new Date(date);
+    end.setDate(end.getDate() + 6);
+    endDate = end.toISOString().slice(0, 10);
+  }
+
+  if (type === "monthly") {
+    startDate = todayDate.slice(0, 7) + "-01";
+    const date = new Date(
+      Number(todayDate.slice(0, 4)),
+      Number(todayDate.slice(5, 7)),
+      0
+    );
+    endDate = date.getFullYear() + "-" +
+      String(date.getMonth() + 1).padStart(2, "0") + "-" +
+      String(date.getDate()).padStart(2, "0");
+  }
+
+  if (type === "custom") {
+    startDate = document.getElementById("reportStartDate").value;
+    endDate = document.getElementById("reportEndDate").value;
+
+    if (!startDate || !endDate || startDate > endDate) {
+      showCustomPopup(
+        "Invalid Dates",
+        "Please select a valid date range.",
+        "error"
+      );
+      return;
+    }
+  }
+
+  const days = getReportDays(startDate, endDate);
+  const result = document.getElementById("reportResult");
+
+  if (!days.length) {
+    result.innerHTML = "<p>No business records found for this period.</p>";
+    return;
+  }
+
+  const totals = {
+    cashProfit: 0,
+    onlineProfit: 0,
+    profit: 0,
+    cashNetProfit: 0,
+    onlineNetProfit: 0,
+    netProfit: 0,
+    expenses: 0
+  };
+
+  const rows = days.map(day => {
+    const t = calculateTotals(day);
+
+    Object.keys(totals).forEach(key => {
+      totals[key] += Number(t[key]) || 0;
+    });
+
+    return `
+      <tr>
+        <td>${day.date}</td>
+        <td>${money(t.cashProfit)}</td>
+        <td>${money(t.onlineProfit)}</td>
+        <td>${money(t.profit)}</td>
+        <td>${money(t.netProfit)}</td>
+      </tr>
+    `;
+  }).join("");
+
+  result.innerHTML = `
+    <h3>Business Report</h3>
+    <p>Period: ${startDate} to ${endDate}</p>
+
+    <p>Cash Profit: <strong>${money(totals.cashProfit)}</strong></p>
+    <p>Online Profit: <strong>${money(totals.onlineProfit)}</strong></p>
+    <p>Total Profit: <strong>${money(totals.profit)}</strong></p>
+    <p>Cash Net Profit: <strong>${money(totals.cashNetProfit)}</strong></p>
+    <p>Online Net Profit: <strong>${money(totals.onlineNetProfit)}</strong></p>
+    <p>Total Expenses: <strong>${money(totals.expenses)}</strong></p>
+    <p>Total Net Profit: <strong>${money(totals.netProfit)}</strong></p>
+
+    <h3>Daily Breakdown</h3>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Cash Profit</th>
+            <th>Online Profit</th>
+            <th>Total Profit</th>
+            <th>Net Profit</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
 function persist() {
   if (!currentUser || !activeStorageKey) return;
   const snapshot = JSON.stringify(data);
@@ -726,15 +835,17 @@ totals.profit += charge;
   if (entry.type === "OUT") totals[balanceKey] -= amount;
 });
 
+
 (day.expenses || []).forEach(expense => {
   const amount = Number(expense.amount) || 0;
+  const paymentMethod = expense.paymentMethod || "CASH";
 
-  if (expense.paymentMethod === "CASH") {
+  if (paymentMethod === "CASH") {
     totals.cash -= amount;
     totals.cashExpenses += amount;
   }
 
-  if (expense.paymentMethod === "ONLINE") {
+  if (paymentMethod === "ONLINE") {
     totals.online -= amount;
     totals.onlineExpenses += amount;
   }
