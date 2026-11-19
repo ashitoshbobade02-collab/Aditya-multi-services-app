@@ -2978,6 +2978,7 @@ setupNumberWheelSteps();
 
 Object.assign(window, { 
   exportPDF,
+  closeReportPopup,
   exportExcel,
   toggleCustomReportDates,
   generateReport,
