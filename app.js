@@ -800,14 +800,39 @@ if (Object.values(opening).some(v => !Number.isFinite(v) || v < 0)) {
   return;
 }
 
- data.currentDay = {
-  date: today(),
-  opening,
-  transactions: [],
-  cashMovements: [],
-  expenses: [],
-  closed: false
-};
+ const todayDate = today();
+
+const sameDateDays = (data.days || []).filter(
+  savedDay => savedDay.date === todayDate
+);
+
+if (sameDateDays.length > 0) {
+  const firstDay = sameDateDays[0];
+
+  data.currentDay = {
+    ...firstDay,
+    date: todayDate,
+    opening: firstDay.opening,
+    transactions: sameDateDays.flatMap(d => d.transactions || []),
+    cashMovements: sameDateDays.flatMap(d => d.cashMovements || []),
+    expenses: sameDateDays.flatMap(d => d.expenses || []),
+    closed: false,
+    closing: null
+  };
+
+  data.days = (data.days || []).filter(
+    savedDay => savedDay.date !== todayDate
+  );
+} else {
+  data.currentDay = {
+    date: todayDate,
+    opening,
+    transactions: [],
+    cashMovements: [],
+    expenses: [],
+    closed: false
+  };
+}
 
   persist();
   refreshDashboard();
@@ -2133,7 +2158,54 @@ showCustomConfirm(
     sbi: totals.sbi
   };
 
-  data.days.push(day);
+  const sameDateDays = data.days.filter(
+  savedDay => savedDay.date === day.date
+);
+
+const combinedDay = {
+  ...day,
+  opening: sameDateDays.length
+    ? sameDateDays[0].opening
+    : day.opening,
+  transactions: [
+    ...sameDateDays.flatMap(d => d.transactions || []),
+    ...(day.transactions || [])
+  ],
+  cashMovements: [
+    ...sameDateDays.flatMap(d => d.cashMovements || []),
+    ...(day.cashMovements || [])
+  ],
+  expenses: [
+    ...sameDateDays.flatMap(d => d.expenses || []),
+    ...(day.expenses || [])
+  ]
+};
+
+const combinedTotals = calculateTotals(combinedDay);
+
+combinedDay.closing = {
+  ...combinedTotals,
+  actualCash: actual,
+  actualOnline: actualOnline,
+  difference: actual - combinedTotals.cash,
+  onlineDifference: actualOnline - combinedTotals.online,
+  closedAt: new Date().toISOString()
+};
+
+combinedDay.closed = true;
+
+data.days = [
+  ...data.days.filter(savedDay => savedDay.date !== day.date),
+  combinedDay
+];
+
+data.walletCarryForward = {
+  biznext: combinedTotals.biznext,
+  roinet: combinedTotals.roinet,
+  tez: combinedTotals.tez,
+  fino: combinedTotals.fino,
+  sbi: combinedTotals.sbi
+};
   data.currentDay = null;
 
   persist();
@@ -2204,17 +2276,30 @@ function renderCalendar() {
     cells.push(`<button type="button" class="calendar-day${hasRecord ? " has-record" : ""}${selected}" onclick="selectHistoryDate('${date}')">${dayNumber}</button>`);
   }
 
-  const selectedDays = data.days.filter(day => day.date === selectedHistoryDate);
+  const matchingDays = (data.days || []).filter(
+  day => day.date === selectedHistoryDate
+);
 
-  if (data.currentDay && data.currentDay.date === selectedHistoryDate) {
-    selectedDays.push(data.currentDay);
-  }
+if (data.currentDay && data.currentDay.date === selectedHistoryDate) {
+  matchingDays.push(data.currentDay);
+}
+
+const selectedDays = matchingDays.length
+  ? [{
+      ...matchingDays[0],
+      transactions: matchingDays.flatMap(d => d.transactions || []),
+      cashMovements: matchingDays.flatMap(d => d.cashMovements || []),
+      expenses: matchingDays.flatMap(d => d.expenses || []),
+      closed: matchingDays.some(d => d.closed),
+      closing: matchingDays.find(d => d.closed)?.closing || null
+    }]
+  : [];
 
   let detail = '<p class="muted">No business record for this date.</p>';
 
   if (selectedDays.length) {
     detail = selectedDays.map((selectedDay, index) => {
-      const closing = selectedDay.closing || calculateTotals(selectedDay);
+      const closing = calculateTotals(selectedDay);
       const transactions = selectedDay.transactions || [];
       const status = selectedDay.closed
         ? '<span class="record-tag">Closed</span>'
