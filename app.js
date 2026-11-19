@@ -886,7 +886,10 @@ function addBusinessTransaction() {
     return;
   }
 
-  if (type === "C-" && amount + charge > totals.cash) {
+  if (
+   type === "C-" &&
+   amount + (chargePaymentMethod === "CASH" ? charge : 0) > totals.cash
+  ) {
     showCustomPopup(
       "Insufficient Balance",
       "You don't have enough cash for this transaction.",
@@ -1136,7 +1139,9 @@ function refreshDashboard() {
     "biznextCollection", "roinetCollection", "tezCollection",
     "finoCollection", "sbiCollection",
     "cashBalance", "onlineBalance",
-    "totalBusiness", "dailyProfit", "netProfit"
+    "totalBusiness", "dailyProfit", "netProfit",
+    "cashProfit", "onlineProfit",
+    "cashNetProfit", "onlineNetProfit"
   ];
 
   if (!day) {
@@ -1186,8 +1191,13 @@ function refreshDashboard() {
     money(combinedBiznextRoinet);
 
   document.getElementById("cashBalance").textContent = money(t.cash);
-  document.getElementById("onlineBalance").textContent = money(t.online);
-  document.getElementById("totalBusiness").textContent = money(t.business);
+  document.getElementById("cashProfit").textContent = money(t.cashProfit);
+  document.getElementById("onlineProfit").textContent = money(t.onlineProfit);
+  document.getElementById("dailyProfit").textContent = money(t.profit);
+
+  document.getElementById("cashNetProfit").textContent = money(t.cashNetProfit);
+  document.getElementById("onlineNetProfit").textContent = money(t.onlineNetProfit);
+  document.getElementById("netProfit").textContent = money(t.netProfit);
   document.getElementById("dailyProfit").textContent = money(t.profit);
   document.getElementById("netProfit").textContent = money(t.netProfit);
 
