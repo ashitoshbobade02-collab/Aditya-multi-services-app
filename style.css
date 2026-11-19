@@ -1122,6 +1122,53 @@ th {
   margin-top: 16px;
 }
 
+/* AMOUNT WHEEL SETTINGS */
+.number-step-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.number-step-item {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 12px;
+  min-width: 0;
+}
+
+.number-step-item label {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.number-step-item input[type="number"] {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 11px;
+  background: var(--background);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.number-step-item input[type="number"]:focus {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+}
+
+@media (max-width: 600px) {
+  .number-step-options {
+    grid-template-columns: 1fr;
+  }
+}
 @media (max-width: 600px) {
   .visibility-options {
     grid-template-columns: 1fr;
