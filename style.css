@@ -640,6 +640,89 @@ details summary {
   margin: 4px 0;
 }
 
+/* COMPACT BUSINESS DAY HISTORY */
+
+.history-day {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin: 9px 0;
+  overflow: hidden;
+}
+
+.history-day-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.history-day-summary::-webkit-details-marker {
+  display: none;
+}
+
+.history-day-number {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--light-blue);
+  color: var(--blue);
+  font-weight: 800;
+}
+
+.history-day-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.history-day-main > strong {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  font-size: 13px;
+}
+
+.history-day-amounts {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.history-day-arrow {
+  font-size: 20px;
+  color: var(--muted);
+  transition: transform 0.2s;
+}
+
+.history-day[open] .history-day-arrow {
+  transform: rotate(180deg);
+}
+
+.history-day-details {
+  border-top: 1px solid var(--line);
+  padding: 12px;
+  font-size: 13px;
+}
+
+.history-day-details p {
+  margin: 7px 0;
+}
+
+.history-day-details h4 {
+  margin: 14px 0 8px;
+}
+
+.history-day-list {
+  margin-top: 12px;
+}
+
 .muted {
   color: var(--muted);
 }
