@@ -1616,6 +1616,7 @@ function refreshDashboard() {
     money(combinedBiznextRoinet);
 
   document.getElementById("cashBalance").textContent = money(t.cash);
+  document.getElementById("onlineBalance").textContent = money(t.online);
   document.getElementById("cashProfit").textContent = money(t.cashProfit);
   document.getElementById("onlineProfit").textContent = money(t.onlineProfit);
   document.getElementById("dailyProfit").textContent = money(t.profit);
