@@ -1028,3 +1028,102 @@ th {
     grid-template-columns: 1fr;
   }
 }
+
+/* DASHBOARD VISIBILITY SETTINGS */
+.dashboard-settings-card {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.dashboard-settings-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 5px 2px;
+  cursor: pointer;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.settings-summary-subtitle {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.settings-description {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 14px 0 20px;
+}
+
+.visibility-group {
+  background: var(--background);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 15px;
+  margin: 14px 0;
+}
+
+.visibility-group h4 {
+  color: var(--text);
+  font-size: 15px;
+  margin: 0 0 5px;
+}
+
+.visibility-group > p {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0 0 12px;
+}
+
+.visibility-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.visibility-options label {
+  display: flex !important;
+  align-items: center;
+  gap: 10px !important;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 11px 12px;
+  margin: 0 !important;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+}
+
+.visibility-options label:has(input:checked) {
+  border-color: var(--blue);
+  background: var(--light-blue);
+}
+
+.visibility-options input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  flex-shrink: 0;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+
+.visibility-save-message {
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  .visibility-options {
+    grid-template-columns: 1fr;
+  }
+}
