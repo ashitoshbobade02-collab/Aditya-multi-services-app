@@ -2020,11 +2020,57 @@ function previewClosing() {
     return;
   }
 
+  const cashInput = document.getElementById("actualCash").value.trim();
+  const onlineInput = document.getElementById("actualOnline").value.trim();
+
+  if (cashInput === "" || onlineInput === "") {
+    showCustomPopup(
+      "Balance Required",
+      "Please enter both Actual Cash and Actual Online balances to check the differences.",
+      "error"
+    );
+    return;
+  }
+
+  const actualCash = Number(cashInput);
+  const actualOnline = Number(onlineInput);
+
+  if (
+    !Number.isFinite(actualCash) || actualCash < 0 ||
+    !Number.isFinite(actualOnline) || actualOnline < 0
+  ) {
+    showCustomPopup("Invalid Balance", "Please enter valid actual balances.", "error");
+    return;
+  }
+
   const totals = calculateTotals(day);
 
+  const getDifference = (actual, expected) => {
+    const difference = actual - expected;
+
+    if (difference === 0) {
+      return "<strong>Matched</strong>";
+    }
+
+    if (difference > 0) {
+      return `<strong>Excess: ${money(difference)}</strong>`;
+    }
+
+    return `<strong>Shortage: ${money(Math.abs(difference))}</strong>`;
+  };
+
   document.getElementById("closingResult").innerHTML = `
+    <h4>Cash Closing</h4>
     <p><strong>Expected Cash:</strong> ${money(totals.cash)}</p>
+    <p><strong>Actual Cash:</strong> ${money(actualCash)}</p>
+    <p>${getDifference(actualCash, totals.cash)}</p>
+
+    <hr>
+
+    <h4>Online Closing</h4>
     <p><strong>Expected Online:</strong> ${money(totals.online)}</p>
+    <p><strong>Actual Online:</strong> ${money(actualOnline)}</p>
+    <p>${getDifference(actualOnline, totals.online)}</p>
   `;
 }
 
