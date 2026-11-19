@@ -2009,67 +2009,28 @@ function previewClosing() {
     return;
   }
 
-  const actual = Number(document.getElementById("actualCash").value);
-  const actualOnline = Number(document.getElementById("actualOnline").value);
+ const cashInput = document.getElementById("actualCash").value.trim();
+const onlineInput = document.getElementById("actualOnline").value.trim();
 
-  if (!Number.isFinite(actual) || actual < 0) {
-  alert("Enter valid actual cash available.");
+if (cashInput === "" || onlineInput === "") {
+  showCustomPopup(
+    "Balance Required",
+    "Please enter both Actual Cash and Actual Online balances before saving the day.",
+    "error"
+  );
+  return;
+}
+
+const actual = Number(cashInput);
+const actualOnline = Number(onlineInput);
+
+if (!Number.isFinite(actual) || actual < 0) {
+  showCustomPopup("Invalid Cash Balance", "Please enter a valid actual cash balance.", "error");
   return;
 }
 
 if (!Number.isFinite(actualOnline) || actualOnline < 0) {
-  alert("Enter valid actual online balance.");
-  return;
-}
-
-  const totals = calculateTotals(day);
-  const expected = totals.cash;
-  const difference = actual - expected;
-
-  const expectedOnline = totals.online;
-  const onlineDifference = actualOnline - expectedOnline;
-
-  document.getElementById("closingResult").innerHTML = `
-    <div style="margin-top:15px;padding:15px;background:#eaf4ff;border-radius:12px">
-      <h3>Daily Profit Summary</h3>
-      <p>Total Profit: <strong>${money(calculateTotals(day).profit)}</strong></p>
-      <p>Total Expenses: <strong>${money(calculateTotals(day).expenses)}</strong></p>
-      <p>Net Profit: <strong style="color:#168653">${money(calculateTotals(day).netProfit)}</strong></p>
-      <hr>
-      <p>Expected cash: <strong>${money(expected)}</strong></p>
-      <p>Actual cash: <strong>${money(actual)}</strong></p>
-      <p>Difference: <strong style="color:${difference < 0 ? '#d94343' : '#168653'}">${money(difference)}</strong></p>
-      <p>${difference === 0 ? "Cash matched" : difference < 0 ? "Cash shortage" : "Cash excess"}</p><p>Expected Online: <strong>${money(expectedOnline)}</strong></p>
-      <p>Actual Online: <strong>${money(actualOnline)}</strong></p>
-      <p>Online Difference: <strong style="color:${onlineDifference < 0 ? '#d94343' : '#168653'}">${money(onlineDifference)}</strong></p>
-      <p>${onlineDifference === 0 ? "Online balance matched" : onlineDifference < 0 ? "Online shortage" : "Online excess"}</p>
-    </div>
-  `;
-}
-
-function saveBusinessDay() {
-  const day = currentDay();
-
-  if (!day) {
-    alert("No active business day.");
-    return;
-  }
-
-  if (day.closed) {
-    alert("This day is already saved and closed.");
-    return;
-  }
-
-  const actual = Number(document.getElementById("actualCash").value);
-  const actualOnline = Number(document.getElementById("actualOnline").value);
-
-  if (!Number.isFinite(actual) || actual < 0) {
-  alert("Enter valid actual cash.");
-  return;
-}
-
-  if (!Number.isFinite(actualOnline) || actualOnline < 0) {
-  alert("Enter valid actual online balance.");
+  showCustomPopup("Invalid Online Balance", "Please enter a valid actual online balance.", "error");
   return;
 }
 
