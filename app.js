@@ -1,5 +1,5 @@
 import { db, auth } from "./firebase.js";
-import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
 
 import {
   GoogleAuthProvider,
@@ -66,6 +66,7 @@ let data = emptyData();
 let currentUser = null;
 let activeStorageKey = null;
 let cloudWriteQueue = Promise.resolve();
+let unsubscribeCloudListener = null;
 let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let selectedHistoryDate = today();
 
@@ -3033,8 +3034,6 @@ function addMenuIcons() {
     element.prepend(icon);
   });
  }
-
-
 /* ==================================
    LOAD USER BUSINESS DATA
 ================================== */
@@ -3082,7 +3081,37 @@ async function loadUserBusinessData(user) {
       "Cloud connection unavailable. Showing this account's device copy."
     );
   }
+    if (unsubscribeCloudListener) {
+    unsubscribeCloudListener();
+    unsubscribeCloudListener = null;
+  }
 
+  unsubscribeCloudListener = onSnapshot(
+    doc(db, "users", user.uid, "appData", "main"),
+    (snapshot) => {
+      if (!currentUser || currentUser.uid !== user.uid) return;
+
+      if (snapshot.exists() && snapshot.data().data) {
+        data = normalizeData(snapshot.data().data);
+
+        localStorage.setItem(
+          activeStorageKey,
+          JSON.stringify(data)
+        );
+
+        updateTransactionFields();
+        updateServiceFields();
+        updateServicePaymentFields();
+        renderCustomerLedgerHistory();
+        refreshDashboard();
+        renderCalendar();
+      }
+    },
+    (error) => {
+      console.error("Real-time cloud sync failed:", error);
+    }
+  );
+  
   updateTransactionFields();
   updateServiceFields();
   updateServicePaymentFields();
@@ -3117,7 +3146,12 @@ onAuthStateChanged(auth, async (user) => {
       openAppScreen("opening");
     }
 
-  } else {
+  } else {    
+    if (unsubscribeCloudListener) {
+      unsubscribeCloudListener();
+      unsubscribeCloudListener = null;
+    }
+    
     currentUser = null;
     activeStorageKey = null;
     data = emptyData();
