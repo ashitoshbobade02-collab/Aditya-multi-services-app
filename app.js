@@ -1680,8 +1680,7 @@ function refreshDashboard() {
     "biznextCollection", "roinetCollection", "tezCollection",
     "finoCollection", "sbiCollection",
     "cashBalance", "onlineBalance",
-    "totalBusiness", "dailyProfit", "netProfit",
-    "cashProfit", "onlineProfit",
+    "totalBusiness", "netProfit",
     "cashNetProfit", "onlineNetProfit"
   ];
 
@@ -1733,14 +1732,8 @@ function refreshDashboard() {
 
   document.getElementById("cashBalance").textContent = money(t.cash);
   document.getElementById("onlineBalance").textContent = money(t.online);
-  document.getElementById("cashProfit").textContent = money(t.cashProfit);
-  document.getElementById("onlineProfit").textContent = money(t.onlineProfit);
-  document.getElementById("dailyProfit").textContent = money(t.profit);
-
   document.getElementById("cashNetProfit").textContent = money(t.cashNetProfit);
   document.getElementById("onlineNetProfit").textContent = money(t.onlineNetProfit);
-  document.getElementById("netProfit").textContent = money(t.netProfit);
-  document.getElementById("dailyProfit").textContent = money(t.profit);
   document.getElementById("netProfit").textContent = money(t.netProfit);
 
   document.getElementById("openingSection").style.display = "none";
