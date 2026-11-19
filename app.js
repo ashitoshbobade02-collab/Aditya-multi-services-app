@@ -294,7 +294,7 @@ function generateReport() {
     days,
     totals
   };
-  result.innerHTML = `
+  document.getElementById("reportPopupSummary").innerHTML = `
     <h3>Business Report</h3>
     <p>Period: ${startDate} to ${endDate}</p>
 
