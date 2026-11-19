@@ -1549,6 +1549,31 @@ function refreshDashboard() {
   const day = currentDay();
   renderExpenseList();
 
+  const todayTransactions = day
+    ? (day.transactions || []).filter(t => t.type !== "SERVICE")
+    : [];
+
+  const todayServices = day
+    ? (day.transactions || []).filter(t => t.type === "SERVICE")
+    : [];
+
+  const todayWithdrawals = day
+    ? (day.transactions || []).filter(t =>
+        ["AEPS", "ONLINE_WITHDRAWAL"].includes(t.type)
+      )
+    : [];
+
+  document.getElementById("todayTransactionCount").textContent =
+    todayTransactions.length;
+
+  document.getElementById("todayServiceCount").textContent =
+    todayServices.length;
+
+  document.getElementById("todayWithdrawalAmount").textContent =
+    money(todayWithdrawals.reduce(
+      (sum, t) => sum + (Number(t.amount) || 0), 0
+    ));
+
   document.getElementById("todayDate").textContent =
     new Date().toLocaleDateString("en-IN", {
       day: "2-digit",
