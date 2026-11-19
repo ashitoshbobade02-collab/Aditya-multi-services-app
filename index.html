@@ -684,14 +684,6 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
 <button type="button" onclick="generateReport()">
   GENERATE REPORT
 </button>
-
-<button type="button" onclick="exportExcel()">
-  DOWNLOAD EXCEL
-</button>
-      
-<button type="button" onclick="exportPDF()">
-  DOWNLOAD PDF
-</button>
       
 <div id="reportResult"></div>
 
@@ -769,5 +761,23 @@ function closeDrawer(){
   <button id="popupOkButton" onclick="closeCustomPopup()">OK, GOT IT</button>
 </div>
   </div>
+  <!-- REPORT POPUP -->
+<div id="reportPopup" class="popup-overlay" style="display:none;">
+  <div class="popup-box report-popup-box">
+    <button type="button" class="report-popup-close"
+      onclick="closeReportPopup()" aria-label="Close">×</button>
+
+    <div class="popup-icon">✓</div>
+    <h2>Business Report</h2>
+    <p id="reportPopupPeriod"></p>
+
+    <div id="reportPopupSummary"></div>
+
+    <div class="popup-actions">
+      <button type="button" onclick="exportExcel()">DOWNLOAD EXCEL</button>
+      <button type="button" onclick="exportPDF()">DOWNLOAD PDF</button>
+    </div>
+  </div>
+</div>
   </body>
 </html>
