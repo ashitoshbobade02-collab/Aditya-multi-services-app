@@ -182,6 +182,29 @@ function today() {
     String(d.getDate()).padStart(2, "0");
 }
 
+function toggleCustomReportDates() {
+  const type = document.getElementById("reportType").value;
+  const dates = document.getElementById("customReportDates");
+
+  dates.style.display = type === "custom" ? "block" : "none";
+}
+
+function getReportDays(startDate, endDate) {
+  const allDays = [...(data.days || [])];
+
+  if (data.currentDay) {
+    allDays.push(data.currentDay);
+  }
+
+  const uniqueDays = new Map(
+    allDays.map(day => [day.date, day])
+  );
+
+  return [...uniqueDays.values()]
+    .filter(day => day.date >= startDate && day.date <= endDate)
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
 function persist() {
   if (!currentUser || !activeStorageKey) return;
   const snapshot = JSON.stringify(data);
