@@ -1545,6 +1545,97 @@ function drawBusinessPerformanceChart() {
   });
 }
 
+function showDashboardHistory(title, items, type) {
+  const popup = document.getElementById("dashboardHistoryPopup");
+  const content = document.getElementById("dashboardHistoryContent");
+  const summary = document.getElementById("dashboardHistorySummary");
+
+  document.getElementById("dashboardHistoryTitle").textContent = title;
+
+  if (!items.length) {
+    summary.textContent = "0 records found today.";
+    content.innerHTML = "<p>No records available yet.</p>";
+  } else {
+    summary.textContent = items.length + " records found today.";
+
+    content.innerHTML = items.slice().reverse().map(t => {
+      let heading = t.type === "ONLINE_WITHDRAWAL"
+        ? (t.platform + " Withdrawal")
+        : t.type === "SERVICE"
+          ? t.serviceName
+          : t.type + (t.platform ? " · " + t.platform : "");
+
+      let details = "";
+
+      if (type === "transactions") {
+        details = `
+          <p>Amount: ${money(t.amount)}</p>
+          <p>Customer Charge: ${money(t.charge || 0)}</p>
+          ${t.type === "SERVICE"
+            ? `<p>Payment: ${t.paymentMethod || ""}</p>`
+            : `<p>Charge Payment: ${t.chargePaymentMethod || "N/A"}</p>`}
+        `;
+      } else if (type === "services") {
+        details = `
+          <p>Amount: ${money(t.amount)}</p>
+          <p>Quantity: ${t.quantity || "Direct entry"}</p>
+          <p>Payment: ${t.paymentMethod || ""}</p>
+          <p>Cash: ${money(t.cashAmount || 0)} | Online: ${money(t.onlineAmount || 0)}</p>
+        `;
+      } else {
+        details = `
+          <p>Amount: ${money(t.amount)}</p>
+          <p>Customer Charge: ${money(t.charge || 0)}</p>
+          <p>Charge Payment: ${t.chargePaymentMethod || "N/A"}</p>
+        `;
+      }
+
+      return `
+        <div style="padding:12px 0;border-bottom:1px solid var(--line);text-align:left;">
+          <strong>${heading}</strong>
+          <p>${t.time || ""}</p>
+          ${details}
+        </div>
+      `;
+    }).join("");
+  }
+
+  popup.style.display = "flex";
+}
+
+function openTodayTransactions() {
+  const day = currentDay();
+  const items = day
+    ? (day.transactions || []).filter(t => t.type !== "SERVICE")
+    : [];
+
+  showDashboardHistory("Today's Transactions", items, "transactions");
+}
+
+function openTodayServices() {
+  const day = currentDay();
+  const items = day
+    ? (day.transactions || []).filter(t => t.type === "SERVICE")
+    : [];
+
+  showDashboardHistory("Today's Services", items, "services");
+}
+
+function openTodayWithdrawals() {
+  const day = currentDay();
+  const items = day
+    ? (day.transactions || []).filter(t =>
+        ["AEPS", "ONLINE_WITHDRAWAL"].includes(t.type)
+      )
+    : [];
+
+  showDashboardHistory("Today's Withdrawals", items, "withdrawals");
+}
+
+function closeDashboardHistory() {
+  document.getElementById("dashboardHistoryPopup").style.display = "none";
+}
+
 function refreshDashboard() {
   const day = currentDay();
   renderExpenseList();
@@ -3047,4 +3138,9 @@ Object.assign(window, {
   showCustomerPaymentForm,
   hideCustomerPaymentForm,
   saveCustomerPayment,
+  openTodayTransactions,
+  openTodayServices,
+  openTodayWithdrawals,
+  closeDashboardHistory,
+  showDashboardHistory,
 });
