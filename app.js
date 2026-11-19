@@ -485,7 +485,7 @@ function exportPDF() {
   doc.autoTable({
     startY: 40,
     head: [["Profit Summary", "Amount (INR)"]],
-    body: summaryRows.map(r => [r[0], pdfMoneyr[1])]),
+    body: summaryRows.map(r => [r[0], pdfMoney(r[1])]),
     margin: { left: margin, right: margin },
     theme: "grid"
   });
@@ -506,8 +506,8 @@ function exportPDF() {
         day.date,
         item.time || "",
         item.type || "",
-        pdfMoneyitem.amount || 0),
-        pdfMoneyitem.charge || 0),
+       pdfMoney(item.amount || 0),
+       pdfMoney(item.charge || 0),
         item.chargePaymentMethod || "CASH",
         item.platform || ""
       ]);
@@ -519,32 +519,32 @@ function exportPDF() {
         item.time || "",
         item.category || "",
         item.paymentMethod || "CASH",
-        pdfMoneyitem.amount || 0),
+        pdfMoney(item.amount || 0),
         item.note || ""
       ]);
     });
 
     dailyRows.push([
       day.date,
-      pdfMoneyt.cashProfit),
-      pdfMoneyt.onlineProfit),
-      pdfMoneyt.profit),
-      pdfMoneyt.cashNetProfit),
-      pdfMoneyt.onlineNetProfit),
-      pdfMoneyt.netProfit)
+      pdfMoney(t.cashProfit),
+      pdfMoney(t.onlineProfit),
+      pdfMoney(t.profit),
+      pdfMoney(t.cashNetProfit),
+      pdfMoney(t.onlineNetProfit),
+      pdfMoney(t.netProfit)
     ]);
 
     walletRows.push([
       day.date,
-      pdfMoneyt.biznext),
-      pdfMoneyt.roinet),
-      pdfMoneyt.tez),
-      pdfMoneyt.fino),
-      pdfMoneyt.sbi),
-      pdfMoneyt.cash),
-      pdfMoneyt.online),
-      c.actualCash == null ? "Not closed" : pdfMoneyc.actualCash),
-      c.actualOnline == null ? "Not closed" : money(c.actualOnline)
+      pdfMoney(t.biznext),
+      pdfMoney(t.roinet),
+      pdfMoney(t.tez),
+      pdfMoney(t.fino),
+      pdfMoney(t.sbi),
+      pdfMoney(t.cash),
+      pdfMoney(t.online),
+      c.actualCash == null ? "Not closed" : pdfMoney(c.actualCash),
+      c.actualOnline == null ? "Not closed" : pdfMoney(c.actualOnline)
     ]);
   });
 
