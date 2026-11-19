@@ -1174,3 +1174,22 @@ th {
     grid-template-columns: 1fr;
   }
 }
+/* Daily Closing Difference Status */
+.closing-matched {
+  color: var(--blue);
+  font-weight: 800;
+}
+
+.closing-excess {
+  color: var(--green);
+  font-weight: 800;
+}
+
+.closing-shortage {
+  color: #dc2626;
+  font-weight: 800;
+}
+
+:root[data-theme="dark"] .closing-shortage {
+  color: #f87171;
+}
