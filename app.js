@@ -215,11 +215,15 @@ function generateReport() {
     const date = new Date(todayDate + "T00:00:00");
     const day = date.getDay();
     date.setDate(date.getDate() - (day === 0 ? 6 : day - 1));
-    startDate = date.toISOString().slice(0, 10);
+    startDate = date.getFullYear() + "-" +
+  String(date.getMonth() + 1).padStart(2, "0") + "-" +
+  String(date.getDate()).padStart(2, "0");
 
     const end = new Date(date);
     end.setDate(end.getDate() + 6);
-    endDate = end.toISOString().slice(0, 10);
+    endDate = end.getFullYear() + "-" +
+  String(end.getMonth() + 1).padStart(2, "0") + "-" +
+  String(end.getDate()).padStart(2, "0");
   }
 
   if (type === "monthly") {
