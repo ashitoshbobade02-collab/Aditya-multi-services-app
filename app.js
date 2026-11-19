@@ -2046,18 +2046,18 @@ function previewClosing() {
   const totals = calculateTotals(day);
 
   const getDifference = (actual, expected) => {
-    const difference = actual - expected;
+  const difference = actual - expected;
 
-    if (difference === 0) {
-      return "<strong>Matched</strong>";
-    }
+  if (difference === 0) {
+    return '<strong class="closing-matched">MATCHED</strong>';
+  }
 
-    if (difference > 0) {
-      return `<strong>Excess: ${money(difference)}</strong>`;
-    }
+  if (difference > 0) {
+    return `<strong class="closing-excess">EXCESS: ${money(difference)}</strong>`;
+  }
 
-    return `<strong>Shortage: ${money(Math.abs(difference))}</strong>`;
-  };
+  return `<strong class="closing-shortage">SHORTAGE: ${money(Math.abs(difference))}</strong>`;
+};
 
   document.getElementById("closingResult").innerHTML = `
     <h4>Cash Closing</h4>
