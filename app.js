@@ -2169,7 +2169,6 @@ function selectHistoryDate(date) {
   renderCalendar();
 }
 
-
 function renderCalendar() {
   const history = document.getElementById("historyList");
   if (!history) return;
@@ -2217,25 +2216,76 @@ function renderCalendar() {
     detail = selectedDays.map((selectedDay, index) => {
       const closing = selectedDay.closing || calculateTotals(selectedDay);
       const transactions = selectedDay.transactions || [];
+      const status = selectedDay.closed
+        ? '<span class="record-tag">Closed</span>'
+        : '<span class="record-tag active-tag">In progress</span>';
 
-      return `<div class="history-summary">
-        <h4>Business Day ${index + 1}</h4>
-        <p><strong>${selectedHistoryDate}</strong> ${selectedDay.closed ? '<span class="record-tag">Closed</span>' : '<span class="record-tag active-tag">In progress</span>'}</p>
-        <p>Business: <strong>${money(closing.business)}</strong></p>
-        <p>Profit: <strong>${money(closing.profit)}</strong></p>
-        <p>Cash difference: <strong>${selectedDay.closing ? money(selectedDay.closing.difference) : 'Not closed'}</strong></p>
-        <h4>Transactions (${transactions.length})</h4>
-        ${transactions.length ? transactions.map(t => `<div class="history-transaction"><strong>${t.type === "SERVICE" ? (t.serviceName || "Service") : (t.type === "ONLINE_WITHDRAWAL" ? `${t.platform} Withdrawal` : `${t.type} ${t.platform ? "· " + t.platform : ""}`)}</strong><span>${t.time || ""}</span><p>Amount: ${money(t.amount)}</p>${t.type === "SERVICE" ? `<p>Payment: ${t.paymentMethod || ""}</p>` : `<p>Charge: ${money(t.charge)}</p>`}</div>`).join("") : '<p>No transactions recorded.</p>'}
-      </div>`;
+      return `
+        <details class="history-day">
+          <summary class="history-day-summary">
+            <span class="history-day-number">${index + 1}</span>
+            <span class="history-day-main">
+              <strong>Business Day ${index + 1} ${status}</strong>
+              <span class="history-day-amounts">
+                ${money(closing.business)} Business
+                <span>•</span>
+                ${money(closing.profit)} Profit
+              </span>
+            </span>
+            <span class="history-day-arrow">⌄</span>
+          </summary>
+
+          <div class="history-day-details">
+            <p><strong>Date:</strong> ${selectedHistoryDate}</p>
+            <p><strong>Business:</strong> ${money(closing.business)}</p>
+            <p><strong>Profit:</strong> ${money(closing.profit)}</p>
+            <p><strong>Cash difference:</strong> ${selectedDay.closing ? money(selectedDay.closing.difference) : "Not closed"}</p>
+            <p><strong>Online difference:</strong> ${selectedDay.closing ? money(selectedDay.closing.onlineDifference || 0) : "Not closed"}</p>
+
+            <h4>Transactions (${transactions.length})</h4>
+
+            ${transactions.length
+              ? transactions.map(t => `
+                <div class="history-transaction">
+                  <strong>${t.type === "SERVICE"
+                    ? (t.serviceName || "Service")
+                    : (t.type === "ONLINE_WITHDRAWAL"
+                      ? `${t.platform} Withdrawal`
+                      : `${t.type} ${t.platform ? "· " + t.platform : ""}`)}</strong>
+                  <span>${t.time || ""}</span>
+                  <p>Amount: ${money(t.amount)}</p>
+                  ${t.type === "SERVICE"
+                    ? `<p>Payment: ${t.paymentMethod || ""}</p>`
+                    : `<p>Charge: ${money(t.charge)}</p>`}
+                </div>
+              `).join("")
+              : '<p class="muted">No transactions recorded.</p>'}
+          </div>
+        </details>
+      `;
     }).join("");
   }
 
-  history.innerHTML = `<div class="calendar-header"><button type="button" class="calendar-nav" onclick="changeCalendarMonth(-1)" aria-label="Previous month">‹</button><strong>${monthLabel}</strong><button type="button" class="calendar-nav" onclick="changeCalendarMonth(1)" aria-label="Next month">›</button></div>
-    <div class="calendar-grid calendar-weekdays">${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(x => `<span>${x}</span>`).join("")}</div>
-    <div class="calendar-grid">${cells.join("")}</div>
-    <p class="calendar-legend"><span></span> Dates with saved business records</p>${detail}`;
-}
+  history.innerHTML = `
+    <div class="calendar-header">
+      <button type="button" class="calendar-nav" onclick="changeCalendarMonth(-1)" aria-label="Previous month">‹</button>
+      <strong>${monthLabel}</strong>
+      <button type="button" class="calendar-nav" onclick="changeCalendarMonth(1)" aria-label="Next month">›</button>
+    </div>
 
+    <div class="calendar-grid calendar-weekdays">
+      ${["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(x => `<span>${x}</span>`).join("")}
+    </div>
+
+    <div class="calendar-grid">${cells.join("")}</div>
+
+    <p class="calendar-legend">
+      <span></span> Dates with saved business records
+    </p>
+
+    <div class="history-day-list">${detail}</div>
+  `;
+}
 
 function exportData() {
   const blob = new Blob(
