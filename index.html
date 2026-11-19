@@ -768,7 +768,20 @@ function closeDrawer(){
     </div>
   </div>
 </div>
-  
+
+<!-- DASHBOARD HISTORY POPUP -->
+<div id="dashboardHistoryPopup" class="popup-overlay" style="display:none;">
+  <div class="popup-box report-popup-box" style="width:min(620px,100%);">
+    <button type="button" class="report-popup-close"
+      onclick="closeDashboardHistory()" aria-label="Close">×</button>
+
+    <h2 id="dashboardHistoryTitle">Today's History</h2>
+    <p id="dashboardHistorySummary"></p>
+
+    <div id="dashboardHistoryContent"></div>
+  </div>
+</div>
+
     <!-- CUSTOM POPUP -->
 <div id="customPopup" class="popup-overlay" style="display:none;">
   <div class="popup-box">
