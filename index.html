@@ -251,7 +251,13 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <label>Customer Charge (₹)</label>
     <input type="number" id="customerCharge" readonly placeholder="Automatic calculation">
 
-    <p id="chargePreview">Customer charge will appear here.</p>
+       <p id="chargePreview">Customer charge will appear here.</p>
+
+    <label>Customer Charge Payment Method</label>
+    <select id="chargePaymentMethod">
+      <option value="CASH">Cash</option>
+      <option value="ONLINE">Online</option>
+    </select>
 
     <button onclick="addBusinessTransaction()">SAVE TRANSACTION</button>
   </div>
