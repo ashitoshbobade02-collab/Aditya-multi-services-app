@@ -420,6 +420,206 @@ function exportExcel() {
   XLSX.writeFile(wb, "Aditya-Multi-Services-Report.xlsx");
 }
 
+function exportPDF() {
+  const report = window.currentReportData;
+
+  if (!report || !report.days.length) {
+    showCustomPopup("No Report", "Generate a report first.", "error");
+    return;
+  }
+
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    showCustomPopup("PDF Unavailable", "PDF library did not load. Check your internet connection.", "error");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p", "mm", "a4");
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 14;
+
+  const addFooter = () => {
+    const pageCount = doc.internal.getNumberOfPages();
+
+    for (let page = 1; page <= pageCount; page++) {
+      doc.setPage(page);
+      doc.setFontSize(8);
+      doc.text(
+        `Aditya Multi Services | Page ${page} of ${pageCount}`,
+        pageWidth / 2,
+        290,
+        { align: "center" }
+      );
+    }
+  };
+
+  doc.setFontSize(18);
+  doc.text("ADITYA MULTI SERVICES", pageWidth / 2, 17, {
+    align: "center"
+  });
+
+  doc.setFontSize(13);
+  doc.text("BUSINESS REPORT", pageWidth / 2, 25, {
+    align: "center"
+  });
+
+  doc.setFontSize(10);
+  doc.text(
+    `Report Period: ${report.startDate} to ${report.endDate}`,
+    margin,
+    34
+  );
+
+  const summaryRows = [
+    ["Cash Profit", report.totals.cashProfit],
+    ["Online Profit", report.totals.onlineProfit],
+    ["Total Profit", report.totals.profit],
+    ["Cash Net Profit", report.totals.cashNetProfit],
+    ["Online Net Profit", report.totals.onlineNetProfit],
+    ["Total Expenses", report.totals.expenses],
+    ["Total Net Profit", report.totals.netProfit]
+  ];
+
+  doc.autoTable({
+    startY: 40,
+    head: [["Profit Summary", "Amount (INR)"]],
+    body: summaryRows.map(r => [r[0], money(r[1])]),
+    margin: { left: margin, right: margin },
+    theme: "grid"
+  });
+
+  let y = doc.lastAutoTable.finalY + 10;
+
+  const transactionRows = [];
+  const expenseRows = [];
+  const dailyRows = [];
+  const walletRows = [];
+
+  report.days.forEach(day => {
+    const t = calculateTotals(day);
+    const c = day.closing || {};
+
+    (day.transactions || []).forEach(item => {
+      transactionRows.push([
+        day.date,
+        item.time || "",
+        item.type || "",
+        money(item.amount || 0),
+        money(item.charge || 0),
+        item.chargePaymentMethod || "CASH",
+        item.platform || ""
+      ]);
+    });
+
+    (day.expenses || []).forEach(item => {
+      expenseRows.push([
+        day.date,
+        item.time || "",
+        item.category || "",
+        item.paymentMethod || "CASH",
+        money(item.amount || 0),
+        item.note || ""
+      ]);
+    });
+
+    dailyRows.push([
+      day.date,
+      money(t.cashProfit),
+      money(t.onlineProfit),
+      money(t.profit),
+      money(t.cashNetProfit),
+      money(t.onlineNetProfit),
+      money(t.netProfit)
+    ]);
+
+    walletRows.push([
+      day.date,
+      money(t.biznext),
+      money(t.roinet),
+      money(t.tez),
+      money(t.fino),
+      money(t.sbi),
+      money(t.cash),
+      money(t.online),
+      c.actualCash == null ? "Not closed" : money(c.actualCash),
+      c.actualOnline == null ? "Not closed" : money(c.actualOnline)
+    ]);
+  });
+
+  const addTable = (title, head, body) => {
+    if (y > 265) {
+      doc.addPage();
+      y = 18;
+    }
+
+    doc.setFontSize(12);
+    doc.text(title, margin, y);
+
+    doc.autoTable({
+      startY: y + 4,
+      head: [head],
+      body: body.length ? body : [["No records"]],
+      margin: { left: margin, right: margin },
+      theme: "grid",
+      styles: {
+        fontSize: 7,
+        cellPadding: 2,
+        overflow: "linebreak"
+      },
+      headStyles: {
+        fontSize: 7
+      },
+      rowPageBreak: "avoid"
+    });
+
+    y = doc.lastAutoTable.finalY + 10;
+  };
+
+  addTable(
+    "Daily Profit Breakdown",
+    ["Date", "Cash Profit", "Online Profit", "Total Profit",
+     "Cash Net", "Online Net", "Total Net"],
+    dailyRows
+  );
+
+  addTable(
+    "Transaction Details",
+    ["Date", "Time", "Type", "Amount", "Charge", "Charge Paid By", "Platform"],
+    transactionRows
+  );
+
+  addTable(
+    "Expense Details",
+    ["Date", "Time", "Category", "Paid By", "Amount", "Note"],
+    expenseRows
+  );
+
+  addTable(
+    "Cash, Online and Wallet Closing Summary",
+    ["Date", "Biznext", "Roinet", "Tez", "Fino", "SBI",
+     "Expected Cash", "Expected Online", "Actual Cash", "Actual Online"],
+    walletRows
+  );
+
+  if (y > 245) {
+    doc.addPage();
+    y = 35;
+  } else {
+    y += 12;
+  }
+
+  doc.setFontSize(11);
+  doc.text("Prepared By: ____________________", margin, y);
+  doc.text("Signature: ____________________", margin, y + 12);
+  doc.text("Date: ____________________", pageWidth - margin, y + 12, {
+    align: "right"
+  });
+
+  addFooter();
+
+  doc.save("Aditya-Multi-Services-Report.pdf");
+}
+
 function persist() {
   if (!currentUser || !activeStorageKey) return;
   const snapshot = JSON.stringify(data);
@@ -2769,6 +2969,7 @@ renderNumberStepSettings();
 setupNumberWheelSteps();
 
 Object.assign(window, { 
+  exportPDF,
   exportExcel,
   toggleCustomReportDates,
   generateReport,
