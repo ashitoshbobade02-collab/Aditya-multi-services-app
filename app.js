@@ -636,6 +636,12 @@ function calculateTotals(day) {
     cash: day.opening.cash,
     online: day.opening.online,
     profit: 0,
+    cashProfit: 0,
+    onlineProfit: 0,
+    cashExpenses: 0,
+    onlineExpenses: 0,
+    cashNetProfit: 0,
+    onlineNetProfit: 0,
     expenses: 0,
     netProfit: 0,
     business: 0,
@@ -693,11 +699,22 @@ function calculateTotals(day) {
       totals.online += onlineReceived;
       totals.serviceIncome += amount;
       totals.profit += amount;
+      totals.cashProfit += cashReceived;
+      totals.onlineProfit += onlineReceived;
     }
 
-    totals.cash += charge;
-    totals.charges += charge;
-    totals.profit += charge;
+   const chargeAccount = t.chargePaymentMethod || "CASH";
+
+if (chargeAccount === "ONLINE") {
+  totals.online += charge;
+  totals.onlineProfit += charge;
+} else {
+  totals.cash += charge;
+  totals.cashProfit += charge;
+}
+
+totals.charges += charge;
+totals.profit += charge;
   });
 
  (day.cashMovements || []).forEach(entry => {
@@ -709,15 +726,17 @@ function calculateTotals(day) {
   if (entry.type === "OUT") totals[balanceKey] -= amount;
 });
 
-  (day.expenses || []).forEach(expense => {
+(day.expenses || []).forEach(expense => {
   const amount = Number(expense.amount) || 0;
 
   if (expense.paymentMethod === "CASH") {
     totals.cash -= amount;
+    totals.cashExpenses += amount;
   }
 
   if (expense.paymentMethod === "ONLINE") {
     totals.online -= amount;
+    totals.onlineExpenses += amount;
   }
 });
   
@@ -726,7 +745,14 @@ function calculateTotals(day) {
     0
   );
 
-  totals.netProfit = totals.profit - totals.expenses;
+totals.cashNetProfit =
+  totals.cashProfit - totals.cashExpenses;
+
+totals.onlineNetProfit =
+  totals.onlineProfit - totals.onlineExpenses;
+
+totals.netProfit =
+  totals.profit - totals.expenses;
 
   return totals;
 }
@@ -831,17 +857,21 @@ function addBusinessTransaction() {
   const charge = ["AEPS", "C+", "C-"].includes(type)
     ? chargeFor(amount)
     : 0;
+   
+  const chargePaymentMethod =
+    document.getElementById("chargePaymentMethod").value;
 
   const platform = type === "AEPS"
     ? document.getElementById("platform").value
     : "";
 
-  const transaction = {
+   const transaction = {
     id: Date.now(),
     time: new Date().toLocaleTimeString("en-IN"),
     type,
     amount,
     charge,
+    chargePaymentMethod,
     platform
   };
 
@@ -879,6 +909,7 @@ function addBusinessTransaction() {
 
   document.getElementById("transactionAmount").value = "";
   document.getElementById("customerCharge").value = "";
+  document.getElementById("chargePaymentMethod").value = "CASH";
 
   calculateChargePreview();
   refreshDashboard();
