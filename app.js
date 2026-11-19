@@ -2000,8 +2000,23 @@ function renderExpenseList() {
 /* ==================================
    DAILY CLOSING
 ================================== */
-
 function previewClosing() {
+  const day = currentDay();
+
+  if (!day) {
+    showCustomPopup("Shop Closed", "Start a business day first.", "error");
+    return;
+  }
+
+  const totals = calculateTotals(day);
+
+  document.getElementById("closingResult").innerHTML = `
+    <p><strong>Expected Cash:</strong> ${money(totals.cash)}</p>
+    <p><strong>Expected Online:</strong> ${money(totals.online)}</p>
+  `;
+}
+
+function saveBusinessDay() {
   const day = currentDay();
 
   if (!day) {
