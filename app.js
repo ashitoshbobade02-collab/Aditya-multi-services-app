@@ -2422,7 +2422,6 @@ if (selectedDays.length) {
           </p>
 
           <h4>Transactions (${transactions.length})</h4>
-
           ${transactions.length
             ? transactions.map(t => `
               <div class="history-transaction">
@@ -2438,61 +2437,37 @@ if (selectedDays.length) {
                   : `<p>Charge: ${money(t.charge)}</p>`}
               </div>
             `).join("")
-            : '<p class="muted">No transactions recorded.</p>'   
-            <h4>Cash / Online Movements (${movements.length})</h4>
+            : '<p class="muted">No transactions recorded.</p>'}
 
-${movements.length
-  ? movements.map(m => `
-    <div class="history-transaction">
-      <strong>${m.type || m.account || "Movement"}</strong>
-      <span>${m.time || ""}</span>
-      <p>Amount: ${money(m.amount)}</p>
-      <p>Account: ${m.account || "CASH"}</p>
-      ${m.note ? `<p>Note: ${m.note}</p>` : ""}
-    </div>
-  `).join("")
-  : '<p class="muted">No movements recorded.</p>'}
-  <h4>Expenses (${expenses.length})</h4>
+          <h4>Expenses (${expenses.length})</h4>
+          ${expenses.length
+            ? expenses.map(e => `
+              <div class="history-transaction">
+                <strong>${e.category || "Expense"}</strong>
+                <span>${e.time || ""}</span>
+                <p>Amount: ${money(e.amount)}</p>
+                <p>Payment: ${e.paymentMethod || "CASH"}</p>
+                ${e.note ? `<p>Note: ${e.note}</p>` : ""}
+              </div>
+            `).join("")
+            : '<p class="muted">No expenses recorded.</p>'}
 
-${expenses.length
-  ? expenses.map(e => `
-    <div class="history-transaction">
-      <strong>${e.category || "Expense"}</strong>
-      <span>${e.time || ""}</span>
-      <p>Amount: ${money(e.amount)}</p>
-      <p>Payment: ${e.paymentMethod || "CASH"}</p>
-      ${e.note ? `<p>Note: ${e.note}</p>` : ""}
-    </div>
-  `).join("")
-  : '<p class="muted">No expenses recorded.</p>'}
+          <h4>Cash / Online Movements (${movements.length})</h4>
+          ${movements.length
+            ? movements.map(m => `
+              <div class="history-transaction">
+                <strong>${m.type || m.account || "Movement"}</strong>
+                <span>${m.time || ""}</span>
+                <p>Amount: ${money(m.amount)}</p>
+                <p>Account: ${m.account || "CASH"}</p>
+                ${m.note ? `<p>Note: ${m.note}</p>` : ""}
+              </div>
+            `).join("")
+            : '<p class="muted">No movements recorded.</p>'}
         </div>
       `;
     }).join("");
-
-    return `
-      <details class="history-day" open>
-        <summary class="history-day-summary">
-          <span class="history-day-number">1</span>
-          <span class="history-day-main">
-            <strong>${title}</strong>
-            <span class="history-day-amounts">
-              ${money(dailyTotals.business)} Business
-              <span>•</span>
-              ${money(dailyTotals.profit)} Profit
-            </span>
-          </span>
-          <span class="history-day-arrow">⌄</span>
-        </summary>
-
-        <div class="history-day-details">
-          <p><strong>Date:</strong> ${selectedHistoryDate}</p>
-          ${sessionDetails}
-        </div>
-      </details>
-    `;
-  }).join("");
-}
-  
+} 
 
   history.innerHTML = `
     <div class="calendar-header">
