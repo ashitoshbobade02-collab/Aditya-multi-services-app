@@ -2768,7 +2768,8 @@ refreshDashboard();
 renderNumberStepSettings();
 setupNumberWheelSteps();
 
-Object.assign(window, {  
+Object.assign(window, { 
+  exportExcel,
   toggleCustomReportDates,
   generateReport,
   saveCashMovement,
