@@ -3122,6 +3122,21 @@ onAuthStateChanged(auth, async (user) => {
     activeStorageKey = null;
     data = emptyData();
 
+    const passwordInput = document.getElementById("loginPassword");
+    const toggleButton = document.querySelector(".password-toggle");
+
+    if (passwordInput) {
+      passwordInput.value = "";
+      passwordInput.type = "password";
+    }
+
+    if (toggleButton) {
+      toggleButton.textContent = "SHOW";
+    }
+
+    const confirmPassword = document.getElementById("confirmPassword");
+    if (confirmPassword) confirmPassword.value = "";
+
     loginScreen.style.display = "flex";
     header.style.display = "none";
     main.style.display = "none";
