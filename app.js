@@ -783,10 +783,22 @@ function startBusinessDay() {
       : Number(document.getElementById("openingSbi").value)
   };
 
-  if (Object.values(opening).some(v => !Number.isFinite(v) || v < 0)) {
-    alert("Enter valid opening balances.");
-    return;
-  }
+  const cashValue = document.getElementById("openingCash").value.trim();
+const onlineValue = document.getElementById("openingOnline").value.trim();
+
+if (cashValue === "" || onlineValue === "") {
+  showCustomPopup(
+    "Missing Opening Balance",
+    "Please enter both Cash and Online opening amounts. Enter 0 if the balance is zero.",
+    "error"
+  );
+  return;
+}
+
+if (Object.values(opening).some(v => !Number.isFinite(v) || v < 0)) {
+  showCustomPopup("Invalid Balance", "Please enter valid opening balances.", "error");
+  return;
+}
 
  data.currentDay = {
   date: today(),
