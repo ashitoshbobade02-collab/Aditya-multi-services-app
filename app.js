@@ -437,6 +437,8 @@ function exportPDF() {
   const doc = new jsPDF("p", "mm", "a4");
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 14;
+  const pdfMoney = value =>
+  "Rs. " + (Number(value) || 0).toFixed(2);
 
   const addFooter = () => {
     const pageCount = doc.internal.getNumberOfPages();
@@ -483,7 +485,7 @@ function exportPDF() {
   doc.autoTable({
     startY: 40,
     head: [["Profit Summary", "Amount (INR)"]],
-    body: summaryRows.map(r => [r[0], money(r[1])]),
+    body: summaryRows.map(r => [r[0], pdfMoneyr[1])]),
     margin: { left: margin, right: margin },
     theme: "grid"
   });
@@ -504,8 +506,8 @@ function exportPDF() {
         day.date,
         item.time || "",
         item.type || "",
-        money(item.amount || 0),
-        money(item.charge || 0),
+        pdfMoneyitem.amount || 0),
+        pdfMoneyitem.charge || 0),
         item.chargePaymentMethod || "CASH",
         item.platform || ""
       ]);
@@ -517,31 +519,31 @@ function exportPDF() {
         item.time || "",
         item.category || "",
         item.paymentMethod || "CASH",
-        money(item.amount || 0),
+        pdfMoneyitem.amount || 0),
         item.note || ""
       ]);
     });
 
     dailyRows.push([
       day.date,
-      money(t.cashProfit),
-      money(t.onlineProfit),
-      money(t.profit),
-      money(t.cashNetProfit),
-      money(t.onlineNetProfit),
-      money(t.netProfit)
+      pdfMoneyt.cashProfit),
+      pdfMoneyt.onlineProfit),
+      pdfMoneyt.profit),
+      pdfMoneyt.cashNetProfit),
+      pdfMoneyt.onlineNetProfit),
+      pdfMoneyt.netProfit)
     ]);
 
     walletRows.push([
       day.date,
-      money(t.biznext),
-      money(t.roinet),
-      money(t.tez),
-      money(t.fino),
-      money(t.sbi),
-      money(t.cash),
-      money(t.online),
-      c.actualCash == null ? "Not closed" : money(c.actualCash),
+      pdfMoneyt.biznext),
+      pdfMoneyt.roinet),
+      pdfMoneyt.tez),
+      pdfMoneyt.fino),
+      pdfMoneyt.sbi),
+      pdfMoneyt.cash),
+      pdfMoneyt.online),
+      c.actualCash == null ? "Not closed" : pdfMoneyc.actualCash),
       c.actualOnline == null ? "Not closed" : money(c.actualOnline)
     ]);
   });
