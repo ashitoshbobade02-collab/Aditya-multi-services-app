@@ -114,35 +114,35 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <h3 class="section-title">Wallet Overview</h3>
 
     <div class="wallets">
-      <div class="wallet">
+      <div class="wallet" id="sectionBiznext">
         <small>Biznext Wallet</small>
         <h2 id="biznextBalance">₹0.00</h2>
         <small>Today's AEPS</small>
         <p id="biznextCollection">₹0.00</p>
       </div>
 
-      <div class="wallet">
+      <div class="wallet" id="sectionRoinet">
         <small>Roinet Wallet</small>
         <h2 id="roinetBalance">₹0.00</h2>
         <small>Today's AEPS</small>
         <p id="roinetCollection">₹0.00</p>
       </div>
 
-      <div class="wallet">
+      <div class="wallet" id="sectionTez">
         <small>Tez Wallet</small>
         <h2 id="tezBalance">₹0.00</h2>
         <small>Today's AEPS</small>
         <p id="tezCollection">₹0.00</p>
       </div>
 
-      <div class="wallet">
+      <div class="wallet" id="sectionFino">
         <small>Fino Wallet</small>
         <h2 id="finoBalance">₹0.00</h2>
         <small>Today's AEPS</small>
         <p id="finoCollection">₹0.00</p>
       </div>
 
-      <div class="wallet">
+      <div class="wallet" id="sectionSbi">
         <small>SBI Wallet</small>
         <h2 id="sbiBalance">₹0.00</h2>
         <small>Today's AEPS</small>
@@ -153,55 +153,55 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <h3 class="section-title">Today's Overview</h3>
 
     <div class="wallets">
-      <div class="card">
+      <div class="card" id="sectionCashBalance">
         <p>Cash Balance</p>
         <h2 id="cashBalance">₹0.00</h2>
       </div>
 
-      <div class="card">
+      <div class="card" id="sectionOnlineBalance">
         <p>Online Balance</p>
         <h2 id="onlineBalance">₹0.00</h2>
       </div>
 
-      <div class="card">
+      <div class="card" id="sectionTodayBusiness">
         <p>Today's Business</p>
         <h2 id="totalBusiness">₹0.00</h2>
       </div>
 
-<div class="card clickable-card" onclick="openTodayTransactions()">
+<div class="card clickable-card" id="sectionTodayTransactions" onclick="openTodayTransactions()">
   <p>Today's Total Transactions</p>
   <h2 id="todayTransactionCount">0</h2>
   <small>View Transaction History →</small>
 </div>
 
-<div class="card clickable-card" onclick="openTodayServices()">
+<div class="card clickable-card" id="sectionTodayServices" onclick="openTodayServices()">
   <p>Today's Total Services</p>
   <h2 id="todayServiceCount">0</h2>
   <small>View Services History →</small>
 </div>
 
-<div class="card clickable-card" onclick="openTodayWithdrawals()">
+<div class="card clickable-card" id="sectionTodayWithdrawals" onclick="openTodayWithdrawals()">
   <p>Today's Total Withdrawals</p>
   <h2 id="todayWithdrawalAmount">₹0.00</h2>
   <small>View Withdrawals History →</small>
 </div>
 
-<div class="card">
+<div class="card" id="sectionCashNetProfit">
   <p>Cash Net Profit</p>
   <h2 class="green" id="cashNetProfit">₹0.00</h2>
 </div>
 
-<div class="card">
+<div class="card" id="sectionOnlineNetProfit">
   <p>Online Net Profit</p>
   <h2 class="green" id="onlineNetProfit">₹0.00</h2>
 </div>
 
-<div class="card">
+<div class="card" id="sectionTotalNetProfit">
   <p>Total Net Profit</p>
   <h2 class="green" id="netProfit">₹0.00</h2>
 </div>
     
-    <div class="wallet performance-card">
+    <div class="wallet performance-card" id="sectionBusinessChart">
      <h3>7-Day Business Performance</h3>
      <canvas id="businessPerformanceChart"></canvas>
      <div class="chart-legend">
@@ -695,8 +695,27 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
  </section>
  
   <section class="app-screen" id="screen-settings">
-  <!-- SETTINGS -->
+ 
+    <!-- SETTINGS -->
 
+<div class="card">
+  <details>
+    <summary style="cursor:pointer; font-weight:bold; font-size:18px;">
+      Dashboard Visibility Settings
+    </summary>
+
+    <p>Choose which cards appear on your dashboard. Changes will be saved automatically.</p>
+
+    <h4>Wallet Overview</h4>
+    <div id="walletVisibilitySettings"></div>
+
+    <h4>Today's Overview</h4>
+    <div id="todayVisibilitySettings"></div>
+
+    <p id="dashboardVisibilitySaveMessage">Changes are saved automatically.</p>
+  </details>
+</div>
+    
 <div class="card">
   <details>
     <summary style="cursor:pointer; font-weight:bold; font-size:18px;">
