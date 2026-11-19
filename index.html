@@ -749,6 +749,23 @@ function closeDrawer(){
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>  
 <script type="module" src="app.js"></script>
 
+  <!-- REPORT POPUP -->
+<div id="reportPopup" class="popup-overlay" style="display:none;">
+  <div class="popup-box report-popup-box">
+    <button type="button" class="report-popup-close"
+      onclick="closeReportPopup()" aria-label="Close">×</button>
+
+    <h2>Business Report</h2>
+    <p id="reportPopupPeriod"></p>
+    <div id="reportPopupSummary"></div>
+
+    <div class="popup-actions">
+      <button type="button" onclick="exportExcel()">DOWNLOAD EXCEL</button>
+      <button type="button" onclick="exportPDF()">DOWNLOAD PDF</button>
+    </div>
+  </div>
+</div>
+  
     <!-- CUSTOM POPUP -->
 <div id="customPopup" class="popup-overlay" style="display:none;">
   <div class="popup-box">
