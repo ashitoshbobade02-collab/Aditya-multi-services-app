@@ -168,19 +168,22 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
         <h2 id="totalBusiness">₹0.00</h2>
       </div>
 
-   <div class="card">
-  <p>Cash Profit</p>
-  <h2 class="green" id="cashProfit">₹0.00</h2>
+<div class="card clickable-card" onclick="openTodayTransactions()">
+  <p>Today's Total Transactions</p>
+  <h2 id="todayTransactionCount">0</h2>
+  <small>View Transaction History →</small>
 </div>
 
-<div class="card">
-  <p>Online Profit</p>
-  <h2 class="green" id="onlineProfit">₹0.00</h2>
+<div class="card clickable-card" onclick="openTodayServices()">
+  <p>Today's Total Services</p>
+  <h2 id="todayServiceCount">0</h2>
+  <small>View Services History →</small>
 </div>
 
-<div class="card">
-  <p>Total Profit</p>
-  <h2 class="green" id="dailyProfit">₹0.00</h2>
+<div class="card clickable-card" onclick="openTodayWithdrawals()">
+  <p>Today's Total Withdrawals</p>
+  <h2 id="todayWithdrawalAmount">₹0.00</h2>
+  <small>View Withdrawals History →</small>
 </div>
 
 <div class="card">
