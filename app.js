@@ -769,7 +769,24 @@ function persist() {
       console.error("Cloud save failed:", error);
       showLoginMessage("Saved on this device. Cloud sync failed: " + (error.message || "Please check your connection."));
     });
+ }
+
+async function resetTestBusinessData() {
+  if (!confirm("Clear all test business records and customer ledger entries?")) return;
+
+  data.days = [];
+  data.currentDay = null;
+  data.walletCarryForward = null;
+  data.customers = [];
+
+  persist();
+  await cloudWriteQueue;
+
+  alert("Test business data cleared successfully.");
+  location.reload();
 }
+
+window.resetTestBusinessData = resetTestBusinessData;
 
 function syncOpeningWalletFields() {
   const carry = data.walletCarryForward;
