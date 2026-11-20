@@ -3481,6 +3481,140 @@ function stopDeviceTracking() {
 }
 
 /* ==================================
+   DEVICE MANAGEMENT
+================================== */
+
+let unsubscribeDeviceList = null;
+
+async function loadDeviceList() {
+  if (!currentUser) return;
+
+  const list = document.getElementById("deviceList");
+  const count = document.getElementById("deviceCount");
+
+  try {
+    const sessionsRef = collection(
+      db,
+      "users",
+      currentUser.uid,
+      "sessions"
+    );
+
+    const snapshot = await getDocs(sessionsRef);
+
+    count.textContent = `Registered Devices: ${snapshot.size}`;
+
+    if (snapshot.empty) {
+      list.textContent = "No registered devices found.";
+      return;
+    }
+
+    list.innerHTML = "";
+
+    snapshot.forEach(docSnap => {
+      const device = docSnap.data();
+
+      const item = document.createElement("div");
+      item.className = "card";
+
+      const name = document.createElement("strong");
+      name.textContent = device.deviceName || "Unknown Device";
+
+      const status = document.createElement("p");
+      status.textContent = docSnap.id === currentDeviceId
+        ? "This Device"
+        : "Other Device";
+
+      const active = document.createElement("p");
+      active.textContent = device.lastSeen
+        ? "Last active: " + device.lastSeen.toDate().toLocaleString()
+        : "Last active: Unknown";
+
+      item.append(name, status, active);
+
+      if (docSnap.id !== currentDeviceId) {
+        const button = document.createElement("button");
+        button.textContent = "SIGN OUT THIS DEVICE";
+
+        button.onclick = () => {
+          showCustomConfirm(
+            "Sign Out Device",
+            "Are you sure you want to sign out this device?",
+            async () => {
+              await updateDoc(docSnap.ref, {
+                revoked: true,
+                active: false
+              });
+
+              await loadDeviceList();
+              showCustomPopup(
+                "Device Signed Out",
+                "The selected device has been signed out.",
+                "success"
+              );
+            }
+          );
+        };
+
+        item.appendChild(button);
+      }
+
+      list.appendChild(item);
+    });
+
+  } catch (error) {
+    console.error("Device list error:", error);
+    list.textContent = "Unable to load devices.";
+  }
+}
+
+async function signOutOtherDevices() {
+  if (!currentUser) return;
+
+  showCustomConfirm(
+    "Sign Out Other Devices",
+    "Are you sure you want to sign out all other devices?",
+    async () => {
+      try {
+        const sessionsRef = collection(
+          db,
+          "users",
+          currentUser.uid,
+          "sessions"
+        );
+
+        const snapshot = await getDocs(sessionsRef);
+
+        for (const deviceDoc of snapshot.docs) {
+          if (deviceDoc.id === currentDeviceId) continue;
+
+          await updateDoc(deviceDoc.ref, {
+            revoked: true,
+            active: false
+          });
+        }
+
+        await loadDeviceList();
+
+        showCustomPopup(
+          "Completed",
+          "All other devices have been signed out.",
+          "success"
+        );
+
+      } catch (error) {
+        console.error("Sign out other devices failed:", error);
+        showCustomPopup(
+          "Error",
+          "Unable to sign out other devices.",
+          "error"
+        );
+      }
+    }
+  );
+        }
+
+/* ==================================
    LOAD USER BUSINESS DATA
 ================================== */
 
@@ -3600,6 +3734,7 @@ onAuthStateChanged(auth, async (user) => {
 } catch (error) {
   console.error("Device registration failed:", error);
     }
+    await loadDeviceList();
 
     if (data.currentDay && !data.currentDay.closed) {
       openAppScreen("home");
@@ -3719,6 +3854,7 @@ Object.assign(window,{
   resetPassword,
   showLoginMessage,
   logoutUser,
+  signOutOtherDevices,
   showAddCustomerForm,
   hideAddCustomerForm,
   addLedgerCustomer,
