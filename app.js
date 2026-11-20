@@ -3728,15 +3728,54 @@ let currentDeviceId = null;
 let unsubscribeDeviceListener = null;
 let deviceHeartbeat = null;
 
-function getDeviceName() {
-  const ua = navigator.userAgent;
+async function getDeviceName() {
+  const ua = navigator.userAgent || "";
+  const uaData = navigator.userAgentData;
 
-  if (/Samsung/i.test(ua)) return "Samsung Device";
-  if (/Android/i.test(ua)) return "Android Device";
+  // Try to get the actual model from browser device information
+  if (uaData && typeof uaData.getHighEntropyValues === "function") {
+    try {
+      const info = await uaData.getHighEntropyValues([
+        "model",
+        "platform"
+      ]);
+
+      const model = (info.model || "").trim();
+
+      if (model) {
+        if (/Samsung|SM-/i.test(ua) || /^SM-/i.test(model)) {
+          return "Samsung " + model.replace(/^Samsung\s*/i, "");
+        }
+
+        return model;
+      }
+    } catch (error) {
+      console.warn("Device model detection unavailable:", error);
+    }
+  }
+
+  // Fallback: detect Samsung model number from the user agent
+  const samsungModel = ua.match(/\b(SM-[A-Z0-9]+)\b/i);
+
+  if (samsungModel) {
+    return "Samsung " + samsungModel[1].toUpperCase();
+  }
+
+  // Fallback: detect other Android device model names
+  const androidModel = ua.match(
+    /Android[^;)]*;\s*([^;)]+?)(?:\s+Build\/|[;)])/i
+  );
+
+  if (androidModel && !/^(?:wv|mobile|tablet)$/i.test(androidModel[1].trim())) {
+    return androidModel[1].trim();
+  }
+
   if (/iPhone/i.test(ua)) return "iPhone";
   if (/iPad/i.test(ua)) return "iPad";
   if (/Windows/i.test(ua)) return "Windows PC";
   if (/Macintosh/i.test(ua)) return "Mac";
+  if (/Android/i.test(ua)) return "Android Device";
+
   return "Other Device";
 }
 
@@ -3763,7 +3802,7 @@ async function registerCurrentDevice(user) {
 
   await setDoc(deviceRef, {
     deviceId: currentDeviceId,
-    deviceName: getDeviceName(),
+    deviceName: await getDeviceName(),
     userAgent: navigator.userAgent,
     active: true,
     revoked: false,
