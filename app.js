@@ -2398,7 +2398,7 @@ if (selectedDays.length) {
 
     const title = sessions.length === 1
       ? "Shop Opening"
-      : `Shop Opening • ${sessions.length} Sessions`;
+      : `Shop Opening • ${sessions.length} Business Shifts`;
 
     const sessionDetails = sessions.map((session, index) => {
       const totals = calculateTotals(session);
@@ -2412,7 +2412,7 @@ if (selectedDays.length) {
 
       return `
         <div class="history-transaction">
-          <h4>Session ${index + 1} ${status}</h4>
+          <h4>Business Shift ${index + 1} ${status}</h4>
 
           <p><strong>Opening Cash:</strong> ${money(session.opening?.cash || 0)}</p>
           <p><strong>Opening Online:</strong> ${money(session.opening?.online || 0)}</p>
