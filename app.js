@@ -3733,6 +3733,7 @@ onAuthStateChanged(auth, async (user) => {
     header.style.display = "";
     main.style.display = "";
 
+    currentUser = user;
        await loadUserBusinessData(user);
    try {
   await registerCurrentDevice(user);
