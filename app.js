@@ -3743,12 +3743,16 @@ async function getDeviceName() {
       const model = (info.model || "").trim();
 
       if (model) {
-        if (/Samsung|SM-/i.test(ua) || /^SM-/i.test(model)) {
-          return "Samsung " + model.replace(/^Samsung\s*/i, "");
-        }
+  if (model.toUpperCase() === "RMX5101") {
+    return "realme 15 Pro 5G";
+  }
 
-        return model;
-      }
+  if (/Samsung|SM-/i.test(ua) || /^SM-/i.test(model)) {
+    return "Samsung " + model.replace(/^Samsung\s*/i, "");
+  }
+
+  return model;
+}
     } catch (error) {
       console.warn("Device model detection unavailable:", error);
     }
@@ -3766,9 +3770,15 @@ async function getDeviceName() {
     /Android[^;)]*;\s*([^;)]+?)(?:\s+Build\/|[;)])/i
   );
 
-  if (androidModel && !/^(?:wv|mobile|tablet)$/i.test(androidModel[1].trim())) {
-    return androidModel[1].trim();
+ if (androidModel && !/^(?:wv|mobile|tablet)$/i.test(androidModel[1].trim())) {
+  const model = androidModel[1].trim().toUpperCase();
+
+  if (model === "RMX5101") {
+    return "realme 15 Pro 5G";
   }
+
+  return androidModel[1].trim();
+}
 
   if (/iPhone/i.test(ua)) return "iPhone";
   if (/iPad/i.test(ua)) return "iPad";
@@ -3862,6 +3872,10 @@ async function updateDeviceActivity() {
 }
 
 function stopDeviceTracking() {
+    if (unsubscribeDeviceList) {
+    unsubscribeDeviceList();
+    unsubscribeDeviceList = null;
+  }
   if (unsubscribeDeviceListener) {
     unsubscribeDeviceListener();
     unsubscribeDeviceListener = null;
@@ -3896,7 +3910,12 @@ async function loadDeviceList() {
       "sessions"
     );
 
-    const snapshot = await getDocs(sessionsRef);
+    if (unsubscribeDeviceList) {
+  unsubscribeDeviceList();
+  unsubscribeDeviceList = null;
+}
+    
+    unsubscribeDeviceList = onSnapshot(sessionsRef, snapshot => {
 
     count.textContent = `Registered Devices: ${snapshot.size}`;
 
@@ -3951,7 +3970,6 @@ async function loadDeviceList() {
                 active: false
               });
 
-              await loadDeviceList();
               showCustomPopup(
                 "Device Signed Out",
                 "The selected device has been signed out.",
@@ -3966,6 +3984,7 @@ async function loadDeviceList() {
 
       list.appendChild(item);
     });
+  });
 
   } catch (error) {
     console.error("Device list error:", error);
