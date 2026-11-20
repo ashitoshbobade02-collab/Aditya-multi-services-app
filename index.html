@@ -96,6 +96,7 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
   <a href="#" onclick="openAppScreen('history'); return false;">History &amp; Calendar</a>
   <a href="#" onclick="openAppScreen('customer-ledger'); return false;">Customer Ledger</a>
   <a href="#" onclick="openAppScreen('customer-history'); return false;">Customer Ledger History</a>
+  <a href="#" onclick="openAppScreen('deleted-history'); return false;">Deleted Entries History</a>
   <a href="#" onclick="openAppScreen('cash-movement'); return false;">Cash In / Cash Out</a>
   <a href="#" onclick="openAppScreen('expenses'); return false;">Expenses</a>
   <a href="#" onclick="openAppScreen('reports'); return false;">Reports</a>
@@ -569,6 +570,23 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
 
 </section>
 
+  <section class="app-screen" id="screen-deleted-history">
+  <h3 class="section-title">Deleted Entries History</h3>
+
+  <div class="card">
+    <p>All deleted business and customer ledger entries are recorded here.</p>
+    <input
+      type="search"
+      id="deletedEntriesSearch"
+      placeholder="Search deleted entries"
+      oninput="renderDeletedEntriesHistory()"
+    >
+    <div id="deletedEntriesList">
+      <p>No deleted entries yet.</p>
+    </div>
+  </div>
+</section>
+  
 <section class="app-screen" id="screen-cash-movement">
   <h3 class="section-title">Cash In / Cash Out</h3>
 
