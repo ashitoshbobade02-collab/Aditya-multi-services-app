@@ -790,24 +790,55 @@ async function resetTestBusinessData() {
 
 window.resetTestBusinessData = resetTestBusinessData;
 
+
 function moveToDeletedHistory(entry, type, source) {
   if (!entry) return;
 
   const day = currentDay();
   data.deletedEntries = data.deletedEntries || [];
 
-  data.deletedEntries.push({
-    ...JSON.parse(JSON.stringify(entry)),
-    deletedId: Date.now() + Math.random(),
-    deletedType: type,
-    deletedFrom: source,
-    originalDate: entry.date || day?.date || today(),
-    originalTime: entry.time || "Not available",
-    businessDate: day?.date || entry.date || today(),
-    sessionNumber: day?.sessionNumber || null,
-    deletedAt: new Date().toLocaleString("en-IN"),
-    deletedTimestamp: new Date().toISOString()
-  });
+  const originalDate = entry.date || day?.date || today();
+  const businessDate = day?.date || entry.date || today();
+  const sessionNumber = day?.sessionNumber || null;
+
+  const existing = data.deletedEntries.find(item =>
+    item.deletedType === type &&
+    item.deletedFrom === source &&
+    String(item.id) === String(entry.id) &&
+    String(item.customerId || "") === String(entry.customerId || "") &&
+    String(item.businessDate || "") === String(businessDate) &&
+    String(item.sessionNumber || "") === String(sessionNumber || "")
+  );
+
+  const now = new Date();
+
+  if (existing) {
+    existing.deletionEvents = existing.deletionEvents || [];
+    existing.deletionEvents.push({
+      deletedAt: now.toLocaleString("en-IN"),
+      deletedTimestamp: now.toISOString()
+    });
+    existing.restoredAt = null;
+    existing.deletedAt = now.toLocaleString("en-IN");
+    existing.deletedTimestamp = now.toISOString();
+  } else {
+    data.deletedEntries.push({
+      ...JSON.parse(JSON.stringify(entry)),
+      deletedId: Date.now() + Math.random(),
+      deletedType: type,
+      deletedFrom: source,
+      originalDate,
+      originalTime: entry.time || "Not available",
+      businessDate,
+      sessionNumber,
+      deletedAt: now.toLocaleString("en-IN"),
+      deletedTimestamp: now.toISOString(),
+      deletionEvents: [{
+        deletedAt: now.toLocaleString("en-IN"),
+        deletedTimestamp: now.toISOString()
+      }]
+    });
+  }
 }
 
 function syncOpeningWalletFields() {
@@ -1842,10 +1873,20 @@ function deleteBusinessEntry(entryId, type) {
       list.splice(index, 1);
       persist();
 
-      if (type === "expense") renderExpenseList();
-      if (type === "movement") renderCashMovements();
+     if (type === "expense") renderExpenseList();
+     if (type === "movement") renderCashMovements();
 
-      refreshDashboard();
+      const historyTitle = document.getElementById("dashboardHistoryTitle")?.textContent || "";
+
+     if (historyTitle === "Today's Transactions") {
+       openTodayTransactions();
+    } else if (historyTitle === "Today's Services") {
+     openTodayServices();
+   } else if (historyTitle === "Today's Withdrawals") {
+    openTodayWithdrawals();
+  }
+
+refreshDashboard();
       showCustomPopup("Deleted", "Entry moved to Deleted Entries History.", "success");
     }
   );
