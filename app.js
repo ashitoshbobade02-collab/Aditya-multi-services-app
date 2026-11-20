@@ -3917,9 +3917,14 @@ async function loadDeviceList() {
       name.textContent = device.deviceName || "Unknown Device";
 
       const status = document.createElement("p");
-      status.textContent = docSnap.id === currentDeviceId
-        ? "This Device"
-        : "Other Device";
+
+      if (docSnap.id === currentDeviceId) {
+      status.textContent = "This Device";
+    } else if (device.revoked === true || device.active === false) {
+      status.textContent = "Signed Out";
+    } else {
+     status.textContent = "Active";
+    }
 
       const active = document.createElement("p");
       active.textContent = device.lastSeen
@@ -3928,7 +3933,11 @@ async function loadDeviceList() {
 
       item.append(name, status, active);
 
-      if (docSnap.id !== currentDeviceId) {
+      if (
+  docSnap.id !== currentDeviceId &&
+  device.revoked !== true &&
+  device.active !== false
+) {
         const button = document.createElement("button");
         button.textContent = "SIGN OUT THIS DEVICE";
 
