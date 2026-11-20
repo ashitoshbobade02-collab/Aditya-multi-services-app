@@ -793,6 +793,7 @@ window.resetTestBusinessData = resetTestBusinessData;
 function moveToDeletedHistory(entry, type, source) {
   if (!entry) return;
 
+  const day = currentDay();
   data.deletedEntries = data.deletedEntries || [];
 
   data.deletedEntries.push({
@@ -800,7 +801,12 @@ function moveToDeletedHistory(entry, type, source) {
     deletedId: Date.now() + Math.random(),
     deletedType: type,
     deletedFrom: source,
-    deletedAt: new Date().toLocaleString("en-IN")
+    originalDate: entry.date || day?.date || today(),
+    originalTime: entry.time || "Not available",
+    businessDate: day?.date || entry.date || today(),
+    sessionNumber: day?.sessionNumber || null,
+    deletedAt: new Date().toLocaleString("en-IN"),
+    deletedTimestamp: new Date().toISOString()
   });
 }
 
@@ -2998,6 +3004,142 @@ function deleteCustomerLedgerEntry(customerId, entryId) {
 window.deleteCustomerLedgerEntry = deleteCustomerLedgerEntry;
 window.deleteBusinessEntry = deleteBusinessEntry;
 
+function restoreDeletedEntry(deletedId) {
+  const entry = (data.deletedEntries || []).find(
+    item => String(item.deletedId) === String(deletedId)
+  );
+
+  if (!entry || entry.restoredAt) return;
+
+  if (entry.deletedType === "ledger") {
+    const customer = getCustomer(entry.customerId);
+
+    if (!customer) {
+      showCustomPopup("Restore Failed", "The original customer no longer exists.", "error");
+      return;
+    }
+
+    customer.history = customer.history || [];
+
+    if (customer.history.some(item => String(item.id) === String(entry.id))) {
+      showCustomPopup("Already Exists", "This ledger entry is already present.", "error");
+      return;
+    }
+
+    const amount = Number(entry.amount) || 0;
+
+    if (entry.type === "addDue") customer.totalDue += amount;
+    if (entry.type === "received") customer.received += amount;
+    if (entry.type === "addOwe") customer.totalShopOwes += amount;
+    if (entry.type === "given") customer.given += amount;
+
+    customer.history.push({
+      id: entry.id,
+      type: entry.type,
+      label: entry.label,
+      amount,
+      date: entry.date,
+      time: entry.time,
+      note: entry.note
+    });
+
+    openCustomerAccount(customer.id);
+    renderCustomerLedger();
+    renderCustomerLedgerHistory();
+
+  } else {
+    const day = currentDay();
+
+    if (
+      !day ||
+      day.closed ||
+      day.date !== entry.businessDate ||
+      Number(day.sessionNumber) !== Number(entry.sessionNumber)
+    ) {
+      showCustomPopup(
+        "Cannot Restore",
+        "The original Business Shift is no longer open. Closed shifts cannot be edited.",
+        "error"
+      );
+      return;
+    }
+
+    const list = entry.deletedType === "expense"
+      ? day.expenses
+      : entry.deletedType === "movement"
+        ? day.cashMovements
+        : day.transactions;
+
+    if (list.some(item => String(item.id) === String(entry.id))) {
+      showCustomPopup("Already Exists", "This entry is already present.", "error");
+      return;
+    }
+
+    list.push({
+      ...entry
+    });
+
+    if (entry.deletedType === "expense") renderExpenseList();
+    if (entry.deletedType === "movement") renderCashMovements();
+  }
+
+  entry.restoredAt = new Date().toLocaleString("en-IN");
+
+  persist();
+  renderDeletedEntriesHistory();
+  refreshDashboard();
+
+  showCustomPopup("Restored", "Entry restored successfully.", "success");
+}
+
+window.renderDeletedEntriesHistory = renderDeletedEntriesHistory;
+window.restoreDeletedEntry = restoreDeletedEntry;
+
+
+function renderDeletedEntriesHistory() {
+  const container = document.getElementById("deletedEntriesList");
+  const searchInput = document.getElementById("deletedEntriesSearch");
+
+  if (!container) return;
+
+  const safe = value => escapeLedgerHTML(String(value ?? ""));
+  const query = (searchInput?.value || "").trim().toLowerCase();
+  const entries = (data.deletedEntries || []).slice().reverse();
+
+  const filtered = entries.filter(entry =>
+    [
+      entry.deletedType,
+      entry.deletedFrom,
+      entry.category,
+      entry.type,
+      entry.serviceName,
+      entry.platform,
+      entry.customerName,
+      entry.note,
+      entry.originalDate
+    ].some(value => String(value || "").toLowerCase().includes(query))
+  );
+
+  if (!filtered.length) {
+    container.innerHTML = "<p>No deleted entries found.</p>";
+    return;
+  }
+
+  container.innerHTML = filtered.map(entry => `
+    <article class="ledger-history-entry">
+      <strong>${safe(entry.deletedType || "Entry")} · ${safe(entry.deletedFrom || "")}</strong>
+      <p><strong>Amount:</strong> ${money(entry.amount)}</p>
+      <p><strong>Original date:</strong> ${safe(entry.originalDate || "Not available")}</p>
+      <p><strong>Original time:</strong> ${safe(entry.originalTime || "Not available")}</p>
+      <p><strong>Deleted on:</strong> ${safe(entry.deletedAt || "Not available")}</p>
+      <p><strong>Note:</strong> ${safe(entry.note || "No note")}</p>
+      ${entry.restoredAt
+        ? `<p><strong>Status:</strong> Restored on ${safe(entry.restoredAt)}</p>`
+        : `<button onclick="restoreDeletedEntry('${safe(entry.deletedId)}')">Restore</button>`}
+    </article>
+  `).join("");
+}
+
 function renderCustomerLedgerHistory() {
   const container = document.getElementById("customerLedgerHistoryList");
   const searchInput = document.getElementById("customerLedgerHistorySearch");
@@ -3295,6 +3437,7 @@ function openAppScreen(screenName) {
     const isPreStart = !data.currentDay || data.currentDay.closed;
 
   const allowedBeforeStart = [
+    "deleted-history",
     "opening",
     "history",
     "customer-ledger",
@@ -3317,6 +3460,10 @@ function openAppScreen(screenName) {
 
   selectedScreen.classList.add("active");
 
+  if (screenName === "deleted-history") {
+  renderDeletedEntriesHistory();
+}
+  
   if (screenName === "settings") {
   loadDeviceList();
   }
@@ -3355,6 +3502,7 @@ if (addCustomerButton) {
     const action = link.getAttribute("onclick") || "";
 
   const allowedOnOpening = [
+  "deleted-history",
   "opening",
   "history",
   "customer-ledger",
