@@ -42,6 +42,7 @@ const emptyData = () => ({
   currentDay: null,
   walletCarryForward: null,
   customers: [],
+  deletedEntries: [],
   numberSteps: {
     opening: 10,
     wallet: 1,
@@ -85,6 +86,7 @@ function normalizeData(value) {
 
   if (!Array.isArray(clean.days)) clean.days = [];
   if (!Array.isArray(clean.customers)) clean.customers = [];
+  if (!Array.isArray(clean.deletedEntries)) clean.deletedEntries = [];
   if (!Object.prototype.hasOwnProperty.call(clean, "currentDay")) clean.currentDay = null;
   if (!Object.prototype.hasOwnProperty.call(clean, "walletCarryForward")) clean.walletCarryForward = null;
 
@@ -787,6 +789,20 @@ async function resetTestBusinessData() {
 }
 
 window.resetTestBusinessData = resetTestBusinessData;
+
+function moveToDeletedHistory(entry, type, source) {
+  if (!entry) return;
+
+  data.deletedEntries = data.deletedEntries || [];
+
+  data.deletedEntries.push({
+    ...JSON.parse(JSON.stringify(entry)),
+    deletedId: Date.now() + Math.random(),
+    deletedType: type,
+    deletedFrom: source,
+    deletedAt: new Date().toLocaleString("en-IN")
+  });
+}
 
 function syncOpeningWalletFields() {
   const carry = data.walletCarryForward;
@@ -1791,6 +1807,44 @@ const totals = chartDay.sessions.length
   });
 }
 
+function deleteBusinessEntry(entryId, type) {
+  const day = currentDay();
+
+  if (!day || day.closed) {
+    showCustomPopup("Cannot Delete", "Only entries in an open Business Shift can be deleted.", "error");
+    return;
+  }
+
+  const list = type === "expense"
+    ? day.expenses
+    : type === "movement"
+      ? day.cashMovements
+      : day.transactions;
+
+  const index = (list || []).findIndex(
+    entry => String(entry.id) === String(entryId)
+  );
+
+  if (index === -1) return;
+
+  showCustomConfirm(
+    "Delete Entry?",
+    "This entry will be removed from business totals and saved in Deleted Entries History.",
+    () => {
+      const entry = list[index];
+      moveToDeletedHistory(entry, type, "Business Shift");
+      list.splice(index, 1);
+      persist();
+
+      if (type === "expense") renderExpenseList();
+      if (type === "movement") renderCashMovements();
+
+      refreshDashboard();
+      showCustomPopup("Deleted", "Entry moved to Deleted Entries History.", "success");
+    }
+  );
+}
+
 function showDashboardHistory(title, items, type) {
   const popup = document.getElementById("dashboardHistoryPopup");
   const content = document.getElementById("dashboardHistoryContent");
@@ -1841,6 +1895,7 @@ function showDashboardHistory(title, items, type) {
           <strong>${heading}</strong>
           <p>${t.time || ""}</p>
           ${details}
+          ${!currentDay()?.closed ? `<button onclick="deleteBusinessEntry('${t.id}', 'transaction')">Delete</button>` : ""}
         </div>
       `;
     }).join("");
@@ -2077,6 +2132,7 @@ list.innerHTML = entries.slice().reverse().map(entry => {
       <p>${entry.time}</p>
       <p>Amount: ${money(entry.amount)}</p>
       <p>Note: ${entry.note || "No note"}</p>
+      <button onclick="deleteBusinessEntry('${entry.id}', 'movement')">Delete</button>
     </div>
   `;
 }).join("");
@@ -2155,6 +2211,7 @@ function renderExpenseList() {
       <p>Amount: ${money(expense.amount)}</p>
       <p>Paid By: ${expense.paymentMethod === "CASH" ? "Cash" : expense.paymentMethod === "ONLINE" ? "Online" : "Not recorded"}</p>
       <p>Note: ${expense.note || "No note"}</p>
+      <button onclick="deleteBusinessEntry('${expense.id}', 'expense')">Delete</button>
     </div>
   `).join("");
 }
@@ -2899,6 +2956,48 @@ function saveCustomerPayment() {
   showCustomPopup("Ledger Updated", label + " has been recorded successfully.", "success");
 }
 
+function deleteCustomerLedgerEntry(customerId, entryId) {
+  const customer = getCustomer(customerId);
+  if (!customer) return;
+
+  const index = (customer.history || []).findIndex(
+    entry => String(entry.id) === String(entryId)
+  );
+
+  if (index === -1) return;
+
+  showCustomConfirm(
+    "Delete Ledger Entry?",
+    "This entry will be removed from the customer balance and saved in Deleted Entries History.",
+    () => {
+      const entry = customer.history[index];
+      const amount = Number(entry.amount) || 0;
+
+      if (entry.type === "addDue") customer.totalDue -= amount;
+      if (entry.type === "received") customer.received -= amount;
+      if (entry.type === "addOwe") customer.totalShopOwes -= amount;
+      if (entry.type === "given") customer.given -= amount;
+
+      moveToDeletedHistory(
+        { ...entry, customerId: customer.id, customerName: customer.name },
+        "ledger",
+        "Customer Ledger"
+      );
+
+      customer.history.splice(index, 1);
+      persist();
+      openCustomerAccount(customer.id);
+      renderCustomerLedger();
+      renderCustomerLedgerHistory();
+
+      showCustomPopup("Deleted", "Ledger entry removed successfully.", "success");
+    }
+  );
+}
+
+window.deleteCustomerLedgerEntry = deleteCustomerLedgerEntry;
+window.deleteBusinessEntry = deleteBusinessEntry;
+
 function renderCustomerLedgerHistory() {
   const container = document.getElementById("customerLedgerHistoryList");
   const searchInput = document.getElementById("customerLedgerHistorySearch");
@@ -2912,7 +3011,7 @@ function renderCustomerLedgerHistory() {
     (customer.history || []).forEach(entry => {
       entries.push({
         ...entry,
-        customerName: customer.name || "Unnamed customer"
+        customerName: customer.name || "Unnamed customer", customerId: customer.id
       });
     });
   });
@@ -2960,6 +3059,7 @@ function renderCustomerLedgerHistory() {
         <p><strong>Date:</strong> ${escapeLedgerHTML(entry.date || "Not available")}</p>
         <p><strong>Time:</strong> ${escapeLedgerHTML(entry.time || "Time not available")}</p>
         <p><strong>Note:</strong> ${escapeLedgerHTML(entry.note || "No note")}</p>
+        <button onclick="deleteCustomerLedgerEntry('${entry.customerId}', '${entry.id}')">Delete</button>
       </article>
     `;
   }).join("");
