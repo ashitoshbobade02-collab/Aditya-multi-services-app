@@ -2640,52 +2640,35 @@ if (selectedDays.length) {
       ? "Shop Opening"
       : `Shop Opening • ${sessions.length} Business Shifts`;
 
-    const sessionDetails = sessions.map((session, index) => {
-      const totals = calculateTotals(session);
-      const transactions = session.transactions || [];
-      const expenses = session.expenses || [];
-      const movements = session.cashMovements || [];
+    
+const sessionDetails = sessions.map((session, index) => {
+  const totals = calculateTotals(session);
 
-      const status = session.closed
-        ? '<span class="record-tag">Closed</span>'
-        : '<span class="record-tag active-tag">In progress</span>';
+  const status = session.closed
+    ? '<span class="record-tag">Closed</span>'
+    : '<span class="record-tag active-tag">In progress</span>';
 
-      return `
-        <details class="history-transaction">
-  <summary>
-    <h4 style="display:inline;">Business Shift ${index + 1} ${status}</h4>
-  </summary>
-  <div>
-          <p><strong>Opening Cash:</strong> ${money(session.opening?.cash || 0)}</p>
-          <p><strong>Opening Online:</strong> ${money(session.opening?.online || 0)}</p>
+  return `
+    <details class="history-transaction">
+      <summary>
+        <h4 style="display:inline;">Business Shift ${index + 1} ${status}</h4>
+      </summary>
+      <div>
+        <p><strong>Opening Cash:</strong> ${money(session.opening?.cash || 0)}</p>
+        <p><strong>Opening Online:</strong> ${money(session.opening?.online || 0)}</p>
+        <p><strong>Business:</strong> ${money(totals.business)}</p>
+        <p><strong>Profit:</strong> ${money(totals.profit)}</p>
+        <p><strong>Cash difference:</strong>
+          ${session.closing ? money(session.closing.difference) : "Not closed"}
+        </p>
+        <p><strong>Online difference:</strong>
+          ${session.closing ? money(session.closing.onlineDifference || 0) : "Not closed"}
+        </p>
+      </div>
+    </details>
+  `;
+}).join("");
 
-          <p><strong>Business:</strong> ${money(totals.business)}</p>
-          <p><strong>Profit:</strong> ${money(totals.profit)}</p>
-
-          <p><strong>Cash difference:</strong>
-            ${session.closing ? money(session.closing.difference) : "Not closed"}
-          </p>
-
-          <p><strong>Online difference:</strong>
-            ${session.closing ? money(session.closing.onlineDifference || 0) : "Not closed"}
-          </p>
-
-          <h4>Transactions (${transactions.length})</h4>
-          ${transactions.length
-            ? transactions.map(t => `
-              <div class="history-transaction">
-                <strong>${t.type === "SERVICE"
-                  ? (t.serviceName || "Service")
-                  : (t.type === "ONLINE_WITHDRAWAL"
-                    ? `${t.platform} Withdrawal`
-                    : `${t.type} ${t.platform ? "· " + t.platform : ""}`)}</strong>
-                <span>${t.time || ""}</span>
-                <p>Amount: ${money(t.amount)}</p>
-                ${t.type === "SERVICE"
-                  ? `<p>Payment: ${t.paymentMethod || ""}</p>`
-                  : `<p>Charge: ${money(t.charge)}</p>`}
-              </div>
-            `).join("")
             : '<p class="muted">No transactions recorded.</p>'}
 
           <h4>Expenses (${expenses.length})</h4>
