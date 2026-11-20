@@ -3547,7 +3547,9 @@ refreshDashboard();
 renderNumberStepSettings();
 setupNumberWheelSteps();
 
-Object.assign(window, { 
+Object.assign(window,{ 
+  openAppScreen,
+  exportPDF,
   exportPDF,
   closeReportPopup,
   exportExcel,
