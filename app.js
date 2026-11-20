@@ -2464,8 +2464,31 @@ if (selectedDays.length) {
             : '<p class="muted">No movements recorded.</p>'}
         </div>
       `;
-    }).join("");
-} 
+        }).join("");
+
+    return `
+      <details class="history-day" open>
+        <summary class="history-day-summary">
+          <span class="history-day-number">1</span>
+          <span class="history-day-main">
+            <strong>${title}</strong>
+            <span class="history-day-amounts">
+              ${money(dailyTotals.business)} Business
+              <span>•</span>
+              ${money(dailyTotals.profit)} Profit
+            </span>
+          </span>
+          <span class="history-day-arrow">⌄</span>
+        </summary>
+
+        <div class="history-day-details">
+          <p><strong>Date:</strong> ${selectedHistoryDate}</p>
+          ${sessionDetails}
+        </div>
+      </details>
+    `;
+  }).join("");
+      }
 
   history.innerHTML = `
     <div class="calendar-header">
