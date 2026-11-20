@@ -3196,6 +3196,11 @@ function openAppScreen(screenName) {
   if (!selectedScreen) return;
 
   selectedScreen.classList.add("active");
+
+  if (screenName === "settings") {
+  loadDeviceList();
+  }
+  
 if (screenName === "home") {
   setTimeout(() => {
     drawBusinessPerformanceChart();
