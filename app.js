@@ -2444,7 +2444,122 @@ alert("Business day saved! The shop is now closed.");
 ================================== */
 
 function showHistory() {
-  renderCalendar();
+  renderTodayCompleteHistory();
+
+  const history = document.getElementById("historyList");
+  if (history) {
+    history.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  }
+}
+
+
+function renderTodayCompleteHistory() {
+  const container = document.getElementById("historyList");
+  if (!container) return;
+
+  const todayDate = today();
+  const records = [];
+
+  const addRecord = (category, title, date, time, amount, note = "") => {
+    records.push({
+      category,
+      title,
+      date: date || todayDate,
+      time: time || "",
+      amount: Number(amount) || 0,
+      note: note || ""
+    });
+  };
+
+  const sessions = [];
+
+  (data.days || []).forEach(day => {
+    if (day.date === todayDate) {
+      getDaySessions(day).forEach(session => sessions.push(session));
+    }
+  });
+
+  if (data.currentDay && data.currentDay.date === todayDate) {
+    sessions.push(data.currentDay);
+  }
+
+  sessions.forEach((session, index) => {
+    const shift = "Business Shift " + (index + 1);
+
+    (session.transactions || []).forEach(t => {
+      addRecord(
+        t.type === "SERVICE" ? "Services" : "Transactions",
+        t.serviceName || t.type + (t.platform ? " · " + t.platform : ""),
+        todayDate, t.time, t.amount,
+        "Charge: " + money(t.charge || 0)
+      );
+    });
+
+    (session.expenses || []).forEach(e => {
+      addRecord("Expenses", e.category, todayDate, e.time, e.amount,
+        e.paymentMethod + (e.note ? " · " + e.note : ""));
+    });
+
+    (session.cashMovements || []).forEach(m => {
+      addRecord("Cash / Online Movements",
+        (m.account || "CASH") + " " + m.type,
+        todayDate, m.time, m.amount, m.note);
+    });
+  });
+
+  (data.customers || []).forEach(customer => {
+    (customer.history || []).forEach(entry => {
+      if (entry.date === todayDate) {
+        addRecord(
+          "Customer Ledger",
+          (entry.label || entry.type) + " · " + customer.name,
+          entry.date, entry.time, entry.amount, entry.note
+        );
+      }
+    });
+  });
+
+  (data.deletedEntries || []).forEach(entry => {
+    const deletionDate = entry.deletedTimestamp
+      ? entry.deletedTimestamp.slice(0, 10)
+      : "";
+
+    if (deletionDate === todayDate || entry.originalDate === todayDate) {
+      addRecord(
+        "Deleted Entries",
+        (entry.deletedType || "Entry") + " · " +
+          (entry.serviceName || entry.category || entry.type || ""),
+        todayDate, entry.deletedAt, entry.amount,
+        "Deleted record · " + (entry.note || entry.deletedFrom || "")
+      );
+    }
+  });
+
+  records.sort((a, b) => b.time.localeCompare(a.time));
+
+  const safe = value => String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"
+  })[char]);
+
+  container.innerHTML = `
+    <h3>Today's Complete History</h3>
+    <p>${todayDate} · ${records.length} records</p>
+    <div style="max-height:650px;overflow-y:auto;padding:10px;border:1px solid var(--line);border-radius:10px;">
+      ${records.length ? records.map(record => `
+        <div style="padding:12px 4px;border-bottom:1px solid var(--line);">
+          <small>${safe(record.category)}</small>
+          <strong style="display:block;">${safe(record.title)}</strong>
+          <p>${safe(record.time)}</p>
+          <strong>${money(record.amount)}</strong>
+          ${record.note ? `<p>${safe(record.note)}</p>` : ""}
+        </div>
+      `).join("") : "<p>No records found for today.</p>"}
+    </div>
+  `;
 }
 
 function changeCalendarMonth(offset) {
