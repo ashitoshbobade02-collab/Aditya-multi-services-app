@@ -761,6 +761,7 @@ function persist() {
   if (!currentUser || !activeStorageKey) return;
   const snapshot = JSON.stringify(data);
   localStorage.setItem(activeStorageKey, snapshot);
+  renderTodayCompleteHistory();
   const userId = currentUser.uid;
   cloudWriteQueue = cloudWriteQueue
     .then(() => setDoc(doc(db, "users", userId, "appData", "main"), {
@@ -4131,6 +4132,7 @@ if (wasPreStart && !isPreStart) {
         updateServiceFields();
         updateServicePaymentFields();
         renderCustomerLedgerHistory();
+        renderTodayCompleteHistory();
         refreshDashboard();
         renderCalendar();
       }
