@@ -3398,12 +3398,26 @@ async function resetPassword() {
 
 async function logoutUser() {
   try {
+    if (currentUser && currentDeviceId) {
+      const deviceRef = doc(
+        db,
+        "users",
+        currentUser.uid,
+        "sessions",
+        currentDeviceId
+      );
+
+      await updateDoc(deviceRef, {
+        active: false,
+        revoked: false
+      });
+    }
+
     await signOut(auth);
   } catch (error) {
     showCustomPopup("Sign Out Failed", error.message, "error");
   }
 }
-
 
 async function linkGoogleAccount() {
   if (!auth.currentUser) {
