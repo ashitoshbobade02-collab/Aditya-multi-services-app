@@ -2587,7 +2587,7 @@ function renderCalendar() {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  const savedDates = new Set(data.days.map(day => day.date));
+  const savedDates = new Set((data.days || []).map(day => day.date));
 
   if (data.currentDay) {
     savedDates.add(data.currentDay.date);
@@ -2606,102 +2606,60 @@ function renderCalendar() {
 
     cells.push(`<button type="button" class="calendar-day${hasRecord ? " has-record" : ""}${selected}" onclick="selectHistoryDate('${date}')">${dayNumber}</button>`);
   }
-  
-const savedRecord = (data.days || []).find(
-  day => day.date === selectedHistoryDate
-);
 
-const selectedSessions = savedRecord
-  ? [...getDaySessions(savedRecord)]
-  : [];
+  const savedRecord = (data.days || []).find(
+    day => day.date === selectedHistoryDate
+  );
 
-if (
-  data.currentDay &&
-  data.currentDay.date === selectedHistoryDate
-) {
-  selectedSessions.push(data.currentDay);
-}
+  const selectedSessions = savedRecord
+    ? [...getDaySessions(savedRecord)]
+    : [];
 
-const selectedDays = selectedSessions.length
-  ? [{
-      date: selectedHistoryDate,
-      sessions: selectedSessions
-    }]
-  : [];
+  if (data.currentDay && data.currentDay.date === selectedHistoryDate) {
+    selectedSessions.push(data.currentDay);
+  }
 
   let detail = '<p class="muted">No business record for this date.</p>';
-  
-if (selectedDays.length) {
-  detail = selectedDays.map(selectedDay => {
-    const sessions = selectedDay.sessions;
-    const dailyTotals = calculateDailyTotals(selectedDay);
 
-    const title = sessions.length === 1
+  if (selectedSessions.length) {
+    const dailyTotals = calculateDailyTotals({
+      date: selectedHistoryDate,
+      sessions: selectedSessions
+    });
+
+    const title = selectedSessions.length === 1
       ? "Shop Opening"
-      : `Shop Opening • ${sessions.length} Business Shifts`;
+      : `Shop Opening • ${selectedSessions.length} Business Shifts`;
 
-    
-const sessionDetails = sessions.map((session, index) => {
-  const totals = calculateTotals(session);
+    const sessionDetails = selectedSessions.map((session, index) => {
+      const totals = calculateTotals(session);
 
-  const status = session.closed
-    ? '<span class="record-tag">Closed</span>'
-    : '<span class="record-tag active-tag">In progress</span>';
+      const status = session.closed
+        ? '<span class="record-tag">Closed</span>'
+        : '<span class="record-tag active-tag">In progress</span>';
 
-  return `
-    <details class="history-transaction">
-      <summary>
-        <h4 style="display:inline;">Business Shift ${index + 1} ${status}</h4>
-      </summary>
-      <div>
-        <p><strong>Opening Cash:</strong> ${money(session.opening?.cash || 0)}</p>
-        <p><strong>Opening Online:</strong> ${money(session.opening?.online || 0)}</p>
-        <p><strong>Business:</strong> ${money(totals.business)}</p>
-        <p><strong>Profit:</strong> ${money(totals.profit)}</p>
-        <p><strong>Cash difference:</strong>
-          ${session.closing ? money(session.closing.difference) : "Not closed"}
-        </p>
-        <p><strong>Online difference:</strong>
-          ${session.closing ? money(session.closing.onlineDifference || 0) : "Not closed"}
-        </p>
-      </div>
-    </details>
-  `;
-}).join("");
-
-            : '<p class="muted">No transactions recorded.</p>'}
-
-          <h4>Expenses (${expenses.length})</h4>
-          ${expenses.length
-            ? expenses.map(e => `
-              <div class="history-transaction">
-                <strong>${e.category || "Expense"}</strong>
-                <span>${e.time || ""}</span>
-                <p>Amount: ${money(e.amount)}</p>
-                <p>Payment: ${e.paymentMethod || "CASH"}</p>
-                ${e.note ? `<p>Note: ${e.note}</p>` : ""}
-              </div>
-            `).join("")
-            : '<p class="muted">No expenses recorded.</p>'}
-
-          <h4>Cash / Online Movements (${movements.length})</h4>
-          ${movements.length
-            ? movements.map(m => `
-              <div class="history-transaction">
-                <strong>${m.type || m.account || "Movement"}</strong>
-                <span>${m.time || ""}</span>
-                <p>Amount: ${money(m.amount)}</p>
-                <p>Account: ${m.account || "CASH"}</p>
-                ${m.note ? `<p>Note: ${m.note}</p>` : ""}
-              </div>
-            `).join("")
-            : '<p class="muted">No movements recorded.</p>'}
-        </div>
-      </details>
+      return `
+        <details class="history-transaction">
+          <summary>
+            <h4 style="display:inline;">Business Shift ${index + 1} ${status}</h4>
+          </summary>
+          <div>
+            <p><strong>Opening Cash:</strong> ${money(session.opening?.cash || 0)}</p>
+            <p><strong>Opening Online:</strong> ${money(session.opening?.online || 0)}</p>
+            <p><strong>Business:</strong> ${money(totals.business)}</p>
+            <p><strong>Profit:</strong> ${money(totals.profit)}</p>
+            <p><strong>Cash difference:</strong>
+              ${session.closing ? money(session.closing.difference) : "Not closed"}
+            </p>
+            <p><strong>Online difference:</strong>
+              ${session.closing ? money(session.closing.onlineDifference || 0) : "Not closed"}
+            </p>
+          </div>
+        </details>
       `;
-        }).join("");
+    }).join("");
 
-    return `
+    detail = `
       <details class="history-day" open>
         <summary class="history-day-summary">
           <span class="history-day-number">1</span>
@@ -2722,8 +2680,7 @@ const sessionDetails = sessions.map((session, index) => {
         </div>
       </details>
     `;
-  }).join("");
-      }
+  }
 
   history.innerHTML = `
     <div class="calendar-header">
