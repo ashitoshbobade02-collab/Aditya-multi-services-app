@@ -379,7 +379,7 @@ function generateReport() {
   };
 
   const rows = days.map(day => {
-    const t = calculateTotals(day);
+    const t = calculateDailyTotals(day);
 
     Object.keys(totals).forEach(key => {
       totals[key] += Number(t[key]) || 0;
