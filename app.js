@@ -1,5 +1,14 @@
 import { db, auth } from "./firebase.js";
-import { doc, getDoc, setDoc, serverTimestamp, onSnapshot } from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  onSnapshot,
+  collection,
+  getDocs,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
 
 import {
   GoogleAuthProvider,
@@ -3351,6 +3360,126 @@ function addMenuIcons() {
     element.prepend(icon);
   });
  }
+
+/* ==================================
+   DEVICE REGISTRATION AND TRACKING
+================================== */
+
+const DEVICE_ID_KEY = "aditya_multi_services_device_id";
+
+let currentDeviceId = null;
+let unsubscribeDeviceListener = null;
+let deviceHeartbeat = null;
+
+function getDeviceName() {
+  const ua = navigator.userAgent;
+
+  if (/Samsung/i.test(ua)) return "Samsung Device";
+  if (/Android/i.test(ua)) return "Android Device";
+  if (/iPhone/i.test(ua)) return "iPhone";
+  if (/iPad/i.test(ua)) return "iPad";
+  if (/Windows/i.test(ua)) return "Windows PC";
+  if (/Macintosh/i.test(ua)) return "Mac";
+  return "Other Device";
+}
+
+async function registerCurrentDevice(user) {
+  if (!user || !user.uid) return;
+
+  currentDeviceId = localStorage.getItem(DEVICE_ID_KEY);
+
+  if (!currentDeviceId) {
+    currentDeviceId = crypto.randomUUID
+      ? crypto.randomUUID()
+      : "device-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+
+    localStorage.setItem(DEVICE_ID_KEY, currentDeviceId);
+  }
+
+  const deviceRef = doc(
+    db,
+    "users",
+    user.uid,
+    "sessions",
+    currentDeviceId
+  );
+
+  await setDoc(deviceRef, {
+    deviceId: currentDeviceId,
+    deviceName: getDeviceName(),
+    userAgent: navigator.userAgent,
+    active: true,
+    revoked: false,
+    lastSeen: serverTimestamp(),
+    signedInAt: serverTimestamp()
+  }, { merge: true });
+
+  if (unsubscribeDeviceListener) {
+    unsubscribeDeviceListener();
+  }
+
+  unsubscribeDeviceListener = onSnapshot(deviceRef, snapshot => {
+    if (!snapshot.exists()) return;
+
+    const session = snapshot.data();
+
+    if (session.revoked === true) {
+      signOut(auth);
+    }
+  });
+
+  if (deviceHeartbeat) {
+    clearInterval(deviceHeartbeat);
+  }
+
+  deviceHeartbeat = setInterval(async () => {
+    if (!auth.currentUser || auth.currentUser.uid !== user.uid) return;
+
+    try {
+      await updateDoc(deviceRef, {
+        lastSeen: serverTimestamp(),
+        active: true
+      });
+    } catch (error) {
+      console.error("Device activity update failed:", error);
+    }
+  }, 60000);
+
+  window.addEventListener("focus", updateDeviceActivity);
+}
+
+async function updateDeviceActivity() {
+  if (!currentUser || !currentDeviceId) return;
+
+  try {
+    await setDoc(
+      doc(db, "users", currentUser.uid, "sessions", currentDeviceId),
+      {
+        lastSeen: serverTimestamp(),
+        active: true
+      },
+      { merge: true }
+    );
+  } catch (error) {
+    console.error("Device activity update failed:", error);
+  }
+}
+
+function stopDeviceTracking() {
+  if (unsubscribeDeviceListener) {
+    unsubscribeDeviceListener();
+    unsubscribeDeviceListener = null;
+  }
+
+  if (deviceHeartbeat) {
+    clearInterval(deviceHeartbeat);
+    deviceHeartbeat = null;
+  }
+
+  window.removeEventListener("focus", updateDeviceActivity);
+  currentDeviceId = null;
+}
+
 /* ==================================
    LOAD USER BUSINESS DATA
 ================================== */
@@ -3466,6 +3595,11 @@ onAuthStateChanged(auth, async (user) => {
     main.style.display = "";
 
        await loadUserBusinessData(user);
+   try {
+  await registerCurrentDevice(user);
+} catch (error) {
+  console.error("Device registration failed:", error);
+    }
 
     if (data.currentDay && !data.currentDay.closed) {
       openAppScreen("home");
@@ -3473,7 +3607,8 @@ onAuthStateChanged(auth, async (user) => {
       openAppScreen("opening");
     }
 
-  } else {    
+  } else {
+    stopDeviceTracking();
     if (unsubscribeCloudListener) {
       unsubscribeCloudListener();
       unsubscribeCloudListener = null;
