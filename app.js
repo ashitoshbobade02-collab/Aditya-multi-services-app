@@ -773,24 +773,6 @@ function persist() {
     });
  }
 
-async function resetTestBusinessData() {
-  if (!confirm("Clear all test business records and customer ledger entries?")) return;
-
-  data.days = [];
-  data.currentDay = null;
-  data.walletCarryForward = null;
-  data.customers = [];
-
-  persist();
-  await cloudWriteQueue;
-
-  alert("Test business data cleared successfully.");
-  location.reload();
-}
-
-window.resetTestBusinessData = resetTestBusinessData;
-
-
 function moveToDeletedHistory(entry, type, source) {
   if (!entry) return;
 
