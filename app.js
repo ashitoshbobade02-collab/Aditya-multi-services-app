@@ -2411,9 +2411,11 @@ if (selectedDays.length) {
         : '<span class="record-tag active-tag">In progress</span>';
 
       return `
-        <div class="history-transaction">
-          <h4>Business Shift ${index + 1} ${status}</h4>
-
+        <details class="history-transaction">
+  <summary>
+    <h4 style="display:inline;">Business Shift ${index + 1} ${status}</h4>
+  </summary>
+  <div>
           <p><strong>Opening Cash:</strong> ${money(session.opening?.cash || 0)}</p>
           <p><strong>Opening Online:</strong> ${money(session.opening?.online || 0)}</p>
 
@@ -2472,6 +2474,7 @@ if (selectedDays.length) {
             `).join("")
             : '<p class="muted">No movements recorded.</p>'}
         </div>
+      </details>
       `;
         }).join("");
 
