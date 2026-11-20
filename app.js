@@ -2372,7 +2372,7 @@ const savedRecord = (data.days || []).find(
 );
 
 const selectedSessions = savedRecord
-  ? getDaySessions(savedRecord)
+  ? [...getDaySessions(savedRecord)]
   : [];
 
 if (
