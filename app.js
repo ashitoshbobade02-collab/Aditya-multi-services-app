@@ -1288,15 +1288,19 @@ timestamp: new Date().toISOString(),
 ================================== */
 
 function calculateTotals(day) {
+    const opening = day.opening || {};
+  const transactions = Array.isArray(day.transactions)
+    ? day.transactions
+    : [];
   const totals = {
-    biznext: day.opening.biznext || 0,
-    roinet: day.opening.roinet || 0,
-    tez: day.opening.tez || 0,
-    fino: day.opening.fino || 0,
-    sbi: day.opening.sbi || 0,
+    biznext: opening.biznext || 0,
+    roinet: opening.roinet || 0,
+    tez: opening.tez || 0,
+    fino: opening.fino || 0,
+    sbi: opening.sbi || 0,
     aeps: 0,
-    cash: day.opening.cash,
-    online: day.opening.online,
+    cash: opening.cash,
+    online: opening.online,
     profit: 0,
     cashProfit: 0,
     onlineProfit: 0,
@@ -1311,7 +1315,7 @@ function calculateTotals(day) {
     serviceIncome: 0
   };
 
-  day.transactions.forEach(t => {
+  transactions.forEach(t => {
     const amount = Number(t.amount) || 0;
     const charge = Number(t.charge) || 0;
 
@@ -3556,9 +3560,11 @@ if (addCustomerButton) {
       action.includes("openAppScreen('" + name + "')")
     );
 
- link.style.display = isPreStart
+ const isOpeningLink = action.includes("openAppScreen('opening')");
+
+    link.style.display = isPreStart
       ? (isAllowed ? "" : "none")
-      : "";
+      : (isOpeningLink ? "none" : "");
   });
 
   // Keep Dark/Light Mode and Sign Out, hide Google linking
