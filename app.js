@@ -3877,7 +3877,7 @@ async function updateDeviceActivity() {
       doc(db, "users", currentUser.uid, "sessions", currentDeviceId),
       {
    lastSeen: serverTimestamp()
-  }
+  },
       { merge: true }
     );
   } catch (error) {
