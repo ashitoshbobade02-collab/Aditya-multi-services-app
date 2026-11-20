@@ -787,13 +787,37 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     </div>
 
     <p id="numberStepSaveMessage" class="visibility-save-message">
-      ✓ Changes are saved automatically.
+  ✓ Changes are saved automatically.
+</p>
+  </details>
+</div>
+
+<!-- DEVICE MANAGEMENT -->
+<div class="card dashboard-settings-card">
+  <details>
+    <summary class="dashboard-settings-summary">
+      <span>Device Management</span>
+      <span class="settings-summary-subtitle">Manage signed-in devices</span>
+    </summary>
+
+    <p class="settings-description">
+      View devices connected to this account and manage their sessions.
     </p>
+
+    <h4 id="deviceCount">Registered Devices: 0</h4>
+
+    <div id="deviceList">
+      <p>Loading registered devices...</p>
+    </div>
+
+    <button type="button" onclick="signOutOtherDevices()">
+      SIGN OUT ALL OTHER DEVICES
+    </button>
   </details>
 </div>
 
 </div>
-</section>
+  </section>
   
 <script>
 function toggleDrawer(){
