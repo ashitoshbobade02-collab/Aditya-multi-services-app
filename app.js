@@ -3856,10 +3856,11 @@ async function registerCurrentDevice(user) {
     if (!auth.currentUser || auth.currentUser.uid !== user.uid) return;
 
     try {
+     
       await updateDoc(deviceRef, {
-        lastSeen: serverTimestamp(),
-        active: true
-      });
+    lastSeen: serverTimestamp()
+  });
+      
     } catch (error) {
       console.error("Device activity update failed:", error);
     }
@@ -3875,9 +3876,8 @@ async function updateDeviceActivity() {
     await setDoc(
       doc(db, "users", currentUser.uid, "sessions", currentDeviceId),
       {
-        lastSeen: serverTimestamp(),
-        active: true
-      },
+   lastSeen: serverTimestamp()
+  }
       { merge: true }
     );
   } catch (error) {
