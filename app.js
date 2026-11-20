@@ -836,8 +836,6 @@ if (Object.values(opening).some(v => !Number.isFinite(v) || v < 0)) {
 
  const todayDate = today();
 
-const todayDate = today();
-
 const existingIndex = (data.days || []).findIndex(
   savedDay => savedDay.date === todayDate
 );
