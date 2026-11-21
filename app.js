@@ -3737,49 +3737,56 @@ function moveHeaderActionsToMenu() {
   }
 }
 
-
 function addMenuIcons() {
   const iconMap = {
-    "Dashboard": "🏠",
-    "Opening Balances": "💰",
-    "New Transaction": "➕",
-    "Services": "🖨️",
-    "Wallet Management": "👛",
-    "Daily Closing": "📋",
-    "History & Calendar": "📅",
-    "Customer Ledger": "👥",
-    "Cash In / Cash Out": "💸",
-    "Expenses": "🧾",
-    "Reports": "📊",
-    "Settings": "⚙️",
-    "LIGHT MODE": "☀️",
-    "DARK MODE": "🌙",
-    "LINK GOOGLE ACCOUNT": "🔗",
-    "SIGN OUT": "🚪"
+    "Dashboard": "layout-dashboard",
+    "Opening Balances": "wallet",
+    "New Transaction": "plus-circle",
+    "Services": "printer",
+    "Wallet Management": "landmark",
+    "Daily Closing": "clipboard-check",
+    "History & Calendar": "calendar-days",
+    "Customer Ledger": "users",
+    "Deleted Entries History": "trash-2",
+    "Cash In / Cash Out": "arrow-left-right",
+    "Expenses": "receipt",
+    "Reports": "chart-no-axes-combined",
+    "Settings": "settings"
   };
 
-  const menu = document.querySelector(".side-drawer");
+  const paths = {
+    "layout-dashboard": '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+    "wallet": '<rect x="3" y="6" width="18" height="15" rx="2"/><path d="M3 10h18M16 15h2"/><path d="M6 6V4h12"/>',
+    "plus-circle": '<circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/>',
+    "printer": '<path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/>',
+    "landmark": '<path d="M3 21h18M4 10h16M5 10V21M9 10V21M15 10V21M19 10V21M2 10l10-7 10 7"/>',
+    "clipboard-check": '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2M8 13l2 2 5-5"/>',
+    "calendar-days": '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 17h.01M12 17h.01"/>',
+    "users": '<path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M10 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+    "trash-2": '<path d="M3 6h18M8 6V4h8v2M19 6l-1 15H6L5 6M10 11v6M14 11v6"/>',
+    "arrow-left-right": '<path d="M17 3l4 4-4 4M3 7h18M7 21l-4-4 4-4M21 17H3"/>',
+    "receipt": '<path d="M4 3h16v18l-4-2-4 2-4-2-4 2zM8 8h8M8 12h8M8 16h4"/>',
+    "chart-no-axes-combined": '<path d="M3 3v18h18M7 14l4-4 4 4 6-7"/>',
+    "settings": '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 1.7-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V20h-2.4v-.21a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-1.7-1.7.06-.06A1.7 1.7 0 0 0 8.4 15a1.7 1.7 0 0 0-1.55-1H6v-2.4h.85a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88L8 8.66l1.7-1.7.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1-1.55V5h2.4v.81a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.7 1.7-.06.06A1.7 1.7 0 0 0 19.4 10a1.7 1.7 0 0 0 1.55 1H21v2.4h-.05a1.7 1.7 0 0 0-1.55 1.6z"/>'
+  };
 
-  if (!menu) return;
+  document.querySelectorAll(".drawer-nav a").forEach(link => {
+    const label = link.textContent.trim();
+    const iconName = iconMap[label];
 
-  menu.querySelectorAll("a, button").forEach(element => {
-    const label = element.textContent.trim().replace(/\s+/g, " ").toUpperCase();
-
-    const matchedLabel = Object.keys(iconMap).find(
-      name => name.toUpperCase() === label
-    );
-
-    if (!matchedLabel) return;
-
-    if (element.querySelector(".menu-icon")) return;
+    if (!iconName || link.querySelector(".menu-icon")) return;
 
     const icon = document.createElement("span");
     icon.className = "menu-icon";
-    icon.textContent = iconMap[matchedLabel];
+    icon.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        ${paths[iconName]}
+      </svg>
+    `;
 
-    element.prepend(icon);
+    link.prepend(icon);
   });
- }
+}
 
 /* ==================================
    DEVICE REGISTRATION AND TRACKING
