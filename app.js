@@ -3644,6 +3644,8 @@ function restoreDeletedEntry(deletedId) {
 
 window.renderDeletedEntriesHistory = renderDeletedEntriesHistory;
 window.restoreDeletedEntry = restoreDeletedEntry;
+window.renderDeletedCustomers = renderDeletedCustomers;
+window.restoreDeletedCustomer = restoreDeletedCustomer;
 
 
 function renderDeletedEntriesHistory() {
@@ -3688,6 +3690,87 @@ function renderDeletedEntriesHistory() {
         : `<button onclick="restoreDeletedEntry('${safe(entry.deletedId)}')">Restore</button>`}
     </article>
   `).join("");
+}
+
+function renderDeletedCustomers() {
+  const container = document.getElementById("deletedCustomersList");
+  if (!container) return;
+
+  const safe = value => escapeLedgerHTML(String(value ?? ""));
+  const customers = (data.deletedCustomers || []).slice().reverse();
+
+  if (!customers.length) {
+    container.innerHTML = "<p>No deleted customers yet.</p>";
+    return;
+  }
+
+  container.innerHTML = customers.map(customer => `
+    <article class="ledger-history-entry">
+      <strong>${safe(customer.name || "Unnamed customer")}</strong>
+      <p>Mobile: ${safe(customer.mobile || "No mobile number")}</p>
+      <p>Remaining customer due: ${money(customerBalance(customer))}</p>
+      <p>Remaining amount we owe: ${money(shopOwesBalance(customer))}</p>
+      <p>Payment history entries: ${(customer.history || []).length}</p>
+      <p>Deleted on: ${safe(customer.deletedAt || "Not available")}</p>
+      ${customer.restoredAt
+        ? `<p><strong>Status:</strong> Restored on ${safe(customer.restoredAt)}</p>`
+        : `<button type="button" onclick="restoreDeletedCustomer('${safe(customer.id)}')">RESTORE CUSTOMER</button>`}
+    </article>
+  `).join("");
+}
+
+function restoreDeletedCustomer(customerId) {
+  const customer = (data.deletedCustomers || []).find(
+    item => String(item.id) === String(customerId)
+  );
+
+  if (!customer || customer.restoredAt) return;
+
+  if (data.customers.some(item => item.id === customer.id)) {
+    showCustomPopup(
+      "Already Exists",
+      "This customer is already in active accounts."
+    );
+    return;
+  }
+
+  if (customer.mobile && data.customers.some(
+    item => item.mobile === customer.mobile
+  )) {
+    showCustomPopup(
+      "Duplicate Mobile Number",
+      "Another active customer already has this mobile number."
+    );
+    return;
+  }
+
+  showCustomConfirm(
+    "Restore Customer?",
+    "Restore " + customer.name + " with their complete payment history?",
+    () => {
+      const restored = JSON.parse(JSON.stringify(customer));
+
+      delete restored.deletedAt;
+      delete restored.deletedTimestamp;
+      delete restored.restoredAt;
+      delete restored.restoredTimestamp;
+
+      data.customers.push(restored);
+
+      customer.restoredAt = new Date().toLocaleString("en-IN");
+      customer.restoredTimestamp = new Date().toISOString();
+
+      persist();
+      renderCustomerLedger();
+      renderDeletedCustomers();
+
+      showCustomPopup(
+        "Customer Restored",
+        customer.name + " has been restored with their payment history.",
+        "success"
+      );
+    }
+  );
 }
 
 function renderCustomerLedgerHistory() {
@@ -4044,8 +4127,9 @@ if (backButton) {
     appScreenHistory.length > 0 ? "inline-flex" : "none";
 }
 
-  if (screenName === "deleted-history") {
+ if (screenName === "deleted-history") {
   renderDeletedEntriesHistory();
+  renderDeletedCustomers();
 }
   
   if (screenName === "settings") {
