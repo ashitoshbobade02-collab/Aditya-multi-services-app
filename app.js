@@ -3570,11 +3570,12 @@ function saveCustomerPayment() {
   sessionNumber: currentDay()?.sessionNumber || null
 });
 
-  persist();
+    persist();
+  refreshDashboard();
   hideCustomerPaymentForm();
   openCustomerAccount(customer.id);
   renderCustomerLedger();
-
+  
   showCustomPopup("Ledger Updated", label + " has been recorded successfully.", "success");
 }
 
@@ -3608,6 +3609,7 @@ function deleteCustomerLedgerEntry(customerId, entryId) {
 
       customer.history.splice(index, 1);
       persist();
+      refreshDashboard();
       openCustomerAccount(customer.id);
       renderCustomerLedger();
       renderCustomerLedgerHistory();
@@ -3653,9 +3655,10 @@ function restoreDeletedEntry(deletedId) {
   id: entry.id,
   type: entry.type,
   label: entry.label,
-  amount,
-  date: entry.date,
-  time: entry.time,
+      amount,
+      paymentMethod: entry.paymentMethod || null,
+      date: entry.date,
+      time: entry.time,
   note: entry.note,
   sessionNumber: entry.sessionNumber || currentDay()?.sessionNumber || null
 });
