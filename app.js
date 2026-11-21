@@ -4269,6 +4269,7 @@ Object.assign(window,{
   saveCashMovement,
   saveExpense,
   togglePasswordVisibility,
+  updateNumberStep,
   startBusinessDay,
   updateTransactionFields,
   calculateChargePreview,
