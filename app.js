@@ -2429,7 +2429,7 @@ alert("Business day saved! The shop is now closed.");
 function showHistory() {
   renderTodayCompleteHistory();
 
-  const history = document.getElementById("historyList");
+  const history = document.getElementById("todayCompleteHistoryList");
   if (history) {
     history.scrollIntoView({
       behavior: "smooth",
@@ -2440,7 +2440,7 @@ function showHistory() {
 
 
 function renderTodayCompleteHistory() {
-  const container = document.getElementById("historyList");
+  const container = document.getElementById("todayCompleteHistoryList");
   if (!container) return;
 
   const todayDate = today();
@@ -2556,7 +2556,7 @@ function selectHistoryDate(date) {
 }
 
 function renderCalendar() {
-  const history = document.getElementById("historyList");
+  const history = document.getElementById("calendarHistoryList");
   if (!history) return;
 
   const year = calendarMonth.getFullYear();
