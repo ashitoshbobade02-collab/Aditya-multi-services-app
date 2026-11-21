@@ -3578,7 +3578,8 @@ window.alert = function(message) {
    SIDE MENU ACTIONS
 ================================== */
 
-function openAppScreen(screenName) {
+let appScreenHistory = [];
+function openAppScreen(screenName, skipHistory = false) {
     const isPreStart = !data.currentDay || data.currentDay.closed;
 
   const allowedBeforeStart = [
@@ -3595,6 +3596,10 @@ function openAppScreen(screenName) {
     screenName = "opening";
   }
   const screens = document.querySelectorAll(".app-screen");
+  const activeScreen = document.querySelector(".app-screen.active");
+  const currentScreenName = activeScreen
+  ? activeScreen.id.replace("screen-", "")
+  : "";
 
   screens.forEach(screen => {
     screen.classList.remove("active");
@@ -3602,8 +3607,23 @@ function openAppScreen(screenName) {
 
   const selectedScreen = document.getElementById("screen-" + screenName);
   if (!selectedScreen) return;
+ 
+  if (
+  !skipHistory &&
+  currentScreenName &&
+  currentScreenName !== screenName
+) {
+  appScreenHistory.push(currentScreenName);
+}
 
   selectedScreen.classList.add("active");
+  
+  const backButton = document.getElementById("appBackButton");
+
+if (backButton) {
+  backButton.style.display =
+    appScreenHistory.length > 0 ? "inline-flex" : "none";
+}
 
   if (screenName === "deleted-history") {
   renderDeletedEntriesHistory();
@@ -3684,6 +3704,13 @@ if (addCustomerButton) {
 }
 
 window.openAppScreen = openAppScreen;
+
+function goBackAppScreen() {
+  const previousScreen = appScreenHistory.pop() || "home";
+  openAppScreen(previousScreen, true);
+}
+
+window.goBackAppScreen = goBackAppScreen;
 
 function moveHeaderActionsToMenu() {
   const drawer = document.getElementById("sideDrawer");
