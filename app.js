@@ -993,6 +993,37 @@ function updateTransactionFields() {
   calculateChargePreview();
 }
 
+function setupTransactionKeyboard() {
+  const fields = [
+    "transactionType",
+    "platform",
+    "transactionAmount",
+    "chargePaymentMethod"
+  ];
+
+  fields.forEach((id, index) => {
+    const field = document.getElementById(id);
+    if (!field) return;
+
+    field.addEventListener("keydown", event => {
+      if (event.key !== "Enter") return;
+
+      event.preventDefault();
+
+      const nextField = document.getElementById(fields[index + 1]);
+
+      if (nextField) {
+        nextField.focus();
+      } else {
+        addBusinessTransaction();
+      }
+    });
+  });
+}
+
+setupTransactionKeyboard();
+
+
 function calculateChargePreview() {
   const type = document.getElementById("transactionType").value;
   const amount =
