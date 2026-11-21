@@ -1293,7 +1293,7 @@ timestamp: new Date().toISOString(),
   "Your service entry has been recorded successfully.",
   "success",
   `<div style="padding:12px;background:#f1f6fc;border-radius:10px;">
-    <strong>Service:</strong> ${serviceName}
+    <strong>Service:</strong> ${escapeLedgerHTML(serviceName)}
     <br>
     <strong>Amount:</strong> ${money(amount)}
   </div>`
@@ -1930,7 +1930,7 @@ function showDashboardHistory(title, items, type) {
       let heading = t.type === "ONLINE_WITHDRAWAL"
         ? (t.platform + " Withdrawal")
         : t.type === "SERVICE"
-          ? t.serviceName
+          ? escapeLedgerHTML(t.serviceName || "")
           : t.type + (t.platform ? " · " + t.platform : "");
 
       let details = "";
@@ -2150,7 +2150,7 @@ function refreshDashboard() {
 
         return `
           <div style="padding:12px 0;border-bottom:1px solid #e2eaf2">
-            <strong>${t.serviceName}</strong>
+            <strong>${escapeLedgerHTML(t.serviceName || "")}</strong>
             <p>${t.time}</p>
             <p>${quantityText}</p>
             <p>Amount: ${money(t.amount)}</p>
