@@ -1815,20 +1815,11 @@ ledgerPayments.forEach(entry => {
     totals.onlineExpenses += amount;
   }
 });
-  
-  const amount = Number(expense.amount) || 0;
-  const paymentMethod = expense.paymentMethod || "CASH";
 
-  if (paymentMethod === "CASH") {
-    totals.cash -= amount;
-    totals.cashExpenses += amount;
-  }
-
-  if (paymentMethod === "ONLINE") {
-    totals.online -= amount;
-    totals.onlineExpenses += amount;
-  }
-});
+totals.expenses = (day.expenses || []).reduce(
+  (sum, expense) => sum + (Number(expense.amount) || 0),
+  0
+);
   
   totals.expenses = (day.expenses || []).reduce(
     (sum, expense) => sum + (Number(expense.amount) || 0),
