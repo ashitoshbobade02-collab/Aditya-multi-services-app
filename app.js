@@ -2007,21 +2007,28 @@ function closeDashboardHistory() {
 
 function refreshDashboard() {
   const day = currentDay();
-  renderExpenseList();
+renderExpenseList();
 
-  const todayTransactions = day
-    ? (day.transactions || []).filter(t => t.type !== "SERVICE")
-    : [];
+const todayReportDay = getReportDays(today(), today())[0] || {
+  date: today(),
+  sessions: day ? getDaySessions(day) : []
+};
 
-  const todayServices = day
-    ? (day.transactions || []).filter(t => t.type === "SERVICE")
-    : [];
+const todaySessions = todayReportDay.sessions || [];
+const allTodayTransactions = todaySessions.flatMap(s => s.transactions || []);
+const allTodayWithdrawals = allTodayTransactions.filter(t =>
+  ["AEPS", "ONLINE_WITHDRAWAL"].includes(t.type)
+);
 
-  const todayWithdrawals = day
-    ? (day.transactions || []).filter(t =>
-        ["AEPS", "ONLINE_WITHDRAWAL"].includes(t.type)
-      )
-    : [];
+  const todayTransactions = allTodayTransactions.filter(
+  t => t.type !== "SERVICE"
+);
+
+const todayServices = allTodayTransactions.filter(
+  t => t.type === "SERVICE"
+);
+
+const todayWithdrawals = allTodayWithdrawals;
 
   document.getElementById("todayTransactionCount").textContent =
     todayTransactions.length;
@@ -2070,40 +2077,58 @@ function refreshDashboard() {
   }
 
   const t = calculateTotals(day);
+const dailyTotals = calculateDailyTotals(todayReportDay);
 
-  document.getElementById("biznextBalance").textContent = money(t.biznext);
-  document.getElementById("roinetBalance").textContent = money(t.roinet);
-  document.getElementById("tezBalance").textContent = money(t.tez);
-  document.getElementById("finoBalance").textContent = money(t.fino);
-  document.getElementById("sbiBalance").textContent = money(t.sbi);
+  document.getElementById("biznextBalance").textContent = money(dailyTotals.biznext);
+  document.getElementById("roinetBalance").textContent = money(dailyTotals.roinet);
+  document.getElementById("tezBalance").textContent = money(dailyTotals.tez);
+  document.getElementById("finoBalance").textContent = money(dailyTotals.fino);
+  document.getElementById("sbiBalance").textContent = money(dailyTotals.sbi);
+  
+  const walletNetMovement = platform =>
+  allTodayTransactions.reduce((sum, transaction) => {
+    if (transaction.platform !== platform) return sum;
 
-  document.getElementById("biznextCollection").textContent =
-    money(t.biznext - day.opening.biznext);
+    const amount = Number(transaction.amount) || 0;
 
-  document.getElementById("roinetCollection").textContent =
-    money(t.roinet - day.opening.roinet);
+    if (transaction.type === "AEPS") return sum + amount;
+    if (transaction.type === "ONLINE_WITHDRAWAL") return sum - amount;
 
-  document.getElementById("tezCollection").textContent =
-    money(t.tez - day.opening.tez);
+    return sum;
+  }, 0);
 
-  document.getElementById("finoCollection").textContent =
-    money(t.fino - day.opening.fino);
+document.getElementById("biznextCollection").textContent =
+  money(walletNetMovement("Biznext"));
 
-  document.getElementById("sbiCollection").textContent =
-    money(t.sbi - day.opening.sbi);
+document.getElementById("roinetCollection").textContent =
+  money(walletNetMovement("Roinet"));
 
-  const combinedBiznextRoinet = day.transactions
-    .filter(transaction => transaction.type === "AEPS" && ["Biznext", "Roinet"].includes(transaction.platform))
-    .reduce((sum, transaction) => sum + (Number(transaction.amount) || 0), 0);
+document.getElementById("tezCollection").textContent =
+  money(walletNetMovement("Tez"));
 
-  document.getElementById("combinedCollection").textContent =
-    money(combinedBiznextRoinet);
+document.getElementById("finoCollection").textContent =
+  money(walletNetMovement("Fino"));
 
-  document.getElementById("cashBalance").textContent = money(t.cash);
-  document.getElementById("onlineBalance").textContent = money(t.online);
-  document.getElementById("cashNetProfit").textContent = money(t.cashNetProfit);
-  document.getElementById("onlineNetProfit").textContent = money(t.onlineNetProfit);
-  document.getElementById("netProfit").textContent = money(t.netProfit);
+document.getElementById("sbiCollection").textContent =
+  money(walletNetMovement("SBI"));
+
+const combinedBiznextRoinet = allTodayTransactions
+  .filter(transaction =>
+    transaction.type === "AEPS" &&
+    ["Biznext", "Roinet"].includes(transaction.platform)
+  )
+  .reduce((sum, transaction) =>
+    sum + (Number(transaction.amount) || 0), 0
+  );
+
+document.getElementById("combinedCollection").textContent =
+  money(combinedBiznextRoinet);
+
+  document.getElementById("cashBalance").textContent = money(dailyTotals.cash);
+  document.getElementById("onlineBalance").textContent = money(dailyTotals.online);
+  document.getElementById("cashNetProfit").textContent = money(dailyTotals.cashNetProfit);
+  document.getElementById("onlineNetProfit").textContent = money(dailyTotals.onlineNetProfit);
+  document.getElementById("netProfit").textContent = money(dailyTotals.netProfit);
 
   document.getElementById("openingSection").style.display = "none";
 
