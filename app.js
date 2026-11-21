@@ -87,6 +87,7 @@ function normalizeData(value) {
   if (!Array.isArray(clean.days)) clean.days = [];
   if (!Array.isArray(clean.customers)) clean.customers = [];
   if (!Array.isArray(clean.deletedEntries)) clean.deletedEntries = [];
+  if (!Array.isArray(clean.deletedCustomers)) clean.deletedCustomers = [];
   if (!Object.prototype.hasOwnProperty.call(clean, "currentDay")) clean.currentDay = null;
   if (!Object.prototype.hasOwnProperty.call(clean, "walletCarryForward")) clean.walletCarryForward = null;
 
@@ -3375,6 +3376,39 @@ function closeCustomerAccount() {
   customerPaymentMode = null;
 }
 
+function deleteLedgerCustomer() {
+  const customer = getCustomer(activeCustomerId);
+
+  if (!customer) return;
+
+  showCustomConfirm(
+    "Delete Customer?",
+    "Delete " + customer.name + "? Their complete account and payment history will be preserved in Deleted Entries History and can be restored later.",
+    () => {
+      const deletedCustomer = JSON.parse(JSON.stringify(customer));
+
+      deletedCustomer.deletedAt = new Date().toLocaleString("en-IN");
+      deletedCustomer.deletedTimestamp = new Date().toISOString();
+
+      data.deletedCustomers = data.deletedCustomers || [];
+      data.deletedCustomers.push(deletedCustomer);
+
+      data.customers = data.customers.filter(
+        item => item.id !== customer.id
+      );
+
+      closeCustomerAccount();
+      persist();
+      renderCustomerLedger();
+
+      showCustomPopup(
+        "Customer Deleted",
+        customer.name + " was moved to deleted customers.",
+        "success"
+      );
+    }
+  );
+}
 
 function showCustomerPaymentForm(mode) {
   if (!activeCustomerId) return;
