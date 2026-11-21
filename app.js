@@ -1784,7 +1784,7 @@ totals.profit += charge;
 
 
 ledgerPayments.forEach(entry => {
-  if (!["received", "given"].includes(entry.type)) return;
+  if (!["received", "given", "addOwe"].includes(entry.type)) return;
   if (!["CASH", "ONLINE"].includes(entry.paymentMethod)) return;
 
   const amount = Number(entry.amount) || 0;
