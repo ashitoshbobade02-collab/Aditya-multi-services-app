@@ -3191,26 +3191,6 @@ function initializeCustomerLedger() {
     if (!Number.isFinite(Number(customer.given))) customer.given = 0;
   });
 
-  const account = document.getElementById("customerAccountSection");
-
-  if (account && !document.getElementById("addCustomerDueButton")) {
-    const firstButton = account.querySelector('button[onclick*="showCustomerPaymentForm"]');
-
-    if (firstButton) {
-      firstButton.insertAdjacentHTML("beforebegin", `
-        <button type="button" id="addCustomerDueButton"
-          onclick="showCustomerPaymentForm('addDue')">
-          ADD AMOUNT DUE
-        </button>
-
-        <button type="button" id="addShopOwesButton"
-          onclick="showCustomerPaymentForm('addOwe')">
-          ADD AMOUNT WE OWE
-        </button>
-      `);
-    }
-  }
-
   const search = document.getElementById("customerSearch");
 
   if (search && !search.dataset.ledgerReady) {
