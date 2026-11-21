@@ -3646,6 +3646,7 @@ window.renderDeletedEntriesHistory = renderDeletedEntriesHistory;
 window.restoreDeletedEntry = restoreDeletedEntry;
 window.renderDeletedCustomers = renderDeletedCustomers;
 window.restoreDeletedCustomer = restoreDeletedCustomer;
+window.deleteLedgerCustomer = deleteLedgerCustomer;
 
 
 function renderDeletedEntriesHistory() {
