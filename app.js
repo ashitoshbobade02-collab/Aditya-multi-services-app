@@ -4717,6 +4717,7 @@ if (wasPreStart && !isPreStart) {
         updateServiceFields();
         updateServicePaymentFields();
         renderCustomerLedgerHistory();
+        initializeCustomerLedger();
         renderTodayCompleteHistory();
         refreshDashboard();
         renderCalendar();
@@ -4731,6 +4732,7 @@ if (wasPreStart && !isPreStart) {
   updateServiceFields();
   updateServicePaymentFields();
   renderCustomerLedgerHistory();
+  initializeCustomerLedger();
   renderNumberStepSettings();
   renderDashboardVisibilitySettings();
   refreshDashboard();
