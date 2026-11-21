@@ -1782,25 +1782,38 @@ totals.profit += charge;
 });
 
 
+ledgerPayments.forEach(entry => {
+  if (!["received", "given"].includes(entry.type)) return;
+  if (!["CASH", "ONLINE"].includes(entry.paymentMethod)) return;
+
+  const amount = Number(entry.amount) || 0;
+  const balanceKey = entry.paymentMethod === "ONLINE"
+    ? "online"
+    : "cash";
+
+  if (entry.type === "received") {
+    totals[balanceKey] += amount;
+  }
+
+  if (entry.type === "given") {
+    totals[balanceKey] -= amount;
+  }
+});
+
 (day.expenses || []).forEach(expense => {
-   
-   ledgerPayments.forEach(entry => {
-    if (!["received", "given"].includes(entry.type)) return;
-    if (!["CASH", "ONLINE"].includes(entry.paymentMethod)) return;
+  const amount = Number(expense.amount) || 0;
+  const paymentMethod = expense.paymentMethod || "CASH";
 
-    const amount = Number(entry.amount) || 0;
-    const balanceKey = entry.paymentMethod === "ONLINE"
-      ? "online"
-      : "cash";
+  if (paymentMethod === "CASH") {
+    totals.cash -= amount;
+    totals.cashExpenses += amount;
+  }
 
-    if (entry.type === "received") {
-      totals[balanceKey] += amount;
-    }
-
-    if (entry.type === "given") {
-      totals[balanceKey] -= amount;
-    }
-  });
+  if (paymentMethod === "ONLINE") {
+    totals.online -= amount;
+    totals.onlineExpenses += amount;
+  }
+});
   
   const amount = Number(expense.amount) || 0;
   const paymentMethod = expense.paymentMethod || "CASH";
