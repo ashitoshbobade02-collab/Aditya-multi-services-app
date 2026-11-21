@@ -1021,8 +1021,50 @@ function setupTransactionKeyboard() {
   });
 }
 
-setupTransactionKeyboard();
+function setupServiceKeyboard() {
+  const fields = [
+    "serviceType",
+    "serviceEntryMode",
+    "serviceQuantity",
+    "idLaminationPrice",
+    "otherServiceDescription",
+    "serviceDirectAmount",
+    "servicePaymentMethod",
+    "serviceCashAmount",
+    "serviceOnlineAmount"
+  ];
 
+  fields.forEach((id) => {
+    const field = document.getElementById(id);
+    if (!field) return;
+
+    field.addEventListener("keydown", event => {
+      if (event.key !== "Enter") return;
+
+      event.preventDefault();
+
+      const visibleFields = fields
+        .map(fieldId => document.getElementById(fieldId))
+        .filter(item =>
+          item &&
+          item.getClientRects().length > 0 &&
+          !item.disabled
+        );
+
+      const index = visibleFields.indexOf(field);
+
+      if (index < visibleFields.length - 1) {
+        visibleFields[index + 1].focus();
+      } else {
+        document.querySelector(
+          '#screen-services button[onclick="addServiceTransaction()"]'
+        ).click();
+      }
+    });
+  });
+}
+
+setupServiceKeyboard();
 
 function calculateChargePreview() {
   const type = document.getElementById("transactionType").value;
