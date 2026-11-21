@@ -2409,6 +2409,8 @@ const todayWithdrawals = allTodayWithdrawals;
 
   const t = calculateTotals(day);
 const dailyTotals = calculateDailyTotals(todayReportDay);
+  document.getElementById("totalBusiness").textContent =
+  money(dailyTotals.business);
 
   document.getElementById("biznextBalance").textContent = money(dailyTotals.biznext);
   document.getElementById("roinetBalance").textContent = money(dailyTotals.roinet);
