@@ -1046,20 +1046,14 @@ function setupServiceKeyboard() {
       event.preventDefault();
 
       // If a popup is open, let Enter activate its OK button.
-      const popup = document.querySelector(
-        '.popup:not(.hidden), .custom-popup:not(.hidden)'
-      );
+ const popup = document.getElementById("customPopup");
 
-      if (popup) {
-        const okButton = popup.querySelector(
-          'button:not([disabled])'
-        );
-        if (okButton) okButton.click();
-        return;
-      }
+if (popup && popup.style.display !== "none") {
+  document.getElementById("popupOkButton").click();
+  return;
+}
 
-      if (saving) return;
-
+if (saving) return;
       const visibleFields = fields
         .map(fieldId => document.getElementById(fieldId))
         .filter(item =>
