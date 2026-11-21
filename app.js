@@ -2134,9 +2134,9 @@ document.getElementById("combinedCollection").textContent =
 
   const withdrawalList = document.getElementById("withdrawalList");
 
-  const withdrawals = day.transactions.filter(
-    t => t.type === "ONLINE_WITHDRAWAL"
-  );
+  const withdrawals = allTodayTransactions.filter(
+  t => t.type === "ONLINE_WITHDRAWAL"
+ );
 
   if (withdrawals.length === 0) {
     withdrawalList.innerHTML = "<p>No withdrawals recorded yet.</p>";
@@ -2153,9 +2153,9 @@ document.getElementById("combinedCollection").textContent =
 
     // Today's normal business transactions
   const list = document.getElementById("transactionList");
-  const normalTransactions = day.transactions.filter(
-    t => t.type !== "SERVICE" && t.type !== "ONLINE_WITHDRAWAL"
-  );
+  const normalTransactions = todayTransactions.filter(
+  t => t.type !== "ONLINE_WITHDRAWAL"
+);
 
   if (list) {
     list.innerHTML = normalTransactions.length
@@ -2172,7 +2172,7 @@ document.getElementById("combinedCollection").textContent =
 
   // Today's services
   const serviceList = document.getElementById("serviceList");
-  const services = day.transactions.filter(t => t.type === "SERVICE");
+  const services = todayServices;
 
   if (serviceList) {
     serviceList.innerHTML = services.length
@@ -2198,7 +2198,7 @@ function renderCashMovements() {
 
   if (!list) return;
 
-  const entries = day ? (day.cashMovements || []) : [];
+  const todaySessions = getReportDays(today(), today())[0]?.sessions || []; const entries = todaySessions.flatMap(s => s.cashMovements || []);
 
   if (entries.length === 0) {
     list.innerHTML = "<p>No cash entries yet.</p>";
@@ -2283,7 +2283,8 @@ function renderExpenseList() {
 
   if (!list) return;
 
-  const expenses = day ? (day.expenses || []) : [];
+  const todaySessions = getReportDays(today(), today())[0]?.sessions || []; 
+  const expenses = todaySessions.flatMap(s => s.expenses || []);
 
   if (expenses.length === 0) {
     list.innerHTML = "<p>No expenses yet.</p>";
