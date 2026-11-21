@@ -491,6 +491,10 @@ function exportExcel() {
   const expenses = [
     ["Date", "Time", "Category", "Payment Method", "Amount", "Note"]
   ];
+ 
+  const movements = [
+    ["Date", "Time", "Account", "Movement", "Amount", "Note"]
+  ];
 
   const cashOnline = [
     ["Date", "Cash Profit", "Online Profit", "Total Profit",
@@ -523,6 +527,17 @@ report.days.forEach(day => {
       ]);
     });
   });
+  
+  (session.cashMovements || []).forEach(m => {
+  movements.push([
+    day.date,
+    m.time || "",
+    m.account || "CASH",
+    m.type || "",
+    m.amount || 0,
+    m.note || ""
+  ]);
+});
 
   const t = calculateDailyTotals(day);
   const lastSession = sessions[sessions.length - 1];
@@ -544,6 +559,7 @@ report.days.forEach(day => {
   addSheet("Summary", summary);
   addSheet("Transactions", transactions);
   addSheet("Expenses", expenses);
+  addSheet("Cash & Online Movements", movements);
   addSheet("Cash & Online", cashOnline);
   addSheet("Wallet Balances", wallets);
 
@@ -624,6 +640,7 @@ function exportPDF() {
 
   const transactionRows = [];
   const expenseRows = [];
+  const movementRows = [];
   const dailyRows = [];
   const walletRows = [];
   
@@ -654,6 +671,17 @@ report.days.forEach(day => {
       ]);
     });
   });
+
+  (session.cashMovements || []).forEach(item => {
+  movementRows.push([
+    day.date,
+    item.time || "",
+    item.account || "CASH",
+    item.type || "",
+    pdfMoney(item.amount || 0),
+    item.note || ""
+  ]);
+});
 
   const t = calculateDailyTotals(day);
   const lastSession = sessions[sessions.length - 1];
@@ -725,6 +753,12 @@ report.days.forEach(day => {
     transactionRows
   );
 
+  addTable(
+    "Cash & Online Movements",
+    ["Date", "Time", "Account", "Movement", "Amount", "Note"],
+     movementRows
+  );
+  
   addTable(
     "Expense Details",
     ["Date", "Time", "Category", "Paid By", "Amount", "Note"],
