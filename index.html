@@ -67,6 +67,7 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     </div>
 
     <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+      <button type="button" id="appBackButton" onclick="goBackAppScreen()" style="display:none;">← BACK</button>
       <button type="button" class="menu-toggle" onclick="toggleDrawer()">☰ MENU</button>
       <div class="date" id="todayDate"></div>
 
@@ -95,7 +96,6 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
   <a href="#" onclick="openAppScreen('daily-closing'); return false;">Daily Closing</a>
   <a href="#" onclick="openAppScreen('history'); return false;">History &amp; Calendar</a>
   <a href="#" onclick="openAppScreen('customer-ledger'); return false;">Customer Ledger</a>
-  <a href="#" onclick="openAppScreen('customer-history'); return false;">Customer Ledger History</a>
   <a href="#" onclick="openAppScreen('deleted-history'); return false;">Deleted Entries History</a>
   <a href="#" onclick="openAppScreen('cash-movement'); return false;">Cash In / Cash Out</a>
   <a href="#" onclick="openAppScreen('expenses'); return false;">Expenses</a>
@@ -441,6 +441,9 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
   <section class="app-screen" id="screen-customer-ledger">
   <!-- CUSTOMER LEDGER -->
   <h3 class="section-title" id="customerLedgerSection">Customer Ledger</h3>
+    <button type="button" onclick="openAppScreen('customer-history')">
+  CUSTOMER LEDGER HISTORY
+</button>
 
   <div class="wallets customer-ledger-summary">
     <div class="card">
@@ -458,6 +461,9 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
 
   <div class="card">
     <h3>Customer Accounts</h3>
+    <button type="button" onclick="openAppScreen('customer-history')">
+  CUSTOMER LEDGER HISTORY
+</button>
 
     <input
       type="search"
