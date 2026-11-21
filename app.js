@@ -2497,7 +2497,8 @@ function renderTodayCompleteHistory() {
   }
 
   sessions.forEach((session, index) => {
-    const shift = "Business Shift " + (index + 1);
+    const shiftNumber = session.sessionNumber || index + 1;
+    const shift = "Business Shift " + shiftNumber;
 
     (session.transactions || []).forEach(t => {
       addRecord(
@@ -2545,7 +2546,10 @@ function renderTodayCompleteHistory() {
           entry.date,
           entry.time,
           entry.amount,
-          entry.note
+          entry.note,
+          entry.sessionNumber
+            ? "Business Shift " + entry.sessionNumber
+            : "Other Records"
         );
       }
     });
@@ -2564,31 +2568,74 @@ function renderTodayCompleteHistory() {
         todayDate,
         entry.deletedAt,
         entry.amount,
-        "Deleted record · " + (entry.note || entry.deletedFrom || "")
+        "Deleted record · " + (entry.note || entry.deletedFrom || ""),
+        entry.sessionNumber
+          ? "Business Shift " + entry.sessionNumber
+          : "Other Records"
       );
     }
   });
-
-  records.sort((a, b) => b.time.localeCompare(a.time));
 
   const safe = value => String(value ?? "").replace(/[&<>"']/g, char => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;",
     '"': "&quot;", "'": "&#39;"
   })[char]);
 
+  const groupedRecords = {};
+
+  records.forEach(record => {
+    const group = record.shift || "Other Records";
+
+    if (!groupedRecords[group]) {
+      groupedRecords[group] = [];
+    }
+
+    groupedRecords[group].push(record);
+  });
+
+  const shiftGroups = Object.keys(groupedRecords).sort((a, b) => {
+    if (a === "Other Records") return 1;
+    if (b === "Other Records") return -1;
+
+    const numA = Number(a.match(/\d+/)?.[0] || 0);
+    const numB = Number(b.match(/\d+/)?.[0] || 0);
+
+    return numA - numB;
+  });
+
+  shiftGroups.forEach(group => {
+    groupedRecords[group].sort((a, b) =>
+      b.time.localeCompare(a.time)
+    );
+  });
+
   container.innerHTML = `
     <h3>Today's Complete History</h3>
     <p>${todayDate} · ${records.length} records</p>
+
     <div style="max-height:650px;overflow-y:auto;padding:10px;border:1px solid var(--line);border-radius:10px;">
-      ${records.length ? records.map(record => `
-        <div style="padding:12px 4px;border-bottom:1px solid var(--line);">
-          <small>${safe(record.category)}${record.shift ? " · " + safe(record.shift) : ""}</small>
-          <strong style="display:block;">${safe(record.title)}</strong>
-          <p>${safe(record.time)}</p>
-          <strong>${money(record.amount)}</strong>
-          ${record.note ? `<p>${safe(record.note)}</p>` : ""}
+
+      ${shiftGroups.length ? shiftGroups.map(group => `
+        <div style="margin-bottom:18px;">
+          <h3 style="padding:12px;background:var(--light-blue);border-radius:8px;color:var(--text);">
+            ${safe(group)}
+            <small style="font-weight:normal;">
+              (${groupedRecords[group].length} records)
+            </small>
+          </h3>
+
+          ${groupedRecords[group].map(record => `
+            <div style="padding:12px 4px;border-bottom:1px solid var(--line);">
+              <small>${safe(record.category)}</small>
+              <strong style="display:block;">${safe(record.title)}</strong>
+              <p>${safe(record.time)}</p>
+              <strong>${money(record.amount)}</strong>
+              ${record.note ? `<p>${safe(record.note)}</p>` : ""}
+            </div>
+          `).join("")}
         </div>
       `).join("") : "<p>No records found for today.</p>"}
+
     </div>
   `;
 }
@@ -3076,14 +3123,15 @@ function saveCustomerPayment() {
   const label = changes[mode]();
 
   customer.history.push({
-    id: "ledger_" + Date.now(),
-    type: mode,
-    label,
-    amount,
-    date,
-    time: new Date().toLocaleTimeString("en-IN"),
-    note
-  });
+  id: "ledger_" + Date.now(),
+  type: mode,
+  label,
+  amount,
+  date,
+  time: new Date().toLocaleTimeString("en-IN"),
+  note,
+  sessionNumber: currentDay()?.sessionNumber || null
+});
 
   persist();
   hideCustomerPaymentForm();
@@ -3165,14 +3213,15 @@ function restoreDeletedEntry(deletedId) {
     if (entry.type === "given") customer.given += amount;
 
     customer.history.push({
-      id: entry.id,
-      type: entry.type,
-      label: entry.label,
-      amount,
-      date: entry.date,
-      time: entry.time,
-      note: entry.note
-    });
+  id: entry.id,
+  type: entry.type,
+  label: entry.label,
+  amount,
+  date: entry.date,
+  time: entry.time,
+  note: entry.note,
+  sessionNumber: entry.sessionNumber || currentDay()?.sessionNumber || null
+});
 
     openCustomerAccount(customer.id);
     renderCustomerLedger();
