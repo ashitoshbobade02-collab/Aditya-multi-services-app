@@ -1229,6 +1229,73 @@ function setupExpenseKeyboard() {
 }
 
 setupExpenseKeyboard();
+function setupArrowNavigation() {
+  const forms = [
+    [
+      "transactionType",
+      "platform",
+      "transactionAmount",
+      "chargePaymentMethod"
+    ],
+    [
+      "serviceType",
+      "serviceEntryMode",
+      "serviceQuantity",
+      "idLaminationPrice",
+      "otherServiceDescription",
+      "serviceDirectAmount",
+      "servicePaymentMethod",
+      "serviceCashAmount",
+      "serviceOnlineAmount"
+    ],
+    [
+      "cashMovementType",
+      "cashMovementAmount",
+      "cashMovementNote"
+    ],
+    [
+      "onlineMovementType",
+      "onlineMovementAmount",
+      "onlineMovementNote"
+    ],
+    [
+      "expenseCategory",
+      "expensePaymentMethod",
+      "expenseAmount",
+      "expenseNote"
+    ]
+  ];
+
+  forms.forEach(fields => {
+    fields.forEach(id => {
+      const field = document.getElementById(id);
+      if (!field || field.tagName !== "INPUT" || field.type !== "text") return;
+
+      field.addEventListener("keydown", event => {
+        if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+
+        event.preventDefault();
+
+        const visibleFields = fields
+          .map(fieldId => document.getElementById(fieldId))
+          .filter(item =>
+            item &&
+            item.getClientRects().length > 0 &&
+            !item.disabled
+          );
+
+        const index = visibleFields.indexOf(field);
+        const nextIndex = event.key === "ArrowDown" ? index + 1 : index - 1;
+
+        if (nextIndex >= 0 && nextIndex < visibleFields.length) {
+          visibleFields[nextIndex].focus();
+        }
+      });
+    });
+  });
+}
+
+setupArrowNavigation();
 
 function calculateChargePreview() {
   const type = document.getElementById("transactionType").value;
