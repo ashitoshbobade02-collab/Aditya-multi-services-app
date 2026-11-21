@@ -1796,9 +1796,9 @@ ledgerPayments.forEach(entry => {
     totals[balanceKey] += amount;
   }
 
-  if (entry.type === "given") {
-    totals[balanceKey] -= amount;
-  }
+  if (entry.type === "given" || entry.type === "addOwe") {
+  totals[balanceKey] -= amount;
+}
 });
 
 (day.expenses || []).forEach(expense => {
@@ -3487,7 +3487,7 @@ paymentAmountInput.step = ["received", "given"].includes(mode)
   document.getElementById("customerPaymentFormTitle").textContent = titles[mode];
   document.getElementById("customerPaymentForm").style.display = "block";
   const paymentMethodGroup = document.getElementById("customerPaymentMethodGroup");
-paymentMethodGroup.style.display = ["received", "given"].includes(mode)
+paymentMethodGroup.style.display = ["received", "given", "addOwe"].includes(mode)
   ? "block"
   : "none";
 
@@ -3511,7 +3511,7 @@ function saveCustomerPayment() {
   const amount = Number(document.getElementById("customerPaymentAmount").value);
   const date = document.getElementById("customerPaymentDate").value;
   const note = document.getElementById("customerPaymentNote").value.trim();
-  const paymentMethod = ["received", "given"].includes(customerPaymentMode)
+  const paymentMethod = ["received", "given", "addOwe"].includes(customerPaymentMode)
   ? document.getElementById("customerPaymentMethod").value
   : null;
 
