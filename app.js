@@ -1034,6 +1034,8 @@ function setupServiceKeyboard() {
     "serviceOnlineAmount"
   ];
 
+  let saving = false;
+
   fields.forEach((id) => {
     const field = document.getElementById(id);
     if (!field) return;
@@ -1042,6 +1044,21 @@ function setupServiceKeyboard() {
       if (event.key !== "Enter") return;
 
       event.preventDefault();
+
+      // If a popup is open, let Enter activate its OK button.
+      const popup = document.querySelector(
+        '.popup:not(.hidden), .custom-popup:not(.hidden)'
+      );
+
+      if (popup) {
+        const okButton = popup.querySelector(
+          'button:not([disabled])'
+        );
+        if (okButton) okButton.click();
+        return;
+      }
+
+      if (saving) return;
 
       const visibleFields = fields
         .map(fieldId => document.getElementById(fieldId))
@@ -1056,9 +1073,18 @@ function setupServiceKeyboard() {
       if (index < visibleFields.length - 1) {
         visibleFields[index + 1].focus();
       } else {
-        document.querySelector(
+        const saveButton = document.querySelector(
           '#screen-services button[onclick="addServiceTransaction()"]'
-        ).click();
+        );
+
+        if (saveButton) {
+          saving = true;
+          saveButton.click();
+
+          setTimeout(() => {
+            saving = false;
+          }, 1000);
+        }
       }
     });
   });
