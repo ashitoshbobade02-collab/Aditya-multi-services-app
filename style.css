@@ -1388,3 +1388,29 @@ th {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* DARK MODE FIXES */
+:root[data-theme="dark"] #loginScreen button:first-of-type {
+  background: var(--white);
+  color: var(--text);
+}
+
+:root[data-theme="dark"] .popup-icon {
+  background: #173b2b;
+  color: #4ade80;
+}
+
+:root[data-theme="dark"] .record-tag {
+  background: #173b2b;
+  color: #4ade80;
+}
+
+:root[data-theme="dark"] .active-tag {
+  background: #423719;
+  color: #facc15;
+}
+
+:root[data-theme="dark"] button:not(.menu-toggle):not(#appBackButton) {
+  background-color: var(--blue);
+  color: #ffffff;
+}
