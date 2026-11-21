@@ -2126,49 +2126,42 @@ function refreshDashboard() {
     `).join("");
   }
 
+    // Today's normal business transactions
   const list = document.getElementById("transactionList");
+  const normalTransactions = day.transactions.filter(
+    t => t.type !== "SERVICE" && t.type !== "ONLINE_WITHDRAWAL"
+  );
 
-  if (!day.transactions.length) {
-    list.innerHTML = "<p>No transactions recorded yet.</p>";
-  } else {
-    list.innerHTML = day.transactions.map(t => {
-      if (t.type === "ONLINE_WITHDRAWAL") {
-        return `
+  if (list) {
+    list.innerHTML = normalTransactions.length
+      ? normalTransactions.map(t => `
           <div style="padding:12px 0;border-bottom:1px solid #e2eaf2">
-            <strong>Online Balance Withdrawal · ${t.platform}</strong>
+            <strong>${t.type} ${t.platform ? "· " + t.platform : ""}</strong>
             <p>${t.time}</p>
             <p>Amount: ${money(t.amount)}</p>
-            <p>Note: ${t.note || "No note"}</p>
+            <p>Customer charge: ${money(t.charge)}</p>
           </div>
-        `;
-      }
+        `).join("")
+      : "<p>No transactions recorded yet.</p>";
+  }
 
-      if (t.type === "SERVICE") {
-        const quantityText = t.quantity
-          ? "Quantity: " + t.quantity
-          : "Direct amount entry";
+  // Today's services
+  const serviceList = document.getElementById("serviceList");
+  const services = day.transactions.filter(t => t.type === "SERVICE");
 
-        return `
+  if (serviceList) {
+    serviceList.innerHTML = services.length
+      ? services.map(t => `
           <div style="padding:12px 0;border-bottom:1px solid #e2eaf2">
             <strong>${escapeLedgerHTML(t.serviceName || "")}</strong>
             <p>${t.time}</p>
-            <p>${quantityText}</p>
+            <p>${t.quantity ? "Quantity: " + t.quantity : "Direct amount entry"}</p>
             <p>Amount: ${money(t.amount)}</p>
             <p>Payment: ${t.paymentMethod}</p>
             <p>Cash: ${money(t.cashAmount)} | Online: ${money(t.onlineAmount)}</p>
           </div>
-        `;
-      }
-
-      return `
-        <div style="padding:12px 0;border-bottom:1px solid #e2eaf2">
-          <strong>${t.type} ${t.platform ? "· " + t.platform : ""}</strong>
-          <p>${t.time}</p>
-          <p>Amount: ${money(t.amount)}</p>
-          <p>Customer charge: ${money(t.charge)}</p>
-        </div>
-      `;
-    }).join("");
+        `).join("")
+      : "<p>No services recorded yet.</p>";
   }
 
   renderCashMovements();
@@ -2472,7 +2465,6 @@ function showHistory() {
   }
 }
 
-
 function renderTodayCompleteHistory() {
   const container = document.getElementById("todayCompleteHistoryList");
   if (!container) return;
@@ -2480,14 +2472,15 @@ function renderTodayCompleteHistory() {
   const todayDate = today();
   const records = [];
 
-  const addRecord = (category, title, date, time, amount, note = "") => {
+  const addRecord = (category, title, date, time, amount, note = "", shift = "") => {
     records.push({
       category,
       title,
       date: date || todayDate,
       time: time || "",
       amount: Number(amount) || 0,
-      note: note || ""
+      note: note || "",
+      shift
     });
   };
 
@@ -2510,31 +2503,36 @@ function renderTodayCompleteHistory() {
       addRecord(
         t.type === "SERVICE" ? "Services" : "Transactions",
         t.serviceName || t.type + (t.platform ? " · " + t.platform : ""),
-        todayDate, t.time, t.amount,
-        "Charge: " + money(t.charge || 0)
+        todayDate,
+        t.time,
+        t.amount,
+        "Charge: " + money(t.charge || 0),
+        shift
       );
     });
 
     (session.expenses || []).forEach(e => {
-      addRecord("Expenses", e.category, todayDate, e.time, e.amount,
-        e.paymentMethod + (e.note ? " · " + e.note : ""));
+      addRecord(
+        "Expenses",
+        e.category,
+        todayDate,
+        e.time,
+        e.amount,
+        e.paymentMethod + (e.note ? " · " + e.note : ""),
+        shift
+      );
     });
 
     (session.cashMovements || []).forEach(m => {
-  movements.push([
-    day.date,
-    m.time || "",
-    m.account || "CASH",
-    m.type || "",
-    m.amount || 0,
-    m.note || ""
-  ]);
-});
-
-    (session.cashMovements || []).forEach(m => {
-      addRecord("Cash / Online Movements",
+      addRecord(
+        "Cash / Online Movements",
         (m.account || "CASH") + " " + m.type,
-        todayDate, m.time, m.amount, m.note);
+        todayDate,
+        m.time,
+        m.amount,
+        m.note,
+        shift
+      );
     });
   });
 
@@ -2544,7 +2542,10 @@ function renderTodayCompleteHistory() {
         addRecord(
           "Customer Ledger",
           (entry.label || entry.type) + " · " + customer.name,
-          entry.date, entry.time, entry.amount, entry.note
+          entry.date,
+          entry.time,
+          entry.amount,
+          entry.note
         );
       }
     });
@@ -2560,7 +2561,9 @@ function renderTodayCompleteHistory() {
         "Deleted Entries",
         (entry.deletedType || "Entry") + " · " +
           (entry.serviceName || entry.category || entry.type || ""),
-        todayDate, entry.deletedAt, entry.amount,
+        todayDate,
+        entry.deletedAt,
+        entry.amount,
         "Deleted record · " + (entry.note || entry.deletedFrom || "")
       );
     }
@@ -2579,7 +2582,7 @@ function renderTodayCompleteHistory() {
     <div style="max-height:650px;overflow-y:auto;padding:10px;border:1px solid var(--line);border-radius:10px;">
       ${records.length ? records.map(record => `
         <div style="padding:12px 4px;border-bottom:1px solid var(--line);">
-          <small>${safe(record.category)}</small>
+          <small>${safe(record.category)}${record.shift ? " · " + safe(record.shift) : ""}</small>
           <strong style="display:block;">${safe(record.title)}</strong>
           <p>${safe(record.time)}</p>
           <strong>${money(record.amount)}</strong>
