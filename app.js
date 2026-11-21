@@ -375,10 +375,10 @@ function generateReport() {
   const result = document.getElementById("reportResult");
 
   if (!days.length) {
-    result.innerHTML = "<p>No business records found for this period.</p>";
-    return;
-  }
-
+  window.currentReportData = null;
+  result.innerHTML = "<p>No business records found for this period.</p>";
+  return;
+}
   const totals = {
     cashProfit: 0,
     onlineProfit: 0,
