@@ -526,7 +526,6 @@ report.days.forEach(day => {
         e.paymentMethod || "CASH", e.amount || 0, e.note || ""
       ]);
     });
-  });
   
   (session.cashMovements || []).forEach(m => {
   movements.push([
@@ -536,8 +535,9 @@ report.days.forEach(day => {
     m.type || "",
     m.amount || 0,
     m.note || ""
-  ]);
-});
+       ]);
+     });
+   });
 
   const t = calculateDailyTotals(day);
   const lastSession = sessions[sessions.length - 1];
@@ -669,7 +669,6 @@ report.days.forEach(day => {
         pdfMoney(item.amount || 0),
         item.note || ""
       ]);
-    });
   });
 
   (session.cashMovements || []).forEach(item => {
@@ -680,8 +679,9 @@ report.days.forEach(day => {
     item.type || "",
     pdfMoney(item.amount || 0),
     item.note || ""
-  ]);
-});
+    ]);
+  });
+});    
 
   const t = calculateDailyTotals(day);
   const lastSession = sessions[sessions.length - 1];
@@ -752,17 +752,17 @@ report.days.forEach(day => {
     ["Date", "Time", "Type", "Amount", "Charge", "Charge Paid By", "Platform"],
     transactionRows
   );
-
-  addTable(
-    "Cash & Online Movements",
-    ["Date", "Time", "Account", "Movement", "Amount", "Note"],
-     movementRows
-  );
   
   addTable(
     "Expense Details",
     ["Date", "Time", "Category", "Paid By", "Amount", "Note"],
     expenseRows
+  );
+  
+  addTable(
+    "Cash & Online Movements",
+    ["Date", "Time", "Account", "Movement", "Amount", "Note"],
+     movementRows
   );
 
   addTable(
