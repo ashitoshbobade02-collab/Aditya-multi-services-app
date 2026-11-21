@@ -2521,6 +2521,17 @@ function renderTodayCompleteHistory() {
     });
 
     (session.cashMovements || []).forEach(m => {
+  movements.push([
+    day.date,
+    m.time || "",
+    m.account || "CASH",
+    m.type || "",
+    m.amount || 0,
+    m.note || ""
+  ]);
+});
+
+    (session.cashMovements || []).forEach(m => {
       addRecord("Cash / Online Movements",
         (m.account || "CASH") + " " + m.type,
         todayDate, m.time, m.amount, m.note);
