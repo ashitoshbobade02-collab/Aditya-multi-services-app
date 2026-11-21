@@ -1301,13 +1301,14 @@ setupArrowNavigation();
 function setupCustomerPaymentKeyboard() {
   const fields = [
     "customerPaymentAmount",
+    "customerPaymentMethod",
     "customerPaymentDate",
     "customerPaymentNote"
   ];
 
   let saving = false;
 
-  fields.forEach((id, index) => {
+  fields.forEach(id => {
     const field = document.getElementById(id);
     if (!field) return;
 
@@ -1325,8 +1326,17 @@ function setupCustomerPaymentKeyboard() {
 
       if (saving) return;
 
-      if (index < fields.length - 1) {
-        document.getElementById(fields[index + 1]).focus();
+      const visibleFields = fields.filter(fieldId => {
+        if (fieldId === "customerPaymentMethod") {
+          return document.getElementById("customerPaymentMethodGroup").style.display !== "none";
+        }
+        return true;
+      });
+
+      const currentIndex = visibleFields.indexOf(id);
+
+      if (currentIndex < visibleFields.length - 1) {
+        document.getElementById(visibleFields[currentIndex + 1]).focus();
       } else {
         const saveButton = document.querySelector(
           '#customerPaymentForm button[onclick="saveCustomerPayment()"]'
@@ -1659,6 +1669,14 @@ timestamp: new Date().toISOString(),
 ================================== */
 
 function calculateTotals(day) {
+    const ledgerPayments = Array.isArray(day.ledgerPayments)
+    ? day.ledgerPayments
+    : (data.customers || []).flatMap(customer =>
+        (customer.history || []).filter(entry =>
+          entry.date === day.date &&
+          entry.sessionNumber === day.sessionNumber
+        )
+      );
     const opening = day.opening || {};
   const transactions = Array.isArray(day.transactions)
     ? day.transactions
@@ -1765,6 +1783,25 @@ totals.profit += charge;
 
 
 (day.expenses || []).forEach(expense => {
+   
+   ledgerPayments.forEach(entry => {
+    if (!["received", "given"].includes(entry.type)) return;
+    if (!["CASH", "ONLINE"].includes(entry.paymentMethod)) return;
+
+    const amount = Number(entry.amount) || 0;
+    const balanceKey = entry.paymentMethod === "ONLINE"
+      ? "online"
+      : "cash";
+
+    if (entry.type === "received") {
+      totals[balanceKey] += amount;
+    }
+
+    if (entry.type === "given") {
+      totals[balanceKey] -= amount;
+    }
+  });
+  
   const amount = Number(expense.amount) || 0;
   const paymentMethod = expense.paymentMethod || "CASH";
 
@@ -1817,7 +1854,15 @@ function calculateDailyTotals(day) {
 
     expenses: sessions.flatMap(session =>
       session.expenses || []
+    ),
+    ledgerPayments: sessions.flatMap(session =>
+  (data.customers || []).flatMap(customer =>
+    (customer.history || []).filter(entry =>
+      entry.date === day.date &&
+      entry.sessionNumber === session.sessionNumber
     )
+  )
+)
   };
 
   return calculateTotals(combinedDay);
@@ -3359,6 +3404,9 @@ function openCustomerAccount(id) {
       <div style="padding:12px 0;border-bottom:1px solid var(--line);">
         <strong>${escapeLedgerHTML(entry.label)}</strong>
         <p>Amount: ${money(entry.amount)}</p>
+        ${entry.paymentMethod
+  ? `<p>Payment Method: ${entry.paymentMethod === "ONLINE" ? "Online" : "Cash"}</p>`
+  : ""}
         <p>Date: ${escapeLedgerHTML(entry.date)}</p>
         <p>Time: ${escapeLedgerHTML(entry.time)}</p>
         <p>Note: ${escapeLedgerHTML(entry.note || "No note")}</p>
@@ -3431,6 +3479,12 @@ paymentAmountInput.step = ["received", "given"].includes(mode)
 
   document.getElementById("customerPaymentFormTitle").textContent = titles[mode];
   document.getElementById("customerPaymentForm").style.display = "block";
+  const paymentMethodGroup = document.getElementById("customerPaymentMethodGroup");
+paymentMethodGroup.style.display = ["received", "given"].includes(mode)
+  ? "block"
+  : "none";
+
+document.getElementById("customerPaymentMethod").value = "CASH";
   document.getElementById("customerPaymentDate").value = today();
   document.getElementById("customerPaymentAmount").value = "";
   document.getElementById("customerPaymentNote").value = "";
@@ -3450,6 +3504,9 @@ function saveCustomerPayment() {
   const amount = Number(document.getElementById("customerPaymentAmount").value);
   const date = document.getElementById("customerPaymentDate").value;
   const note = document.getElementById("customerPaymentNote").value.trim();
+  const paymentMethod = ["received", "given"].includes(customerPaymentMode)
+  ? document.getElementById("customerPaymentMethod").value
+  : null;
 
   if (!Number.isFinite(amount) || amount <= 0) {
     showCustomPopup("Invalid Amount", "Enter a valid amount greater than zero.", "error");
@@ -3499,6 +3556,7 @@ function saveCustomerPayment() {
   type: mode,
   label,
   amount,
+  paymentMethod,
   date,
   time: new Date().toLocaleTimeString("en-IN"),
   note,
