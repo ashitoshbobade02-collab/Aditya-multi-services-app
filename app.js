@@ -1001,7 +1001,9 @@ function setupTransactionKeyboard() {
     "chargePaymentMethod"
   ];
 
-  fields.forEach((id, index) => {
+  let saving = false;
+
+  fields.forEach((id) => {
     const field = document.getElementById(id);
     if (!field) return;
 
@@ -1010,16 +1012,46 @@ function setupTransactionKeyboard() {
 
       event.preventDefault();
 
-      const nextField = document.getElementById(fields[index + 1]);
+      const popup = document.getElementById("customPopup");
 
-      if (nextField) {
-        nextField.focus();
+      if (popup && popup.style.display !== "none") {
+        document.getElementById("popupOkButton").click();
+        return;
+      }
+
+      if (saving) return;
+
+      const visibleFields = fields
+        .map(fieldId => document.getElementById(fieldId))
+        .filter(item =>
+          item &&
+          item.getClientRects().length > 0 &&
+          !item.disabled
+        );
+
+      const index = visibleFields.indexOf(field);
+
+      if (index < visibleFields.length - 1) {
+        visibleFields[index + 1].focus();
       } else {
-        addBusinessTransaction();
+        const saveButton = document.querySelector(
+          '#screen-transaction button[onclick="addBusinessTransaction()"]'
+        );
+
+        if (saveButton) {
+          saving = true;
+          saveButton.click();
+
+          setTimeout(() => {
+            saving = false;
+          }, 1000);
+        }
       }
     });
   });
 }
+
+setupTransactionKeyboard();
 
 function setupServiceKeyboard() {
   const fields = [
