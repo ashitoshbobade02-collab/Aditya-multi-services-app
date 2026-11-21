@@ -1952,30 +1952,28 @@ function showDashboardHistory(title, items, type) {
 }
 
 function openTodayTransactions() {
-  const day = currentDay();
-  const items = day
-    ? (day.transactions || []).filter(t => t.type !== "SERVICE")
-    : [];
+  const sessions = getReportDays(today(), today())[0]?.sessions || [];
+  const items = sessions
+    .flatMap(session => session.transactions || [])
+    .filter(t => t.type !== "SERVICE");
 
   showDashboardHistory("Today's Transactions", items, "transactions");
 }
 
 function openTodayServices() {
-  const day = currentDay();
-  const items = day
-    ? (day.transactions || []).filter(t => t.type === "SERVICE")
-    : [];
+  const sessions = getReportDays(today(), today())[0]?.sessions || [];
+  const items = sessions
+    .flatMap(session => session.transactions || [])
+    .filter(t => t.type === "SERVICE");
 
   showDashboardHistory("Today's Services", items, "services");
 }
 
 function openTodayWithdrawals() {
-  const day = currentDay();
-  const items = day
-    ? (day.transactions || []).filter(t =>
-        ["AEPS", "ONLINE_WITHDRAWAL"].includes(t.type)
-      )
-    : [];
+  const sessions = getReportDays(today(), today())[0]?.sessions || [];
+  const items = sessions
+    .flatMap(session => session.transactions || [])
+    .filter(t => ["AEPS", "ONLINE_WITHDRAWAL"].includes(t.type));
 
   showDashboardHistory("Today's Withdrawals", items, "withdrawals");
 }
