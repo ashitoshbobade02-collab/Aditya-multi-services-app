@@ -1180,6 +1180,56 @@ function setupCashMovementKeyboard() {
 
 setupCashMovementKeyboard();
 
+function setupExpenseKeyboard() {
+  const fields = [
+    "expenseCategory",
+    "expensePaymentMethod",
+    "expenseAmount",
+    "expenseNote"
+  ];
+
+  let saving = false;
+
+  fields.forEach((id, index) => {
+    const field = document.getElementById(id);
+    if (!field) return;
+
+    field.addEventListener("keydown", event => {
+      if (event.key !== "Enter") return;
+
+      event.preventDefault();
+
+      const popup = document.getElementById("customPopup");
+
+      if (popup && popup.style.display !== "none") {
+        document.getElementById("popupOkButton").click();
+        return;
+      }
+
+      if (saving) return;
+
+      if (index < fields.length - 1) {
+        document.getElementById(fields[index + 1]).focus();
+      } else {
+        const saveButton = document.querySelector(
+          '#screen-expenses button[onclick="saveExpense()"]'
+        );
+
+        if (saveButton) {
+          saving = true;
+          saveButton.click();
+
+          setTimeout(() => {
+            saving = false;
+          }, 1000);
+        }
+      }
+    });
+  });
+}
+
+setupExpenseKeyboard();
+
 function calculateChargePreview() {
   const type = document.getElementById("transactionType").value;
   const amount =
