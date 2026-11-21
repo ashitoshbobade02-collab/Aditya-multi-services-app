@@ -1782,12 +1782,12 @@ totals.profit += charge;
   if (entry.type === "OUT") totals[balanceKey] -= amount;
 });
 
-
 ledgerPayments.forEach(entry => {
-  if (!["received", "given", "addOwe"].includes(entry.type)) return;
+  if (!["received", "given", "addDue", "addOwe"].includes(entry.type)) return;
   if (!["CASH", "ONLINE"].includes(entry.paymentMethod)) return;
 
   const amount = Number(entry.amount) || 0;
+
   const balanceKey = entry.paymentMethod === "ONLINE"
     ? "online"
     : "cash";
@@ -1796,9 +1796,13 @@ ledgerPayments.forEach(entry => {
     totals[balanceKey] += amount;
   }
 
-  if (entry.type === "given" || entry.type === "addOwe") {
-  totals[balanceKey] -= amount;
-}
+  if (
+    entry.type === "given" ||
+    entry.type === "addDue" ||
+    entry.type === "addOwe"
+  ) {
+    totals[balanceKey] -= amount;
+  }
 });
 
 (day.expenses || []).forEach(expense => {
@@ -3471,11 +3475,12 @@ function showCustomerPaymentForm(mode) {
   if (!activeCustomerId) return;
 
   customerPaymentMode = mode;
-  
-const paymentAmountInput = document.getElementById("customerPaymentAmount");
-paymentAmountInput.step = ["received", "given"].includes(mode)
-  ? data.numberSteps.payment
-  : data.numberSteps.ledger;
+
+  const paymentAmountInput = document.getElementById("customerPaymentAmount");
+
+  paymentAmountInput.step = ["received", "given"].includes(mode)
+    ? data.numberSteps.payment
+    : data.numberSteps.ledger;
 
   const titles = {
     received: "Record Payment Received",
@@ -3486,15 +3491,19 @@ paymentAmountInput.step = ["received", "given"].includes(mode)
 
   document.getElementById("customerPaymentFormTitle").textContent = titles[mode];
   document.getElementById("customerPaymentForm").style.display = "block";
-  const paymentMethodGroup = document.getElementById("customerPaymentMethodGroup");
-paymentMethodGroup.style.display = ["received", "given", "addOwe"].includes(mode)
-  ? "block"
-  : "none";
 
-document.getElementById("customerPaymentMethod").value = "CASH";
+  const paymentMethodGroup = document.getElementById("customerPaymentMethodGroup");
+
+  paymentMethodGroup.style.display =
+    ["received", "given", "addDue", "addOwe"].includes(mode)
+      ? "block"
+      : "none";
+
+  document.getElementById("customerPaymentMethod").value = "CASH";
   document.getElementById("customerPaymentDate").value = today();
   document.getElementById("customerPaymentAmount").value = "";
   document.getElementById("customerPaymentNote").value = "";
+
   document.getElementById("customerPaymentAmount").focus();
 }
 
@@ -3508,12 +3517,18 @@ function saveCustomerPayment() {
 
   if (!customer || !customerPaymentMode) return;
 
-  const amount = Number(document.getElementById("customerPaymentAmount").value);
+  const amount = Number(
+    document.getElementById("customerPaymentAmount").value
+  );
+
   const date = document.getElementById("customerPaymentDate").value;
   const note = document.getElementById("customerPaymentNote").value.trim();
-  const paymentMethod = ["received", "given", "addOwe"].includes(customerPaymentMode)
-  ? document.getElementById("customerPaymentMethod").value
-  : null;
+
+  const mode = customerPaymentMode;
+
+  const paymentMethod = ["received", "given", "addDue", "addOwe"].includes(mode)
+    ? document.getElementById("customerPaymentMethod").value
+    : null;
 
   if (!Number.isFinite(amount) || amount <= 0) {
     showCustomPopup("Invalid Amount", "Enter a valid amount greater than zero.", "error");
@@ -3525,7 +3540,11 @@ function saveCustomerPayment() {
     return;
   }
 
-  const mode = customerPaymentMode;
+  if (["received", "given", "addDue", "addOwe"].includes(mode) &&
+      !["CASH", "ONLINE"].includes(paymentMethod)) {
+    showCustomPopup("Payment Method Required", "Select Cash or Online.", "error");
+    return;
+  }
 
   if (mode === "received" && amount > customerBalance(customer)) {
     showCustomPopup("Amount Too High", "Payment received cannot exceed the remaining customer due.", "error");
@@ -3542,14 +3561,17 @@ function saveCustomerPayment() {
       customer.totalDue += amount;
       return "New Customer Due";
     },
+
     received: () => {
       customer.received += amount;
       return "Payment Received";
     },
+
     addOwe: () => {
       customer.totalShopOwes += amount;
       return "New Amount We Owe";
     },
+
     given: () => {
       customer.given += amount;
       return "Payment Given";
@@ -3559,24 +3581,28 @@ function saveCustomerPayment() {
   const label = changes[mode]();
 
   customer.history.push({
-  id: "ledger_" + Date.now(),
-  type: mode,
-  label,
-  amount,
-  paymentMethod,
-  date,
-  time: new Date().toLocaleTimeString("en-IN"),
-  note,
-  sessionNumber: currentDay()?.sessionNumber || null
-});
+    id: "ledger_" + Date.now(),
+    type: mode,
+    label,
+    amount,
+    paymentMethod,
+    date,
+    time: new Date().toLocaleTimeString("en-IN"),
+    note,
+    sessionNumber: currentDay()?.sessionNumber || null
+  });
 
-    persist();
+  persist();
   refreshDashboard();
   hideCustomerPaymentForm();
   openCustomerAccount(customer.id);
   renderCustomerLedger();
-  
-  showCustomPopup("Ledger Updated", label + " has been recorded successfully.", "success");
+
+  showCustomPopup(
+    "Ledger Updated",
+    label + " has been recorded successfully.",
+    "success"
+  );
 }
 
 function deleteCustomerLedgerEntry(customerId, entryId) {
