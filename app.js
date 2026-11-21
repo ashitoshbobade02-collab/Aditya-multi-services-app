@@ -1670,8 +1670,9 @@ timestamp: new Date().toISOString(),
 
 function calculateTotals(day) {
     const ledgerPayments = Array.isArray(day.ledgerPayments)
-    ? day.ledgerPayments
-    : (data.customers || []).flatMap(customer =>
+  ? day.ledgerPayments
+  : [...(data.customers || []), ...(data.deletedCustomers || [])]
+      .flatMap(customer =>
         (customer.history || []).filter(entry =>
           entry.date === day.date &&
           entry.sessionNumber === day.sessionNumber
@@ -1868,15 +1869,20 @@ function calculateDailyTotals(day) {
     expenses: sessions.flatMap(session =>
       session.expenses || []
     ),
+
     ledgerPayments: sessions.flatMap(session =>
-  (data.customers || []).flatMap(customer =>
-    (customer.history || []).filter(entry =>
-      entry.date === day.date &&
-      entry.sessionNumber === session.sessionNumber
+      [...(data.customers || []), ...(data.deletedCustomers || [])]
+        .flatMap(customer =>
+          (customer.history || []).filter(entry =>
+            entry.date === day.date &&
+            entry.sessionNumber === session.sessionNumber
+          )
+        )
     )
-  )
-)
   };
+
+  return calculateTotals(combinedDay);
+}
 
   return calculateTotals(combinedDay);
 }
