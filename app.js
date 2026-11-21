@@ -1118,6 +1118,68 @@ if (saving) return;
 
 setupServiceKeyboard();
 
+function setupCashMovementKeyboard() {
+  const forms = [
+    {
+      fields: [
+        "cashMovementType",
+        "cashMovementAmount",
+        "cashMovementNote"
+      ],
+      button: '#screen-cash-movement button[onclick="saveCashMovement(\'CASH\')"]'
+    },
+    {
+      fields: [
+        "onlineMovementType",
+        "onlineMovementAmount",
+        "onlineMovementNote"
+      ],
+      button: '#screen-cash-movement button[onclick="saveCashMovement(\'ONLINE\')"]'
+    }
+  ];
+
+  forms.forEach(form => {
+    let saving = false;
+
+    form.fields.forEach((id, index) => {
+      const field = document.getElementById(id);
+      if (!field) return;
+
+      field.addEventListener("keydown", event => {
+        if (event.key !== "Enter") return;
+
+        event.preventDefault();
+
+        const popup = document.getElementById("customPopup");
+
+        if (popup && popup.style.display !== "none") {
+          document.getElementById("popupOkButton").click();
+          return;
+        }
+
+        if (saving) return;
+
+        if (index < form.fields.length - 1) {
+          document.getElementById(form.fields[index + 1]).focus();
+        } else {
+          const saveButton = document.querySelector(form.button);
+
+          if (saveButton) {
+            saving = true;
+            saveButton.click();
+
+            setTimeout(() => {
+              saving = false;
+            }, 1000);
+          }
+        }
+      });
+    });
+  });
+}
+
+setupCashMovementKeyboard();
+
 function calculateChargePreview() {
   const type = document.getElementById("transactionType").value;
   const amount =
