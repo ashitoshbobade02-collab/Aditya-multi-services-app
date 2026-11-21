@@ -1881,10 +1881,7 @@ function calculateDailyTotals(day) {
     )
   };
 
-  return calculateTotals(combinedDay);
-}
-
-  return calculateTotals(combinedDay);
+   return calculateTotals(combinedDay);
 }
 
 function saveCashMovement(account = "CASH") {
