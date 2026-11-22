@@ -441,12 +441,20 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
   <h3 class="section-title" id="historySection">History &amp; Calendar</h3>
 
   <div class="card">
-    <button onclick="showHistory()">TODAY'S COMPLETE HISTORY</button>
-    <button onclick="renderCalendar()">OPEN CALENDAR HISTORY</button>
-    <button onclick="exportData()">EXPORT BACKUP</button>
-    <div id="todayCompleteHistoryList"></div>
-    <div id="calendarHistoryList"></div>
-  </div>
+  <button onclick="showHistory()">TODAY'S COMPLETE HISTORY</button>
+  <button onclick="renderCalendar()">OPEN CALENDAR HISTORY</button>
+  <button onclick="exportData()">EXPORT BACKUP</button>
+  <button onclick="document.getElementById('restoreBackupFile').click()">RESTORE BACKUP</button>
+  <input
+    type="file"
+    id="restoreBackupFile"
+    accept=".json,application/json"
+    style="display:none"
+    onchange="restoreBackup(event)"
+  >
+  <div id="todayCompleteHistoryList"></div>
+  <div id="calendarHistoryList"></div>
+</div>
 
   </section>
 
