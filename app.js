@@ -2853,7 +2853,12 @@ function renderTodayCompleteHistory() {
   const container = document.getElementById("todayCompleteHistoryList");
   if (!container) return;
 
-  const todayDate = today();
+  const todayDate =
+  data.currentDay &&
+  !data.currentDay.closed &&
+  data.currentDay.date
+    ? data.currentDay.date
+    : today();
   const records = [];
 
   const addRecord = (category, title, date, time, amount, note = "", shift = "") => {
