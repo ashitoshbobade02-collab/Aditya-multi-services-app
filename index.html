@@ -450,6 +450,23 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
 
   </section>
 
+<section class="app-screen" id="screen-deleted-history">
+  <h3 class="section-title">Deleted Entries History</h3>
+
+  <div class="card">
+    <p>All deleted business entries are recorded here.</p>
+    <input
+      type="search"
+      id="deletedEntriesSearch"
+      placeholder="Search deleted entries"
+      oninput="renderDeletedEntriesHistory()"
+    >
+    <div id="deletedEntriesList">
+      <p>No deleted entries yet.</p>
+    </div>
+  </div>
+</section>
+  
 <section class="app-screen" id="screen-cash-movement">
   <h3 class="section-title">Cash In / Cash Out</h3>
 
