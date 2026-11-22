@@ -3421,6 +3421,9 @@ async function signInWithGoogle() {
 
 async function signInWithEmail() {
   const password = document.getElementById("loginPassword").value;
+  const forgotButton = document.getElementById("forgotPasswordButton");
+
+  forgotButton.style.display = "none";
 
   if (!password) {
     return showLoginMessage("Please enter your password.");
@@ -3446,6 +3449,14 @@ async function signInWithEmail() {
     document.getElementById("confirmPasswordGroup").style.display = "none";
 
   } catch (error) {
+    if (
+      error.code === "auth/wrong-password" ||
+      error.code === "auth/invalid-credential" ||
+      error.code === "auth/user-not-found"
+    ) {
+      forgotButton.style.display = "block";
+    }
+
     showLoginMessage("Sign-in failed. Check your email and password.");
   }
 }
