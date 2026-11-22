@@ -3499,7 +3499,16 @@ function confirmCustomPopup() {
 }
 
 window.alert = function(message) {
-  showCustomPopup("Aditya Multi Services", String(message), "success");
+  const text = String(message);
+
+  const isSuccess =
+    /successfully|saved!/i.test(text);
+
+  showCustomPopup(
+    isSuccess ? "Success!" : "Please Check",
+    text,
+    isSuccess ? "success" : "error"
+  );
 };
 /* ==================================
    SIDE MENU ACTIONS
