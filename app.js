@@ -570,7 +570,10 @@ report.days.forEach(day => {
   addSheet("Cash & Online", cashOnline);
   addSheet("Wallet Balances", wallets);
 
-  XLSX.writeFile(wb, "Aditya-Multi-Services-Report.xlsx");
+  XLSX.writeFile(
+  wb,
+  `Aditya-Multi-Services-Report-${report.startDate}-to-${report.endDate}.xlsx`
+);
 }
 
 function exportPDF() {
@@ -795,7 +798,9 @@ report.days.forEach(day => {
 
   addFooter();
 
-  doc.save("Aditya-Multi-Services-Report.pdf");
+  doc.save(
+  `Aditya-Multi-Services-Report-${report.startDate}-to-${report.endDate}.pdf`
+);
 }
 
 function persist() {
