@@ -3506,6 +3506,10 @@ async function createAccount() {
 
     confirmPassword.value = "";
     confirmGroup.style.display = "none";
+     
+document.getElementById("createAccountButton").style.display = "none";
+document.getElementById("resendVerificationButton").style.display = "block";
+document.getElementById("forgotPasswordButton").style.display = "none";
 
     } catch (error) {
     isCreatingAccount = false;
