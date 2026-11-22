@@ -16,6 +16,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  sendEmailVerification,
   onAuthStateChanged,
   signOut,
   linkWithPopup
@@ -72,6 +73,7 @@ const emptyData = () => ({
 
 let data = emptyData();
 let currentUser = null;
+let isCreatingAccount = false;
 let activeStorageKey = null;
 let cloudWriteQueue = Promise.resolve();
 let unsubscribeCloudListener = null;
