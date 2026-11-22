@@ -2030,6 +2030,8 @@ function setupWithdrawalKeyboard() {
     "withdrawalNote"
   ];
 
+  let saving = false;
+
   fields.forEach((id, index) => {
     const field = document.getElementById(id);
     if (!field) return;
@@ -2039,6 +2041,15 @@ function setupWithdrawalKeyboard() {
 
       event.preventDefault();
 
+      const popup = document.getElementById("customPopup");
+
+      if (popup && popup.style.display !== "none") {
+        document.getElementById("popupOkButton").click();
+        return;
+      }
+
+      if (saving) return;
+
       if (index < fields.length - 1) {
         document.getElementById(fields[index + 1]).focus();
       } else {
@@ -2046,7 +2057,14 @@ function setupWithdrawalKeyboard() {
           '#screen-wallet button[onclick="addOnlineWithdrawal()"]'
         );
 
-        if (saveButton) saveButton.click();
+        if (saveButton) {
+          saving = true;
+          saveButton.click();
+
+          setTimeout(() => {
+            saving = false;
+          }, 1000);
+        }
       }
     });
   });
