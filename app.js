@@ -3162,6 +3162,103 @@ function exportData() {
 
   URL.revokeObjectURL(url);
 }
+
+async function restoreBackup(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    let importedData;
+
+    try {
+      importedData = JSON.parse(reader.result);
+
+      if (
+        !importedData ||
+        typeof importedData !== "object" ||
+        Array.isArray(importedData) ||
+        !Array.isArray(importedData.days) ||
+        !Object.prototype.hasOwnProperty.call(importedData, "currentDay")
+      ) {
+        throw new Error("Invalid backup structure");
+      }
+
+    } catch (error) {
+      showCustomPopup(
+        "Invalid Backup",
+        "This file is not a valid Aditya Multi Services backup.",
+        "error"
+      );
+      event.target.value = "";
+      return;
+    }
+
+    showCustomConfirm(
+      "Restore Backup?",
+      "This will replace your current business data. A fresh backup of your current data will be downloaded first. Continue?",
+      async () => {
+        try {
+          // Download a safety backup before replacing current data.
+          exportData();
+
+          // Restore and normalize the selected backup.
+          data = normalizeData(importedData);
+
+          // Save restored data to this device and Firebase.
+          persist();
+
+          updateTransactionFields();
+          updateServiceFields();
+          updateServicePaymentFields();
+          renderTodayCompleteHistory();
+          renderDeletedEntriesHistory();
+          refreshDashboard();
+          renderCalendar();
+          renderNumberStepSettings();
+          renderDashboardVisibilitySettings();
+          applyDashboardVisibility();
+
+          openAppScreen(
+            data.currentDay && !data.currentDay.closed
+              ? "home"
+              : "opening"
+          );
+
+          showCustomPopup(
+            "Backup Restored",
+            "Your backup has been loaded. Cloud synchronization has been started.",
+            "success"
+          );
+
+        } catch (error) {
+          console.error("Backup restore failed:", error);
+
+          showCustomPopup(
+            "Restore Failed",
+            "Unable to restore this backup. Please check the file and try again.",
+            "error"
+          );
+        }
+
+        event.target.value = "";
+      }
+    );
+  };
+
+  reader.onerror = () => {
+    showCustomPopup(
+      "File Error",
+      "Unable to read this backup file.",
+      "error"
+    );
+    event.target.value = "";
+  };
+
+  reader.readAsText(file);
+}
+
 window.deleteBusinessEntry = deleteBusinessEntry;
 
 function restoreDeletedEntry(deletedId) {
@@ -4289,6 +4386,7 @@ Object.assign(window, {
   renderCalendar,
   toggleTheme,
   exportData,
+  restoreBackup,
   showCustomPopup,
   closeCustomPopup,
   signInWithGoogle,
