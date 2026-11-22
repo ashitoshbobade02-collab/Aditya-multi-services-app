@@ -74,6 +74,7 @@ const emptyData = () => ({
 let data = emptyData();
 let currentUser = null;
 let isCreatingAccount = false;
+let isResendingVerification = false;
 let activeStorageKey = null;
 let cloudWriteQueue = Promise.resolve();
 let unsubscribeCloudListener = null;
