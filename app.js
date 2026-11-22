@@ -2279,6 +2279,67 @@ refreshDashboard();
   );
 }
 
+function undoLastBusinessAction() {
+  const day = currentDay();
+
+  if (!day || day.closed) {
+    showCustomPopup("Undo Unavailable", "Undo is available only during an open Business Shift.", "error");
+    return;
+  }
+
+  const entries = [
+    ...(day.transactions || []).map(entry => ({
+      entry,
+      type: "transaction",
+      list: day.transactions
+    })),
+    ...(day.expenses || []).map(entry => ({
+      entry,
+      type: "expense",
+      list: day.expenses
+    })),
+    ...(day.cashMovements || []).map(entry => ({
+      entry,
+      type: "movement",
+      list: day.cashMovements
+    }))
+  ];
+
+  if (!entries.length) {
+    showCustomPopup("Nothing to Undo", "There are no entries to undo in this shift.", "info");
+    return;
+  }
+
+  entries.sort((a, b) =>
+    Number(b.entry.id || 0) - Number(a.entry.id || 0)
+  );
+
+  const latest = entries[0];
+
+  showCustomConfirm(
+    "Undo Last Action?",
+    "The latest entry will be removed from business totals and saved in Deleted Entries History.",
+    () => {
+      const index = latest.list.findIndex(
+        item => String(item.id) === String(latest.entry.id)
+      );
+
+      if (index === -1) return;
+
+      moveToDeletedHistory(latest.entry, latest.type, "Undo");
+      latest.list.splice(index, 1);
+
+      persist();
+      renderDeletedEntriesHistory();
+      refreshDashboard();
+
+      showCustomPopup("Undo Successful", "The last action has been undone.", "success");
+    }
+  );
+}
+
+window.undoLastBusinessAction = undoLastBusinessAction;
+
 function showDashboardHistory(title, items, type) {
   const popup = document.getElementById("dashboardHistoryPopup");
   const content = document.getElementById("dashboardHistoryContent");
@@ -3789,6 +3850,12 @@ if (backButton) {
     screenName !== "home" && appScreenHistory.length > 0
       ? "inline-flex"
       : "none";
+}
+  
+  const undoButton = document.getElementById("undoLastActionButton");
+
+if (undoButton) {
+  undoButton.style.display = isPreStart ? "none" : "inline-flex";
 }
 
  if (screenName === "deleted-history") {
