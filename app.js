@@ -1663,13 +1663,15 @@ function calculateTotals(day) {
       totals.cash -= amount;
     }
 
-    if (t.type === "ONLINE_WITHDRAWAL") {
-      if (t.platform === "Biznext") totals.biznext -= amount;
-      if (t.platform === "Roinet") totals.roinet -= amount;
-      if (t.platform === "Tez") totals.tez -= amount;
-      if (t.platform === "Fino") totals.fino -= amount;
-      if (t.platform === "SBI") totals.sbi -= amount;
-    }
+   if (t.type === "ONLINE_WITHDRAWAL") {
+  if (t.platform === "Biznext") totals.biznext -= amount;
+  if (t.platform === "Roinet") totals.roinet -= amount;
+  if (t.platform === "Tez") totals.tez -= amount;
+  if (t.platform === "Fino") totals.fino -= amount;
+  if (t.platform === "SBI") totals.sbi -= amount;
+
+  totals.online += amount;
+}
 
     if (t.type === "C+") {
       totals.cash += amount;
@@ -2011,7 +2013,7 @@ function addOnlineWithdrawal() {
 
   showCustomPopup(
     "Withdrawal Successful!",
-    "Your online balance withdrawal has been saved.",
+    "Money has been transferred from the selected wallet to Online Balance.",
     "success",
     `<div style="padding:12px;background:#f1f6fc;border-radius:10px;">
       <strong>Software:</strong> ${platform}
