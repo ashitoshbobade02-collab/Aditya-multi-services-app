@@ -3441,6 +3441,7 @@ resendButton.style.display = "none";
     await userCredential.user.reload();
 
     if (!userCredential.user.emailVerified) {
+      resendButton.style.display = "block";
       await signOut(auth);
 
       return showLoginMessage(
