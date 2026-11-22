@@ -4522,6 +4522,7 @@ Object.assign(window, {
   signInWithGoogle,
   signInWithEmail,
   createAccount,
+  resendVerificationEmail,
   resetPassword,
   showLoginMessage,
   logoutUser,
