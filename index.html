@@ -83,7 +83,11 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
     <div style="display:flex;gap:6px;align-items:center;">
     <button type="button" id="appBackButton" onclick="goBackAppScreen()" style="display:none;">← BACK</button>
-    <button type="button" class="menu-toggle" onclick="toggleDrawer()">☰ MENU</button>
+    <button type="button" id="undoLastActionButton"
+   onclick="undoLastBusinessAction()" style="display:none;">
+  ↶ UNDO
+ </button>
+      <button type="button" class="menu-toggle" onclick="toggleDrawer()">☰ MENU</button>
     </div>
       <div class="date" id="todayDate"></div>
 
