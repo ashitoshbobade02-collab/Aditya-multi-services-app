@@ -3187,7 +3187,7 @@ function renderDeletedEntriesHistory() {
   }
 
   container.innerHTML = filtered.map(entry => `
-    <article class="ledger-history-entry">
+    <article class="deleted-entry-history">
       <strong>${safe(entry.deletedType || "Entry")} · ${safe(entry.deletedFrom || "")}</strong>
       <p><strong>Amount:</strong> ${money(entry.amount)}</p>
       <p><strong>Original date:</strong> ${safe(entry.originalDate || "Not available")}</p>
