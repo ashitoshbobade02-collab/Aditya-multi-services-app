@@ -1615,7 +1615,8 @@ timestamp: new Date().toISOString(),
    BUSINESS CALCULATIONS
 ================================== */
 
-    const opening = day.opening || {};
+function calculateTotals(day) {
+  const opening = day.opening || {};
   const transactions = Array.isArray(day.transactions)
     ? day.transactions
     : [];
@@ -1717,29 +1718,6 @@ totals.profit += charge;
 
   if (entry.type === "IN") totals[balanceKey] += amount;
   if (entry.type === "OUT") totals[balanceKey] -= amount;
-});
-
-ledgerPayments.forEach(entry => {
-  if (!["received", "given", "addDue", "addOwe"].includes(entry.type)) return;
-  if (!["CASH", "ONLINE"].includes(entry.paymentMethod)) return;
-
-  const amount = Number(entry.amount) || 0;
-
-  const balanceKey = entry.paymentMethod === "ONLINE"
-    ? "online"
-    : "cash";
-
-  if (entry.type === "received") {
-    totals[balanceKey] += amount;
-  }
-
-  if (
-    entry.type === "given" ||
-    entry.type === "addDue" ||
-    entry.type === "addOwe"
-  ) {
-    totals[balanceKey] -= amount;
-  }
 });
 
 (day.expenses || []).forEach(expense => {
