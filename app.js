@@ -3786,7 +3786,9 @@ function openAppScreen(screenName, skipHistory = false) {
 
 if (backButton) {
   backButton.style.display =
-    appScreenHistory.length > 0 ? "inline-flex" : "none";
+    screenName !== "home" && appScreenHistory.length > 0
+      ? "inline-flex"
+      : "none";
 }
 
  if (screenName === "deleted-history") {
