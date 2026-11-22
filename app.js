@@ -4313,7 +4313,21 @@ onAuthStateChanged(auth, async (user) => {
   const header = document.querySelector("header");
   const main = document.querySelector("main");
 
-  if (user) {
+   if (user) {
+    if (isCreatingAccount) {
+      return;
+    }
+
+    await user.reload();
+
+    if (user.email && !user.emailVerified) {
+      await signOut(auth);
+      showLoginMessage(
+        "Your email is not verified. Please check your inbox and click the verification link."
+      );
+      return;
+    }
+
     loginScreen.style.display = "none";
     header.style.display = "";
     main.style.display = "";
