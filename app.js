@@ -4361,9 +4361,9 @@ onAuthStateChanged(auth, async (user) => {
   const main = document.querySelector("main");
 
    if (user) {
-    if (isCreatingAccount) {
-      return;
-    }
+    if (isCreatingAccount || isResendingVerification) {
+  return;
+}
 
     await user.reload();
 
