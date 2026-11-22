@@ -2267,8 +2267,12 @@ function showDashboardHistory(title, items, type) {
 }
 
 function openTodayTransactions() {
-  const sessions = getReportDays(today(), today())[0]?.sessions || [];
-  const items = sessions
+  const reportDay = getReportDays(today(), today())[0] || {
+    date: today(),
+    sessions: currentDay() ? getDaySessions(currentDay()) : []
+  };
+
+  const items = (reportDay.sessions || [])
     .flatMap(session => session.transactions || [])
     .filter(t => t.type !== "SERVICE");
 
@@ -2276,8 +2280,12 @@ function openTodayTransactions() {
 }
 
 function openTodayServices() {
-  const sessions = getReportDays(today(), today())[0]?.sessions || [];
-  const items = sessions
+  const reportDay = getReportDays(today(), today())[0] || {
+    date: today(),
+    sessions: currentDay() ? getDaySessions(currentDay()) : []
+  };
+
+  const items = (reportDay.sessions || [])
     .flatMap(session => session.transactions || [])
     .filter(t => t.type === "SERVICE");
 
@@ -2285,13 +2293,18 @@ function openTodayServices() {
 }
 
 function openTodayWithdrawals() {
-  const sessions = getReportDays(today(), today())[0]?.sessions || [];
-  const items = sessions
+  const reportDay = getReportDays(today(), today())[0] || {
+    date: today(),
+    sessions: currentDay() ? getDaySessions(currentDay()) : []
+  };
+
+  const items = (reportDay.sessions || [])
     .flatMap(session => session.transactions || [])
     .filter(t => ["AEPS", "ONLINE_WITHDRAWAL"].includes(t.type));
 
   showDashboardHistory("Today's Withdrawals", items, "withdrawals");
 }
+
 
 function closeDashboardHistory() {
   document.getElementById("dashboardHistoryPopup").style.display = "none";
