@@ -41,7 +41,6 @@ const emptyData = () => ({
   days: [],
   currentDay: null,
   walletCarryForward: null,
-  customers: [],
   deletedEntries: [],
   numberSteps: {
     opening: 10,
@@ -50,8 +49,7 @@ const emptyData = () => ({
     service: 1,
     closing: 1,
     withdrawal: 1,
-    payment: 10,
-    ledger: 1
+    payment: 10
   },
   dashboardVisibility: {
     biznext: true,
@@ -80,14 +78,16 @@ let unsubscribeCloudListener = null;
 let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
 let selectedHistoryDate = today();
 
-
 function normalizeData(value) {
   const clean = value && typeof value === "object" ? value : emptyData();
 
   if (!Array.isArray(clean.days)) clean.days = [];
-  if (!Array.isArray(clean.customers)) clean.customers = [];
   if (!Array.isArray(clean.deletedEntries)) clean.deletedEntries = [];
-  if (!Array.isArray(clean.deletedCustomers)) clean.deletedCustomers = [];
+
+  // Remove old Customer Ledger data only
+  delete clean.customers;
+  delete clean.deletedCustomers;
+
   if (!Object.prototype.hasOwnProperty.call(clean, "currentDay")) clean.currentDay = null;
   if (!Object.prototype.hasOwnProperty.call(clean, "walletCarryForward")) clean.walletCarryForward = null;
 
@@ -98,13 +98,16 @@ function normalizeData(value) {
     ...(clean.numberSteps || {})
   };
 
+  // Remove the old ledger number step
+  delete clean.numberSteps.ledger;
+
   clean.dashboardVisibility = {
     ...defaults.dashboardVisibility,
     ...(clean.dashboardVisibility || {})
-   };
+  };
+
   return clean;
 }
-
 
 function getDaySessions(day) {
   if (!day) return [];
@@ -116,6 +119,16 @@ function getDaySessions(day) {
 
   // Old format: preserve existing business-day records
   return [day];
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
 }
 
 function money(value) {
@@ -136,8 +149,7 @@ function renderNumberStepSettings() {
     service: "stepService",
     closing: "stepClosing",
     withdrawal: "stepWithdrawal",
-    payment: "stepPayment",
-    ledger: "stepLedger"
+    payment: "stepPayment"
   };
 
   Object.entries(fields).forEach(([key, id]) => {
@@ -252,12 +264,6 @@ function setupNumberWheelSteps() {
     ) return;
 
     let key = fieldSettings[input.id];
-
-    if (input.id === "customerPaymentAmount") {
-      key = ["received", "given"].includes(customerPaymentMode)
-        ? "payment"
-        : "ledger";
-    }
 
     if (!key) return;
 
@@ -1298,65 +1304,6 @@ function setupArrowNavigation() {
 
 setupArrowNavigation();
 
-function setupCustomerPaymentKeyboard() {
-  const fields = [
-    "customerPaymentAmount",
-    "customerPaymentMethod",
-    "customerPaymentDate",
-    "customerPaymentNote"
-  ];
-
-  let saving = false;
-
-  fields.forEach(id => {
-    const field = document.getElementById(id);
-    if (!field) return;
-
-    field.addEventListener("keydown", event => {
-      if (event.key !== "Enter") return;
-
-      event.preventDefault();
-
-      const popup = document.getElementById("customPopup");
-
-      if (popup && popup.style.display !== "none") {
-        document.getElementById("popupOkButton").click();
-        return;
-      }
-
-      if (saving) return;
-
-      const visibleFields = fields.filter(fieldId => {
-        if (fieldId === "customerPaymentMethod") {
-          return document.getElementById("customerPaymentMethodGroup").style.display !== "none";
-        }
-        return true;
-      });
-
-      const currentIndex = visibleFields.indexOf(id);
-
-      if (currentIndex < visibleFields.length - 1) {
-        document.getElementById(visibleFields[currentIndex + 1]).focus();
-      } else {
-        const saveButton = document.querySelector(
-          '#customerPaymentForm button[onclick="saveCustomerPayment()"]'
-        );
-
-        if (saveButton) {
-          saving = true;
-          saveButton.click();
-
-          setTimeout(() => {
-            saving = false;
-          }, 1000);
-        }
-      }
-    });
-  });
-}
-
-setupCustomerPaymentKeyboard();
-
 function calculateChargePreview() {
   const type = document.getElementById("transactionType").value;
   const amount =
@@ -1657,7 +1604,7 @@ timestamp: new Date().toISOString(),
   "Your service entry has been recorded successfully.",
   "success",
   `<div style="padding:12px;background:#f1f6fc;border-radius:10px;">
-    <strong>Service:</strong> ${escapeLedgerHTML(serviceName)}
+    <strong>Service:</strong> ${escapeHTML(serviceName)}
     <br>
     <strong>Amount:</strong> ${money(amount)}
   </div>`
@@ -1668,16 +1615,6 @@ timestamp: new Date().toISOString(),
    BUSINESS CALCULATIONS
 ================================== */
 
-function calculateTotals(day) {
-    const ledgerPayments = Array.isArray(day.ledgerPayments)
-  ? day.ledgerPayments
-  : [...(data.customers || []), ...(data.deletedCustomers || [])]
-      .flatMap(customer =>
-        (customer.history || []).filter(entry =>
-          entry.date === day.date &&
-          entry.sessionNumber === day.sessionNumber
-        )
-      );
     const opening = day.opening || {};
   const transactions = Array.isArray(day.transactions)
     ? day.transactions
@@ -1864,16 +1801,6 @@ function calculateDailyTotals(day) {
     expenses: sessions.flatMap(session =>
       session.expenses || []
     ),
-
-    ledgerPayments: sessions.flatMap(session =>
-      [...(data.customers || []), ...(data.deletedCustomers || [])]
-        .flatMap(customer =>
-          (customer.history || []).filter(entry =>
-            entry.date === day.date &&
-            entry.sessionNumber === session.sessionNumber
-          )
-        )
-    )
   };
 
    return calculateTotals(combinedDay);
@@ -2319,7 +2246,7 @@ function showDashboardHistory(title, items, type) {
       let heading = t.type === "ONLINE_WITHDRAWAL"
         ? (t.platform + " Withdrawal")
         : t.type === "SERVICE"
-          ? escapeLedgerHTML(t.serviceName || "")
+          ? escapeHTML(t.serviceName || "")
           : t.type + (t.platform ? " · " + t.platform : "");
 
       let details = "";
@@ -2567,7 +2494,7 @@ document.getElementById("combinedCollection").textContent =
     serviceList.innerHTML = services.length
       ? services.map(t => `
           <div style="padding:12px 0;border-bottom:1px solid #e2eaf2">
-            <strong>${escapeLedgerHTML(t.serviceName || "")}</strong>
+            <strong>${escapeHTML(t.serviceName || "")}</strong>
             <p>${t.time}</p>
             <p>${t.quantity ? "Quantity: " + t.quantity : "Direct amount entry"}</p>
             <p>Amount: ${money(t.amount)}</p>
@@ -2952,24 +2879,6 @@ function renderTodayCompleteHistory() {
     });
   });
 
-  (data.customers || []).forEach(customer => {
-    (customer.history || []).forEach(entry => {
-      if (entry.date === todayDate) {
-        addRecord(
-          "Customer Ledger",
-          (entry.label || entry.type) + " · " + customer.name,
-          entry.date,
-          entry.time,
-          entry.amount,
-          entry.note,
-          entry.sessionNumber
-            ? "Business Shift " + entry.sessionNumber
-            : "Other Records"
-        );
-      }
-    });
-  });
-
   (data.deletedEntries || []).forEach(entry => {
     const deletionDate = entry.deletedTimestamp
       ? entry.deletedTimestamp.slice(0, 10)
@@ -3211,441 +3120,6 @@ function exportData() {
 
   URL.revokeObjectURL(url);
 }
-
-/* ==================================
-   CUSTOMER LEDGER
-================================== */
-
-let activeCustomerId = null;
-let customerPaymentMode = null;
-
-function escapeLedgerHTML(value) {
-  return String(value ?? "").replace(/[&<>"']/g, char => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
-  })[char]);
-}
-
-function getCustomer(id) {
-  return data.customers.find(customer => customer.id === id);
-}
-
-function customerBalance(customer) {
-  return Math.max(0, Number(customer.totalDue || 0) - Number(customer.received || 0));
-}
-
-function shopOwesBalance(customer) {
-  return Math.max(0, Number(customer.totalShopOwes || 0) - Number(customer.given || 0));
-}
-
-function initializeCustomerLedger() {
-  data.customers.forEach(customer => {
-    if (!Array.isArray(customer.history)) customer.history = [];
-    if (!Number.isFinite(Number(customer.totalDue))) customer.totalDue = 0;
-    if (!Number.isFinite(Number(customer.received))) customer.received = 0;
-    if (!Number.isFinite(Number(customer.totalShopOwes))) customer.totalShopOwes = 0;
-    if (!Number.isFinite(Number(customer.given))) customer.given = 0;
-  });
-
-  const search = document.getElementById("customerSearch");
-
-  if (search && !search.dataset.ledgerReady) {
-    search.addEventListener("input", renderCustomerLedger);
-    search.dataset.ledgerReady = "true";
-  }
-
-  renderCustomerLedger();
-}
-
-function showAddCustomerForm() {
-  document.getElementById("customerFormSection").style.display = "block";
-  document.getElementById("customerName").focus();
-}
-
-function hideAddCustomerForm() {
-  document.getElementById("customerFormSection").style.display = "none";
-  document.getElementById("customerName").value = "";
-  document.getElementById("customerMobile").value = "";
-}
-
-function addLedgerCustomer() {
-  const name = document.getElementById("customerName").value.trim();
-  const mobile = document.getElementById("customerMobile").value.trim();
-
-  if (!name) {
-    showCustomPopup("Customer Name Required", "Please enter the customer's name.", "error");
-    return;
-  }
-
-  const duplicate = data.customers.some(customer =>
-    mobile && customer.mobile && customer.mobile === mobile
-  );
-
-  if (duplicate) {
-    showCustomPopup("Customer Already Exists", "A customer with this mobile number already exists.", "error");
-    return;
-  }
-
-  const customer = {
-    id: "customer_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8),
-    name,
-    mobile,
-    totalDue: 0,
-    received: 0,
-    totalShopOwes: 0,
-    given: 0,
-    history: [],
-    createdAt: new Date().toISOString()
-  };
-
-  data.customers.push(customer);
-
-  persist();
-  hideAddCustomerForm();
-  renderCustomerLedger();
-
-  showCustomPopup("Customer Added", name + " has been added successfully.", "success");
-}
-
-function renderCustomerLedger() {
-  const list = document.getElementById("customerList");
-  const owesTotal = document.getElementById("customerOwesTotal");
-  const shopOwesTotal = document.getElementById("shopOwesTotal");
-  const report = document.getElementById("customerOutstandingReport");
-
-  if (!list || !owesTotal || !shopOwesTotal || !report) return;
-
-  const customers = data.customers || [];
-
-  const totalCustomerOwes = customers.reduce(
-    (sum, customer) => sum + customerBalance(customer), 0
-  );
-
-  const totalShopOwes = customers.reduce(
-    (sum, customer) => sum + shopOwesBalance(customer), 0
-  );
-
-  owesTotal.textContent = money(totalCustomerOwes);
-  shopOwesTotal.textContent = money(totalShopOwes);
-
-  const search = (document.getElementById("customerSearch")?.value || "")
-    .trim().toLowerCase();
-
-  const filtered = customers.filter(customer =>
-    customer.name.toLowerCase().includes(search) ||
-    String(customer.mobile || "").toLowerCase().includes(search)
-  );
-
-  if (!filtered.length) {
-    list.innerHTML = customers.length
-      ? "<p>No matching customers found.</p>"
-      : "<p>No customers added yet.</p>";
-  } else {
-    list.innerHTML = filtered.map(customer => {
-      const due = customerBalance(customer);
-      const payable = shopOwesBalance(customer);
-
-      return `
-        <div class="customer-ledger-card"
-          style="padding:15px 0;border-bottom:1px solid var(--line);">
-
-          <strong>${escapeLedgerHTML(customer.name)}</strong>
-          <p>${escapeLedgerHTML(customer.mobile || "No mobile number")}</p>
-
-          <p>Remaining customer due:
-            <strong>${money(due)}</strong>
-          </p>
-
-          <p>Remaining amount we owe:
-            <strong>${money(payable)}</strong>
-          </p>
-
-          <button type="button"
-            onclick="openCustomerAccount('${escapeLedgerHTML(customer.id)}')">
-            VIEW ACCOUNT &amp; HISTORY
-          </button>
-        </div>
-      `;
-    }).join("");
-  }
-
-  const outstanding = customers.filter(customer =>
-    customerBalance(customer) > 0 || shopOwesBalance(customer) > 0
-  );
-
-  report.innerHTML = outstanding.length
-    ? outstanding.map(customer => `
-        <div style="padding:12px 0;border-bottom:1px solid var(--line);">
-          <strong>${escapeLedgerHTML(customer.name)}</strong>
-          <p>Customer owes us: ${money(customerBalance(customer))}</p>
-          <p>We owe customer: ${money(shopOwesBalance(customer))}</p>
-        </div>
-      `).join("")
-    : "<p>No outstanding balances yet.</p>";
-}
-
-function openCustomerAccount(id) {
-  const customer = getCustomer(id);
-
-  if (!customer) return;
-
-  activeCustomerId = id;
-
-  document.getElementById("customerAccountSection").style.display = "block";
-  document.getElementById("customerAccountName").textContent = customer.name;
-  document.getElementById("customerAccountMobile").textContent =
-    customer.mobile || "No mobile number added";
-
-  document.getElementById("customerTotalDue").textContent = money(customer.totalDue);
-  document.getElementById("customerPaymentReceived").textContent = money(customer.received);
-  document.getElementById("customerRemainingBalance").textContent =
-    money(customerBalance(customer));
-  document.getElementById("customerShopOwes").textContent =
-    money(shopOwesBalance(customer));
-
-  const history = document.getElementById("customerPaymentHistory");
-
-  if (!customer.history.length) {
-    history.innerHTML = "<p>No payment history yet.</p>";
-  } else {
-    history.innerHTML = [...customer.history].reverse().map(entry => `
-      <div style="padding:12px 0;border-bottom:1px solid var(--line);">
-        <strong>${escapeLedgerHTML(entry.label)}</strong>
-        <p>Amount: ${money(entry.amount)}</p>
-        ${entry.paymentMethod
-  ? `<p>Payment Method: ${entry.paymentMethod === "ONLINE" ? "Online" : "Cash"}</p>`
-  : ""}
-        <p>Date: ${escapeLedgerHTML(entry.date)}</p>
-        <p>Time: ${escapeLedgerHTML(entry.time)}</p>
-        <p>Note: ${escapeLedgerHTML(entry.note || "No note")}</p>
-      </div>
-    `).join("");
-  }
-
-  document.getElementById("customerPaymentForm").style.display = "none";
-  document.getElementById("customerAccountSection").scrollIntoView({ behavior: "smooth" });
-}
-
-
-function closeCustomerAccount() {
-  document.getElementById("customerAccountSection").style.display = "none";
-  document.getElementById("customerPaymentForm").style.display = "none";
-  activeCustomerId = null;
-  customerPaymentMode = null;
-}
-
-function deleteLedgerCustomer() {
-  const customer = getCustomer(activeCustomerId);
-
-  if (!customer) return;
-
-  showCustomConfirm(
-    "Delete Customer?",
-    "Delete " + customer.name + "? Their complete account and payment history will be preserved in Deleted Entries History and can be restored later.",
-    () => {
-      const deletedCustomer = JSON.parse(JSON.stringify(customer));
-
-      deletedCustomer.deletedAt = new Date().toLocaleString("en-IN");
-      deletedCustomer.deletedTimestamp = new Date().toISOString();
-
-      data.deletedCustomers = data.deletedCustomers || [];
-      data.deletedCustomers.push(deletedCustomer);
-
-      data.customers = data.customers.filter(
-        item => item.id !== customer.id
-      );
-
-      closeCustomerAccount();
-      persist();
-      renderCustomerLedger();
-
-      showCustomPopup(
-        "Customer Deleted",
-        customer.name + " was moved to deleted customers.",
-        "success"
-      );
-    }
-  );
-}
-
-function showCustomerPaymentForm(mode) {
-  if (!activeCustomerId) return;
-
-  customerPaymentMode = mode;
-
-  const paymentAmountInput = document.getElementById("customerPaymentAmount");
-
-  paymentAmountInput.step = ["received", "given"].includes(mode)
-    ? data.numberSteps.payment
-    : data.numberSteps.ledger;
-
-  const titles = {
-    received: "Record Payment Received",
-    given: "Record Payment Given",
-    addDue: "Add Amount Customer Owes Us",
-    addOwe: "Add Amount We Owe Customer"
-  };
-
-  document.getElementById("customerPaymentFormTitle").textContent = titles[mode];
-  document.getElementById("customerPaymentForm").style.display = "block";
-
-  const paymentMethodGroup = document.getElementById("customerPaymentMethodGroup");
-
-  paymentMethodGroup.style.display =
-    ["received", "given", "addDue", "addOwe"].includes(mode)
-      ? "block"
-      : "none";
-
-  document.getElementById("customerPaymentMethod").value = "CASH";
-  document.getElementById("customerPaymentDate").value = today();
-  document.getElementById("customerPaymentAmount").value = "";
-  document.getElementById("customerPaymentNote").value = "";
-
-  document.getElementById("customerPaymentAmount").focus();
-}
-
-function hideCustomerPaymentForm() {
-  document.getElementById("customerPaymentForm").style.display = "none";
-  customerPaymentMode = null;
-}
-
-function saveCustomerPayment() {
-  const customer = getCustomer(activeCustomerId);
-
-  if (!customer || !customerPaymentMode) return;
-
-  const amount = Number(
-    document.getElementById("customerPaymentAmount").value
-  );
-
-  const date = document.getElementById("customerPaymentDate").value;
-  const note = document.getElementById("customerPaymentNote").value.trim();
-
-  const mode = customerPaymentMode;
-
-  const paymentMethod = ["received", "given", "addDue", "addOwe"].includes(mode)
-    ? document.getElementById("customerPaymentMethod").value
-    : null;
-
-  if (!Number.isFinite(amount) || amount <= 0) {
-    showCustomPopup("Invalid Amount", "Enter a valid amount greater than zero.", "error");
-    return;
-  }
-
-  if (!date) {
-    showCustomPopup("Date Required", "Please select the payment date.", "error");
-    return;
-  }
-
-  if (["received", "given", "addDue", "addOwe"].includes(mode) &&
-      !["CASH", "ONLINE"].includes(paymentMethod)) {
-    showCustomPopup("Payment Method Required", "Select Cash or Online.", "error");
-    return;
-  }
-
-  if (mode === "received" && amount > customerBalance(customer)) {
-    showCustomPopup("Amount Too High", "Payment received cannot exceed the remaining customer due.", "error");
-    return;
-  }
-
-  if (mode === "given" && amount > shopOwesBalance(customer)) {
-    showCustomPopup("Amount Too High", "Payment given cannot exceed the amount we still owe this customer.", "error");
-    return;
-  }
-
-  const changes = {
-    addDue: () => {
-      customer.totalDue += amount;
-      return "New Customer Due";
-    },
-
-    received: () => {
-      customer.received += amount;
-      return "Payment Received";
-    },
-
-    addOwe: () => {
-      customer.totalShopOwes += amount;
-      return "New Amount We Owe";
-    },
-
-    given: () => {
-      customer.given += amount;
-      return "Payment Given";
-    }
-  };
-
-  const label = changes[mode]();
-
-  customer.history.push({
-    id: "ledger_" + Date.now(),
-    type: mode,
-    label,
-    amount,
-    paymentMethod,
-    date,
-    time: new Date().toLocaleTimeString("en-IN"),
-    note,
-    sessionNumber: currentDay()?.sessionNumber || null
-  });
-
-  persist();
-  refreshDashboard();
-  hideCustomerPaymentForm();
-  openCustomerAccount(customer.id);
-  renderCustomerLedger();
-
-  showCustomPopup(
-    "Ledger Updated",
-    label + " has been recorded successfully.",
-    "success"
-  );
-}
-
-function deleteCustomerLedgerEntry(customerId, entryId) {
-  const customer = getCustomer(customerId);
-  if (!customer) return;
-
-  const index = (customer.history || []).findIndex(
-    entry => String(entry.id) === String(entryId)
-  );
-
-  if (index === -1) return;
-
-  showCustomConfirm(
-    "Delete Ledger Entry?",
-    "This entry will be removed from the customer balance and saved in Deleted Entries History.",
-    () => {
-      const entry = customer.history[index];
-      const amount = Number(entry.amount) || 0;
-
-      if (entry.type === "addDue") customer.totalDue -= amount;
-      if (entry.type === "received") customer.received -= amount;
-      if (entry.type === "addOwe") customer.totalShopOwes -= amount;
-      if (entry.type === "given") customer.given -= amount;
-
-      moveToDeletedHistory(
-        { ...entry, customerId: customer.id, customerName: customer.name },
-        "ledger",
-        "Customer Ledger"
-      );
-
-      customer.history.splice(index, 1);
-      persist();
-      refreshDashboard();
-      openCustomerAccount(customer.id);
-      renderCustomerLedger();
-      renderCustomerLedgerHistory();
-
-      showCustomPopup("Deleted", "Ledger entry removed successfully.", "success");
-    }
-  );
-}
-
-window.deleteCustomerLedgerEntry = deleteCustomerLedgerEntry;
 window.deleteBusinessEntry = deleteBusinessEntry;
 
 function restoreDeletedEntry(deletedId) {
@@ -3655,79 +3129,37 @@ function restoreDeletedEntry(deletedId) {
 
   if (!entry || entry.restoredAt) return;
 
-  if (entry.deletedType === "ledger") {
-    const customer = getCustomer(entry.customerId);
+  const day = currentDay();
 
-    if (!customer) {
-      showCustomPopup("Restore Failed", "The original customer no longer exists.", "error");
-      return;
-    }
-
-    customer.history = customer.history || [];
-
-    if (customer.history.some(item => String(item.id) === String(entry.id))) {
-      showCustomPopup("Already Exists", "This ledger entry is already present.", "error");
-      return;
-    }
-
-    const amount = Number(entry.amount) || 0;
-
-    if (entry.type === "addDue") customer.totalDue += amount;
-    if (entry.type === "received") customer.received += amount;
-    if (entry.type === "addOwe") customer.totalShopOwes += amount;
-    if (entry.type === "given") customer.given += amount;
-
-    customer.history.push({
-  id: entry.id,
-  type: entry.type,
-  label: entry.label,
-      amount,
-      paymentMethod: entry.paymentMethod || null,
-      date: entry.date,
-      time: entry.time,
-  note: entry.note,
-  sessionNumber: entry.sessionNumber || currentDay()?.sessionNumber || null
-});
-
-    openCustomerAccount(customer.id);
-    renderCustomerLedger();
-    renderCustomerLedgerHistory();
-
-  } else {
-    const day = currentDay();
-
-    if (
-      !day ||
-      day.closed ||
-      day.date !== entry.businessDate ||
-      Number(day.sessionNumber) !== Number(entry.sessionNumber)
-    ) {
-      showCustomPopup(
-        "Cannot Restore",
-        "The original Business Shift is no longer open. Closed shifts cannot be edited.",
-        "error"
-      );
-      return;
-    }
-
-    const list = entry.deletedType === "expense"
-      ? day.expenses
-      : entry.deletedType === "movement"
-        ? day.cashMovements
-        : day.transactions;
-
-    if (list.some(item => String(item.id) === String(entry.id))) {
-      showCustomPopup("Already Exists", "This entry is already present.", "error");
-      return;
-    }
-
-    list.push({
-      ...entry
-    });
-
-    if (entry.deletedType === "expense") renderExpenseList();
-    if (entry.deletedType === "movement") renderCashMovements();
+  if (
+    !day ||
+    day.closed ||
+    day.date !== entry.businessDate ||
+    Number(day.sessionNumber) !== Number(entry.sessionNumber)
+  ) {
+    showCustomPopup(
+      "Cannot Restore",
+      "The original Business Shift is no longer open. Closed shifts cannot be edited.",
+      "error"
+    );
+    return;
   }
+
+  const list = entry.deletedType === "expense"
+    ? day.expenses
+    : entry.deletedType === "movement"
+      ? day.cashMovements
+      : day.transactions;
+
+  if (list.some(item => String(item.id) === String(entry.id))) {
+    showCustomPopup("Already Exists", "This entry is already present.", "error");
+    return;
+  }
+
+  list.push({ ...entry });
+
+  if (entry.deletedType === "expense") renderExpenseList();
+  if (entry.deletedType === "movement") renderCashMovements();
 
   entry.restoredAt = new Date().toLocaleString("en-IN");
 
@@ -3740,10 +3172,6 @@ function restoreDeletedEntry(deletedId) {
 
 window.renderDeletedEntriesHistory = renderDeletedEntriesHistory;
 window.restoreDeletedEntry = restoreDeletedEntry;
-window.renderDeletedCustomers = renderDeletedCustomers;
-window.restoreDeletedCustomer = restoreDeletedCustomer;
-window.deleteLedgerCustomer = deleteLedgerCustomer;
-
 
 function renderDeletedEntriesHistory() {
   const container = document.getElementById("deletedEntriesList");
@@ -3751,7 +3179,14 @@ function renderDeletedEntriesHistory() {
 
   if (!container) return;
 
-  const safe = value => escapeLedgerHTML(String(value ?? ""));
+  const safe = value => String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  })[char]);
+
   const query = (searchInput?.value || "").trim().toLowerCase();
   const entries = (data.deletedEntries || []).slice().reverse();
 
@@ -3763,7 +3198,6 @@ function renderDeletedEntriesHistory() {
       entry.type,
       entry.serviceName,
       entry.platform,
-      entry.customerName,
       entry.note,
       entry.originalDate
     ].some(value => String(value || "").toLowerCase().includes(query))
@@ -3787,154 +3221,6 @@ function renderDeletedEntriesHistory() {
         : `<button onclick="restoreDeletedEntry('${safe(entry.deletedId)}')">Restore</button>`}
     </article>
   `).join("");
-}
-
-function renderDeletedCustomers() {
-  const container = document.getElementById("deletedCustomersList");
-  if (!container) return;
-
-  const safe = value => escapeLedgerHTML(String(value ?? ""));
-  const customers = (data.deletedCustomers || []).slice().reverse();
-
-  if (!customers.length) {
-    container.innerHTML = "<p>No deleted customers yet.</p>";
-    return;
-  }
-
-  container.innerHTML = customers.map(customer => `
-    <article class="ledger-history-entry">
-      <strong>${safe(customer.name || "Unnamed customer")}</strong>
-      <p>Mobile: ${safe(customer.mobile || "No mobile number")}</p>
-      <p>Remaining customer due: ${money(customerBalance(customer))}</p>
-      <p>Remaining amount we owe: ${money(shopOwesBalance(customer))}</p>
-      <p>Payment history entries: ${(customer.history || []).length}</p>
-      <p>Deleted on: ${safe(customer.deletedAt || "Not available")}</p>
-      ${customer.restoredAt
-        ? `<p><strong>Status:</strong> Restored on ${safe(customer.restoredAt)}</p>`
-        : `<button type="button" onclick="restoreDeletedCustomer('${safe(customer.id)}')">RESTORE CUSTOMER</button>`}
-    </article>
-  `).join("");
-}
-
-function restoreDeletedCustomer(customerId) {
-  const customer = (data.deletedCustomers || []).find(
-    item => String(item.id) === String(customerId)
-  );
-
-  if (!customer || customer.restoredAt) return;
-
-  if (data.customers.some(item => item.id === customer.id)) {
-    showCustomPopup(
-      "Already Exists",
-      "This customer is already in active accounts."
-    );
-    return;
-  }
-
-  if (customer.mobile && data.customers.some(
-    item => item.mobile === customer.mobile
-  )) {
-    showCustomPopup(
-      "Duplicate Mobile Number",
-      "Another active customer already has this mobile number."
-    );
-    return;
-  }
-
-  showCustomConfirm(
-    "Restore Customer?",
-    "Restore " + customer.name + " with their complete payment history?",
-    () => {
-      const restored = JSON.parse(JSON.stringify(customer));
-
-      delete restored.deletedAt;
-      delete restored.deletedTimestamp;
-      delete restored.restoredAt;
-      delete restored.restoredTimestamp;
-
-      data.customers.push(restored);
-
-      customer.restoredAt = new Date().toLocaleString("en-IN");
-      customer.restoredTimestamp = new Date().toISOString();
-
-      persist();
-      renderCustomerLedger();
-      renderDeletedCustomers();
-
-      showCustomPopup(
-        "Customer Restored",
-        customer.name + " has been restored with their payment history.",
-        "success"
-      );
-    }
-  );
-}
-
-function renderCustomerLedgerHistory() {
-  const container = document.getElementById("customerLedgerHistoryList");
-  const searchInput = document.getElementById("customerLedgerHistorySearch");
-
-  if (!container) return;
-
-  const query = (searchInput?.value || "").trim().toLowerCase();
-  const entries = [];
-
-  (data.customers || []).forEach(customer => {
-    (customer.history || []).forEach(entry => {
-      entries.push({
-        ...entry,
-        customerName: customer.name || "Unnamed customer", customerId: customer.id
-      });
-    });
-  });
-
-  entries.sort((a, b) => {
-    const at = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-    const bt = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-
-    if (at && bt) return bt - at;
-    if (at) return -1;
-    if (bt) return 1;
-
-    return String(b.date || "").localeCompare(String(a.date || "")) ||
-      String(b.time || "").localeCompare(String(a.time || ""));
-  });
-
-  const filtered = entries.filter(entry =>
-    [entry.customerName, entry.label, entry.type, entry.note]
-      .some(value => String(value || "").toLowerCase().includes(query))
-  );
-
-  if (!filtered.length) {
-    container.innerHTML =
-      '<p class="customer-ledger-empty">No customer ledger entries found.</p>';
-    return;
-  }
-
-  const labels = {
-    addDue: "Amount Due Added",
-    received: "Payment Received",
-    addOwe: "Amount We Owe Added",
-    given: "Payment Given"
-  };
-
-  container.innerHTML = filtered.map(entry => {
-    const label = labels[entry.type] || entry.label || "Ledger Entry";
-
-    return `
-      <article class="ledger-history-entry">
-        <div class="ledger-history-heading">
-          <strong>${escapeLedgerHTML(entry.customerName)}</strong>
-          <strong>${escapeLedgerHTML(money(entry.amount))}</strong>
-        </div>
-        <p class="ledger-history-type">${escapeLedgerHTML(label)}</p>
-        <p><strong>Date:</strong> ${escapeLedgerHTML(entry.date || "Not available")}</p>
-        <p><strong>Time:</strong> ${escapeLedgerHTML(entry.time || "Time not available")}</p>
-        <p><strong>Note:</strong> ${escapeLedgerHTML(entry.note || "No note")}</p>
-        <button onclick="deleteCustomerLedgerEntry('${entry.customerId}', '${entry.id}')">Delete</button>
-      </article>
-    `;
-  }).join("");
 }
 
 /* ==================================
@@ -4185,8 +3471,6 @@ function openAppScreen(screenName, skipHistory = false) {
     "deleted-history",
     "opening",
     "history",
-    "customer-ledger",
-    "customer-history",
     "reports",
     "settings"
   ];
@@ -4226,7 +3510,6 @@ if (backButton) {
 
  if (screenName === "deleted-history") {
   renderDeletedEntriesHistory();
-  renderDeletedCustomers();
 }
   
   if (screenName === "settings") {
@@ -4242,14 +3525,6 @@ if (screenName === "home") {
   const footer = document.querySelector("footer");
   const menuButton = document.querySelector(".menu-toggle");
   const isOpening = screenName === "opening";
-  // Hide Add New Customer until the business day starts
-const addCustomerButton = document.querySelector(
-  "#screen-customer-ledger button[onclick='showAddCustomerForm()']"
-);
-
-if (addCustomerButton) {
-  addCustomerButton.style.display = isPreStart ? "none" : "";
-}
 
   // Keep business name and date visible
   if (footer) {
@@ -4270,8 +3545,6 @@ if (addCustomerButton) {
   "deleted-history",
   "opening",
   "history",
-  "customer-ledger",
-  "customer-history",
   "reports",
   "settings"
 ];
@@ -4373,7 +3646,6 @@ function addMenuIcons() {
     "Wallet Management": "landmark",
     "Daily Closing": "clipboard-check",
     "History & Calendar": "calendar-days",
-    "Customer Ledger": "users",
     "Deleted Entries History": "trash-2",
     "Cash In / Cash Out": "arrow-left-right",
     "Expenses": "receipt",
@@ -4813,8 +4085,6 @@ if (wasPreStart && !isPreStart) {
         updateTransactionFields();
         updateServiceFields();
         updateServicePaymentFields();
-        renderCustomerLedgerHistory();
-        initializeCustomerLedger();
         renderTodayCompleteHistory();
         refreshDashboard();
         renderCalendar();
@@ -4825,18 +4095,16 @@ if (wasPreStart && !isPreStart) {
     }
   );
   
-  updateTransactionFields();
-  updateServiceFields();
-  updateServicePaymentFields();
-  renderCustomerLedgerHistory();
-  initializeCustomerLedger();
-  renderNumberStepSettings();
-  renderDashboardVisibilitySettings();
-  refreshDashboard();
-  applyDashboardVisibility();
-  drawBusinessPerformanceChart();
-  renderCalendar();
-}
+ updateTransactionFields();
+ updateServiceFields();
+ updateServicePaymentFields();
+ renderNumberStepSettings();
+ renderDashboardVisibilitySettings();
+ refreshDashboard();
+ applyDashboardVisibility();
+ drawBusinessPerformanceChart();
+ renderCalendar();
+ }
 
 /* ==================================
    CHECK LOGIN STATUS
@@ -4936,13 +4204,11 @@ addMenuIcons();
 updateTransactionFields();
 updateServiceFields();
 updateServicePaymentFields();
-initializeCustomerLedger();
-renderCustomerLedgerHistory();
 refreshDashboard();
 renderNumberStepSettings();
 setupNumberWheelSteps();
 
-Object.assign(window,{ 
+Object.assign(window, {
   openAppScreen,
   exportPDF,
   exportPDF,
@@ -4981,16 +4247,6 @@ Object.assign(window,{
   showLoginMessage,
   logoutUser,
   signOutOtherDevices,
-  showAddCustomerForm,
-  hideAddCustomerForm,
-  addLedgerCustomer,
-  renderCustomerLedger,
-  renderCustomerLedgerHistory,
-  openCustomerAccount,
-  closeCustomerAccount,
-  showCustomerPaymentForm,
-  hideCustomerPaymentForm,
-  saveCustomerPayment,
   openTodayTransactions,
   openTodayServices,
   openTodayWithdrawals,
