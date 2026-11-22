@@ -3421,9 +3421,11 @@ async function signInWithGoogle() {
 
 async function signInWithEmail() {
   const password = document.getElementById("loginPassword").value;
-  const forgotButton = document.getElementById("forgotPasswordButton");
+const forgotButton = document.getElementById("forgotPasswordButton");
+const resendButton = document.getElementById("resendVerificationButton");
 
-  forgotButton.style.display = "none";
+forgotButton.style.display = "none";
+resendButton.style.display = "none";
 
   if (!password) {
     return showLoginMessage("Please enter your password.");
