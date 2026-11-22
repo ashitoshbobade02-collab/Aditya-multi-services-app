@@ -3457,9 +3457,51 @@ async function createAccount() {
     return showLoginMessage("Passwords do not match.");
   }
 
-  try {
-    await createUserWithEmailAndPassword(auth, getLoginEmail(), password);
+   try {
+    isCreatingAccount = true;
+
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      getLoginEmail(),
+      password
+    );
+
+    await sendEmailVerification(userCredential.user);
+       
+     await signOut(auth);
+    isCreatingAccount = false;
+
+    showLoginMessage(
+      "Account created! Please check your email and click the verification link before logging in.",
+      false
+    );
+
+    confirmPassword.value = "";
+    confirmGroup.style.display = "none";
+
   } catch (error) {
+    isCreatingAccount = false;
+
+    showLoginMessage(
+      error.code === "auth/email-already-in-use"
+        ? "This email already has an account. Please sign in instead."
+        : (error.message || "Account creation failed.")
+    );
+  }
+}
+
+    await signOut(auth);
+
+    showLoginMessage(
+      "Account created! Please check your email and click the verification link before logging in.",
+      false
+    );
+
+    confirmPassword.value = "";
+    confirmGroup.style.display = "none";
+
+  } catch (error) {
+    isCreatingAccount = false;
     showLoginMessage(
       error.code === "auth/email-already-in-use"
         ? "This email already has an account. Please sign in instead."
