@@ -1773,25 +1773,38 @@ function calculateDailyTotals(day) {
 
   if (!sessions.length) return calculateTotals(day);
 
-  const firstSession = sessions[0];
+  const sessionTotals = sessions.map(session =>
+    calculateTotals(session)
+  );
 
-  const combinedDay = {
-    opening: firstSession.opening || {},
-
-    transactions: sessions.flatMap(session =>
-      session.transactions || []
-    ),
-
-    cashMovements: sessions.flatMap(session =>
-      session.cashMovements || []
-    ),
-
-    expenses: sessions.flatMap(session =>
-      session.expenses || []
-    ),
+  const dailyTotals = {
+    ...sessionTotals[sessionTotals.length - 1]
   };
 
-   return calculateTotals(combinedDay);
+  const sumKeys = [
+    "aeps",
+    "profit",
+    "cashProfit",
+    "onlineProfit",
+    "cashExpenses",
+    "onlineExpenses",
+    "cashNetProfit",
+    "onlineNetProfit",
+    "expenses",
+    "netProfit",
+    "business",
+    "charges",
+    "serviceIncome"
+  ];
+
+  sumKeys.forEach(key => {
+    dailyTotals[key] = sessionTotals.reduce(
+      (sum, totals) => sum + (Number(totals[key]) || 0),
+      0
+    );
+  });
+
+  return dailyTotals;
 }
 
 function saveCashMovement(account = "CASH") {
