@@ -3774,7 +3774,8 @@ function openAppScreen(screenName, skipHistory = false) {
   if (
   !skipHistory &&
   currentScreenName &&
-  currentScreenName !== screenName
+  currentScreenName !== screenName &&
+  currentScreenName !== "opening"
 ) {
   appScreenHistory.push(currentScreenName);
 }
