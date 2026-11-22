@@ -3507,6 +3507,52 @@ async function createAccount() {
   }
 }
 
+async function resendVerificationEmail() {
+  const email = getLoginEmail();
+  const password = document.getElementById("loginPassword").value;
+
+  if (!email || !password) {
+    return showLoginMessage(
+      "Enter your email and password to resend the verification email."
+    );
+  }
+
+  try {
+    isResendingVerification = true;
+
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    await userCredential.user.reload();
+
+    if (userCredential.user.emailVerified) {
+      await signOut(auth);
+      return showLoginMessage(
+        "Your email is already verified. You can sign in now.",
+        false
+      );
+    }
+
+    await sendEmailVerification(userCredential.user);
+    await signOut(auth);
+
+    showLoginMessage(
+      "Verification email sent again. Please check your inbox and spam folder.",
+      false
+    );
+
+  } catch (error) {
+    showLoginMessage(
+      "Could not resend the verification email. Check your email and password."
+    );
+  } finally {
+    isResendingVerification = false;
+  }
+}
+
 async function resetPassword() {
   try {
     await sendPasswordResetEmail(auth, getLoginEmail());
