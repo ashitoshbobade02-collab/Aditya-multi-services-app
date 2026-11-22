@@ -3426,8 +3426,24 @@ async function signInWithEmail() {
   }
 
   try {
-    await signInWithEmailAndPassword(auth, getLoginEmail(), password);
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      getLoginEmail(),
+      password
+    );
+
+    await userCredential.user.reload();
+
+    if (!userCredential.user.emailVerified) {
+      await signOut(auth);
+
+      return showLoginMessage(
+        "Your email is not verified. Please check your inbox and click the verification link."
+      );
+    }
+
     document.getElementById("confirmPasswordGroup").style.display = "none";
+
   } catch (error) {
     showLoginMessage("Sign-in failed. Check your email and password.");
   }
