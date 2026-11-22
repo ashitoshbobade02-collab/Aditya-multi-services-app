@@ -61,10 +61,12 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
       <input type="password" id="confirmPassword" placeholder="Re-enter your password" autocomplete="new-password">
     </div>
 
-    <button onclick="signInWithEmail()">SIGN IN</button>
-    <button onclick="createAccount()">CREATE ACCOUNT</button>
-    <button onclick="resendVerificationEmail()">RESEND VERIFICATION EMAIL</button>
-    <button onclick="resetPassword()">FORGOT PASSWORD?</button>
+    
+<button id="signInButton" onclick="signInWithEmail()">SIGN IN</button>
+<button id="createAccountButton" onclick="createAccount()">CREATE ACCOUNT</button>
+<button id="resendVerificationButton" onclick="resendVerificationEmail()" style="display:none;">RESEND VERIFICATION EMAIL</button>
+<button id="forgotPasswordButton" onclick="resetPassword()" style="display:none;">FORGOT PASSWORD?</button>
+
 
     <p id="loginMessage"></p>
   </div>
