@@ -3496,8 +3496,12 @@ async function createAccount() {
     confirmPassword.value = "";
     confirmGroup.style.display = "none";
 
-  } catch (error) {
+    } catch (error) {
     isCreatingAccount = false;
+
+    if (auth.currentUser) {
+      await signOut(auth);
+    }
 
     showLoginMessage(
       error.code === "auth/email-already-in-use"
