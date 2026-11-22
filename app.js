@@ -2021,6 +2021,37 @@ function addOnlineWithdrawal() {
   );
 }
 
+function setupWithdrawalKeyboard() {
+  const fields = [
+    "withdrawalPlatform",
+    "withdrawalAmount",
+    "withdrawalNote"
+  ];
+
+  fields.forEach((id, index) => {
+    const field = document.getElementById(id);
+    if (!field) return;
+
+    field.addEventListener("keydown", event => {
+      if (event.key !== "Enter") return;
+
+      event.preventDefault();
+
+      if (index < fields.length - 1) {
+        document.getElementById(fields[index + 1]).focus();
+      } else {
+        const saveButton = document.querySelector(
+          '#screen-wallet button[onclick="addOnlineWithdrawal()"]'
+        );
+
+        if (saveButton) saveButton.click();
+      }
+    });
+  });
+}
+
+setupWithdrawalKeyboard();
+
 /* ==================================
    DASHBOARD
 ================================== */
