@@ -36,7 +36,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path dist | Out-Null
           Copy-Item index.html, app.js, firebase.js, style.css -Destination dist
 
-            - name: Generate Windows icon
+      - name: Generate Windows icon
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path src-tauri/icons | Out-Null
