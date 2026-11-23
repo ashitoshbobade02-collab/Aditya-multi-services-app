@@ -912,6 +912,7 @@ th {
 
   .side-drawer {
     width: min(320px, 88vw);
+    padding-top: calc(18px + env(safe-area-inset-top));
   }
 
   input,
