@@ -1,0 +1,12 @@
+[package]
+name = "aditya_multi_services"
+version = "1.0.0"
+description = "Aditya Multi Services Business Management System"
+authors = ["Aditya Multi Services"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
