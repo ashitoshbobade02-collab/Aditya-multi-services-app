@@ -36,6 +36,12 @@ jobs:
           New-Item -ItemType Directory -Force -Path dist | Out-Null
           Copy-Item index.html, app.js, firebase.js, style.css -Destination dist
 
+            - name: Generate Windows icon
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path src-tauri/icons | Out-Null
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-cli/templates/app/icons/icon.ico" -OutFile "src-tauri/icons/icon.ico"
+
       - name: Build Tauri
         run: npx --yes @tauri-apps/cli@latest build
 
