@@ -1,0 +1,62 @@
+
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'src-tauri/**'
+      - 'index.html'
+      - 'app.js'
+      - 'firebase.js'
+      - 'style.css'
+      - '.github/workflows/android-build.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK and NDK
+        run: |
+          sdkmanager --install "platforms;android-37" "build-tools;36.0.0" "ndk;28.2.13676358"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/28.2.13676358" >> $GITHUB_ENV
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android, armv7-linux-androideabi, i686-linux-android, x86_64-linux-android
+
+      - name: Prepare frontend
+        run: |
+          mkdir -p dist
+          cp index.html app.js firebase.js style.css dist/
+
+      - name: Initialize Android project
+        run: npx --yes @tauri-apps/cli@latest android init --ci
+
+      - name: Build Android APK
+        run: npx --yes @tauri-apps/cli@latest android build --apk --debug --ci
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Aditya-Multi-Services-Android-APK
+          path: src-tauri/gen/android/app/build/outputs/apk/universal/debug/*.apk
