@@ -5,6 +5,10 @@ description = "Aditya Multi Services Business Management System"
 authors = ["Aditya Multi Services"]
 edition = "2021"
 
+[lib]
+name = "aditya_multi_services_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
