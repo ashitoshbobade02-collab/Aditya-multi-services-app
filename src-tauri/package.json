@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "tauri": "npx --yes @tauri-apps/cli@latest"
+  }
+}
