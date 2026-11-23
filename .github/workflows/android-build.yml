@@ -31,8 +31,10 @@ jobs:
           distribution: temurin
           java-version: 25
 
-      - name: Setup Android SDK
+            - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
 
       - name: Install Android SDK and NDK
         run: |
