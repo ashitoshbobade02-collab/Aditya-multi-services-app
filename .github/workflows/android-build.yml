@@ -50,6 +50,11 @@ jobs:
         run: |
           mkdir -p dist
           cp index.html app.js firebase.js style.css dist/
+    
+      - name: Prepare Tauri icon
+        run: |
+          mkdir -p src-tauri/icons
+          curl -fL "https://raw.githubusercontent.com/tauri-apps/tauri/dev/crates/tauri-cli/templates/app/src-tauri/icons/icon.png" -o src-tauri/icons/icon.png
 
       - name: Initialize Android project
         run: npx --yes @tauri-apps/cli@latest android init --ci
