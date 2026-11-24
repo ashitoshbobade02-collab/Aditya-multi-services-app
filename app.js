@@ -2486,6 +2486,9 @@ const todayServices = allTodayTransactions.filter(
   money(todayTransactions.reduce(
     (sum, t) => sum + (Number(t.amount) || 0), 0
   ));
+  
+  document.getElementById("todayPhonePeCount").textContent =
+  todayTransactions.length + " transactions";
 
   document.getElementById("todayServiceCount").textContent =
     todayServices.length;
