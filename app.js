@@ -2497,6 +2497,9 @@ const todayServices = allTodayTransactions.filter(
     money(todayWithdrawals.reduce(
       (sum, t) => sum + (Number(t.amount) || 0), 0
     ));
+  
+  document.getElementById("todayAepsCount").textContent =
+  todayWithdrawals.length + " transactions";
 
   document.getElementById("todayDate").textContent =
     new Date().toLocaleDateString("en-IN", {
