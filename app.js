@@ -2490,6 +2490,11 @@ const todayServices = allTodayTransactions.filter(
   document.getElementById("todayPhonePeCount").textContent =
   todayTransactions.length + " transactions";
 
+  document.getElementById("todayPhonePeProfit").textContent =
+  "Net PhonePe Profit: " + money(todayTransactions.reduce(
+    (sum, t) => sum + (Number(t.charge) || 0), 0
+  ));
+
   document.getElementById("todayServiceCount").textContent =
     todayServices.length;
 
