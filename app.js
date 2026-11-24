@@ -141,25 +141,10 @@ let activeSettingsKey = null;
   if (!Object.prototype.hasOwnProperty.call(clean, "currentDay")) clean.currentDay = null;
   if (!Object.prototype.hasOwnProperty.call(clean, "walletCarryForward")) clean.walletCarryForward = null;
 
-  const defaults = emptyData();
-
-  clean.numberSteps = {
-    ...defaults.numberSteps,
-    ...(clean.numberSteps || {})
-  };
-
-  // Remove the old ledger number step
-  delete clean.numberSteps.ledger;
-
-  clean.dashboardVisibility = {
-    ...defaults.dashboardVisibility,
-    ...(clean.dashboardVisibility || {})
-  };
-
-    clean.dashboardLayout = {
-  ...defaults.dashboardLayout,
-  ...(clean.dashboardLayout || {})
-};
+  // Keep device-specific settings out of business data
+delete clean.numberSteps;
+delete clean.dashboardVisibility;
+delete clean.dashboardLayout;
 
   return clean;
 }
