@@ -1248,3 +1248,30 @@ th {
 .deleted-entry-history p {
   margin: 6px 0;
 }
+
+/* Customer charge lock button */
+.customer-charge-lock {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  padding: 0;
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--background);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.customer-charge-lock svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.customer-charge-lock:hover {
+  background: var(--light-blue);
+}
