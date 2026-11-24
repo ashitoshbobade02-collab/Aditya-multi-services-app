@@ -1266,6 +1266,23 @@ th {
   cursor: pointer;
 }
 
+.customer-charge-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.customer-charge-input {
+  flex: 1;
+  min-width: 0;
+  width: 0;
+}
+
+.customer-charge-field .customer-charge-lock {
+  flex: 0 0 48px;
+}
+
 .customer-charge-lock svg {
   width: 22px;
   height: 22px;
