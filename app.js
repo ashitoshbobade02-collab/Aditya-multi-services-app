@@ -1657,9 +1657,7 @@ function calculateTotals(day) {
     const amount = Number(t.amount) || 0;
     const charge = Number(t.charge) || 0;
 
-    if (t.type !== "ONLINE_WITHDRAWAL") {
-      totals.business += amount;
-    }
+    totals.business += amount;
 
     if (t.type === "AEPS") {
       totals.aeps += amount;
@@ -2569,10 +2567,12 @@ document.getElementById("todayServiceProfit").textContent =
 
   const t = calculateTotals(day);
 const dailyTotals = calculateDailyTotals(todayReportDay);
-  document.getElementById("totalBusiness").textContent =
-  document.getElementById("todayBusinessNetProfit").textContent =
-    "Total Net Profit: " + money(dailyTotals.netProfit);
+
+document.getElementById("totalBusiness").textContent =
   money(dailyTotals.business);
+
+document.getElementById("todayBusinessNetProfit").textContent =
+  "Total Net Profit: " + money(dailyTotals.netProfit);
 
   document.getElementById("biznextBalance").textContent = money(dailyTotals.biznext);
   document.getElementById("roinetBalance").textContent = money(dailyTotals.roinet);
