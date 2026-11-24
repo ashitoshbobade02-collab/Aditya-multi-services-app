@@ -1336,13 +1336,10 @@ function calculateChargePreview() {
 
 function toggleCustomerChargeEdit() {
   const chargeInput = document.getElementById("customerCharge");
-  const toggleButton = document.getElementById("customerChargeToggle");
 
   chargeInput.readOnly = !chargeInput.readOnly;
 
-  toggleButton.textContent = chargeInput.readOnly
-    ? "Unlock Edit"
-    : "Lock Charge";
+  updateCustomerChargeLockIcon();
 
   if (!chargeInput.readOnly) {
     chargeInput.focus();
@@ -1350,6 +1347,29 @@ function toggleCustomerChargeEdit() {
 
   document.getElementById("chargePreview").textContent =
     "Customer charge: " + money(Number(chargeInput.value) || 0);
+}
+
+function updateCustomerChargeLockIcon() {
+  const chargeInput = document.getElementById("customerCharge");
+  const toggleButton = document.getElementById("customerChargeToggle");
+
+  if (chargeInput.readOnly) {
+    toggleButton.innerHTML = `
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="10" width="16" height="11" rx="2"></rect>
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+      </svg>`;
+    toggleButton.title = "Charge is locked";
+    toggleButton.setAttribute("aria-label", "Unlock customer charge");
+  } else {
+    toggleButton.innerHTML = `
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="10" width="16" height="11" rx="2"></rect>
+        <path d="M8 10V7a4 4 0 0 1 7.5-2"></path>
+      </svg>`;
+    toggleButton.title = "Charge is unlocked";
+    toggleButton.setAttribute("aria-label", "Lock customer charge");
+  }
 }
 
 /* ==================================
