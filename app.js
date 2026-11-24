@@ -25,71 +25,76 @@ import {
 const KEY = "aditya_multi_services_v3";
 const THEME_KEY = "aditya_multi_services_theme_v1";
 
-function togglePasswordVisibility() {
-  const passwordInput = document.getElementById("loginPassword");
-  const toggleButton = document.querySelector(".password-toggle");
-
-  if (passwordInput.type === "password") {
-    passwordInput.type = "text";
-    toggleButton.textContent = "HIDE";
-  } else {
-    passwordInput.type = "password";
-    toggleButton.textContent = "SHOW";
+  function togglePasswordVisibility() {
+    const passwordInput = document.getElementById("loginPassword");
+    const toggleButton = document.querySelector(".password-toggle");
+  
+    if (passwordInput.type === "password") {
+      passwordInput.type = "text";
+      toggleButton.textContent = "HIDE";
+    } else {
+      passwordInput.type = "password";
+      toggleButton.textContent = "SHOW";
+    }
   }
-}
-
-const emptyData = () => ({
-  days: [],
-  currentDay: null,
-  walletCarryForward: null,
-  deletedEntries: [],
-  numberSteps: {
-    opening: 10,
-    wallet: 1,
-    transaction: 10,
-    service: 1,
-    closing: 1,
-    withdrawal: 1,
-    payment: 10
-  },
-  dashboardVisibility: {
-    biznext: true,
-    roinet: true,
-    tez: true,
-    fino: true,
-    sbi: true,
-    cashBalance: true,
-    onlineBalance: true,
-    todayBusiness: true,
-    todayTransactions: true,
-    todayServices: true,
-    todayWithdrawals: true,
-    cashNetProfit: true,
-    onlineNetProfit: true,
-    totalNetProfit: true,
-    businessChart: true
-  }
-});
-
-let data = emptyData();
-let currentUser = null;
-let isCreatingAccount = false;
-let isResendingVerification = false;
-let activeStorageKey = null;
-let cloudWriteQueue = Promise.resolve();
-let unsubscribeCloudListener = null;
-let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-let selectedHistoryDate = today();
-
-function normalizeData(value) {
-  const clean = value && typeof value === "object" ? value : emptyData();
-
-  if (!Array.isArray(clean.days)) clean.days = [];
-  if (!Array.isArray(clean.deletedEntries)) clean.deletedEntries = [];
-
-  // Remove old Customer Ledger data only
-  delete clean.customers;
-  delete clean.deletedCustomers;
+  
+  const emptyData = () => ({
+    days: [],
+    currentDay: null,
+    walletCarryForward: null,
+    deletedEntries: [],
+    numberSteps: {
+      opening: 10,
+      wallet: 1,
+      transaction: 10,
+      service: 1,
+      closing: 1,
+      withdrawal: 1,
+      payment: 10
+    },
+    dashboardVisibility: {
+      biznext: true,
+      roinet: true,
+      tez: true,
+      fino: true,
+      sbi: true,
+      cashBalance: true,
+      onlineBalance: true,
+      todayBusiness: true,
+      todayTransactions: true,
+      todayServices: true,
+      todayWithdrawals: true,
+      cashNetProfit: true,
+      onlineNetProfit: true,
+      totalNetProfit: true,
+      businessChart: true
+    },
+      dashboardLayout: {
+      wallets: [],
+      overview: []
+    }
+  });
+  
+  let data = emptyData();
+  let currentUser = null;
+  let isCreatingAccount = false;
+  let isResendingVerification = false;
+  let activeStorageKey = null;
+  let cloudWriteQueue = Promise.resolve();
+  let unsubscribeCloudListener = null;
+  let calendarMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  let selectedHistoryDate = today();
+  let dashboardCustomizeMode = false;
+  
+  function normalizeData(value) {
+    const clean = value && typeof value === "object" ? value : emptyData();
+  
+    if (!Array.isArray(clean.days)) clean.days = [];
+    if (!Array.isArray(clean.deletedEntries)) clean.deletedEntries = [];
+  
+    // Remove old Customer Ledger data only
+    delete clean.customers;
+    delete clean.deletedCustomers;
 
   if (!Object.prototype.hasOwnProperty.call(clean, "currentDay")) clean.currentDay = null;
   if (!Object.prototype.hasOwnProperty.call(clean, "walletCarryForward")) clean.walletCarryForward = null;
@@ -108,6 +113,11 @@ function normalizeData(value) {
     ...defaults.dashboardVisibility,
     ...(clean.dashboardVisibility || {})
   };
+
+    clean.dashboardLayout = {
+  ...defaults.dashboardLayout,
+  ...(clean.dashboardLayout || {})
+};
 
   return clean;
 }
@@ -237,6 +247,217 @@ function updateNumberStep(key, value) {
 
   const message = document.getElementById("numberStepSaveMessage");
   if (message) message.textContent = "Saved successfully.";
+}
+
+function applyDashboardLayout() {
+  if (dashboardCustomizeMode) return;
+
+  const groups = [
+    {
+      element: document.getElementById("dashboardWalletGroup"),
+      order: data.dashboardLayout?.wallets || []
+    },
+    {
+      element: document.getElementById("dashboardOverviewGroup"),
+      order: data.dashboardLayout?.overview || []
+    }
+  ];
+
+  groups.forEach(({ element, order }) => {
+    if (!element) return;
+
+    const children = Array.from(element.children);
+
+    const orderedItems = order
+      .map(id => children.find(item => item.id === id))
+      .filter(Boolean);
+
+    const remainingItems = children.filter(
+      item => !orderedItems.includes(item)
+    );
+
+    [...orderedItems, ...remainingItems].forEach(item => {
+      element.appendChild(item);
+    });
+  });
+}
+
+function getDashboardLayout() {
+  return {
+    wallets: Array.from(
+      document.getElementById("dashboardWalletGroup")?.children || []
+    ).map(item => item.id).filter(Boolean),
+
+    overview: Array.from(
+      document.getElementById("dashboardOverviewGroup")?.children || []
+    ).map(item => item.id).filter(Boolean)
+  };
+}
+
+function setupDashboardCustomization() {
+  const groups = [
+    document.getElementById("dashboardWalletGroup"),
+    document.getElementById("dashboardOverviewGroup")
+  ];
+
+  groups.forEach(group => {
+    if (!group) return;
+
+    Array.from(group.children).forEach(item => {
+      if (!item.id) return;
+
+      item.classList.add("dashboard-sort-item");
+
+      if (item.querySelector(".dashboard-drag-handle")) return;
+
+      const handle = document.createElement("button");
+
+      handle.type = "button";
+      handle.className = "dashboard-drag-handle";
+      handle.title = "Drag to rearrange";
+      handle.setAttribute("aria-label", "Drag to rearrange dashboard card");
+
+      handle.innerHTML = `
+        <svg viewBox="0 0 24 24" width="20" height="20"
+          fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round">
+          <circle cx="9" cy="5" r="1"></circle>
+          <circle cx="15" cy="5" r="1"></circle>
+          <circle cx="9" cy="12" r="1"></circle>
+          <circle cx="15" cy="12" r="1"></circle>
+          <circle cx="9" cy="19" r="1"></circle>
+          <circle cx="15" cy="19" r="1"></circle>
+        </svg>
+      `;
+
+      handle.addEventListener("click", event => {
+        event.stopPropagation();
+      });
+
+      item.appendChild(handle);
+    });
+  });
+}
+
+function enableDashboardDragging() {
+  document.querySelectorAll(".dashboard-drag-handle").forEach(handle => {
+    if (handle.dataset.dragReady === "true") return;
+
+    handle.dataset.dragReady = "true";
+
+    handle.addEventListener("pointerdown", event => {
+      if (!dashboardCustomizeMode) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      const draggedItem = handle.closest(".dashboard-sort-item");
+      const group = draggedItem?.parentElement;
+
+      if (!draggedItem || !group) return;
+
+      draggedItem.classList.add("dashboard-dragging");
+
+      const moveItem = moveEvent => {
+        const target = document.elementFromPoint(
+          moveEvent.clientX,
+          moveEvent.clientY
+        )?.closest(".dashboard-sort-item");
+
+        if (!target || target === draggedItem || target.parentElement !== group) {
+          return;
+        }
+
+        const rect = target.getBoundingClientRect();
+        const insertAfter =
+          moveEvent.clientY > rect.top + rect.height / 2;
+
+        group.insertBefore(
+          draggedItem,
+          insertAfter ? target.nextSibling : target
+        );
+      };
+
+      const stopDragging = () => {
+        draggedItem.classList.remove("dashboard-dragging");
+        document.removeEventListener("pointermove", moveItem);
+        document.removeEventListener("pointerup", stopDragging);
+        document.removeEventListener("pointercancel", stopDragging);
+      };
+
+      document.addEventListener("pointermove", moveItem);
+      document.addEventListener("pointerup", stopDragging);
+      document.addEventListener("pointercancel", stopDragging);
+    });
+  });
+}
+
+function toggleDashboardCustomize() {
+  dashboardCustomizeMode = !dashboardCustomizeMode;
+
+  const dashboard = document.getElementById("dashboardSection");
+  const customizeButton = document.getElementById("customizeDashboardButton");
+  const saveButton = document.getElementById("saveDashboardLayoutButton");
+  const resetButton = document.getElementById("resetDashboardLayoutButton");
+
+  if (dashboardCustomizeMode) {
+    setupDashboardCustomization();
+    enableDashboardDragging();
+
+    dashboard.classList.add("dashboard-customize-active");
+    customizeButton.textContent = "CANCEL";
+    saveButton.style.display = "";
+    resetButton.style.display = "";
+  } else {
+    dashboard.classList.remove("dashboard-customize-active");
+
+    applyDashboardLayout();
+
+    customizeButton.textContent = "CUSTOMIZE DASHBOARD";
+    saveButton.style.display = "none";
+    resetButton.style.display = "none";
+  }
+}
+
+function saveDashboardLayout() {
+  data.dashboardLayout = getDashboardLayout();
+
+  persist();
+
+  dashboardCustomizeMode = false;
+
+  document.getElementById("dashboardSection")
+    .classList.remove("dashboard-customize-active");
+
+  document.getElementById("customizeDashboardButton").textContent =
+    "CUSTOMIZE DASHBOARD";
+
+  document.getElementById("saveDashboardLayoutButton").style.display = "none";
+  document.getElementById("resetDashboardLayoutButton").style.display = "none";
+}
+
+function resetDashboardLayout() {
+  data.dashboardLayout = {
+    wallets: [],
+    overview: []
+  };
+
+  applyDashboardLayout();
+  persist();
+
+  dashboardCustomizeMode = false;
+
+  document.getElementById("dashboardSection")
+    .classList.remove("dashboard-customize-active");
+
+  document.getElementById("customizeDashboardButton").textContent =
+    "CUSTOMIZE DASHBOARD";
+
+  document.getElementById("saveDashboardLayoutButton").style.display = "none";
+  document.getElementById("resetDashboardLayoutButton").style.display = "none";
+
+  document.getElementById("dashboardVisibilitySaveMessage").textContent =
+    "Dashboard layout reset to default.";
 }
 
 function setupNumberWheelSteps() {
@@ -2510,6 +2731,8 @@ function closeDashboardHistory() {
 }
 
 function refreshDashboard() {
+    applyDashboardLayout();
+  
   const day = currentDay();
 renderExpenseList();
 
@@ -4728,4 +4951,7 @@ Object.assign(window, {
   renderDashboardVisibilitySettings,
   applyDashboardVisibility,
   updateDashboardVisibility,
+  toggleDashboardCustomize,
+  saveDashboardLayout,
+  resetDashboardLayout,
 });
