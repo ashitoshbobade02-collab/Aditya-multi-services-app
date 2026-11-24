@@ -25,6 +25,78 @@ import {
 const KEY = "aditya_multi_services_v3";
 const THEME_KEY = "aditya_multi_services_theme_v1";
 
+const SETTINGS_KEY = "aditya_multi_services_settings_v1";
+
+const emptySettings = () => ({
+  numberSteps: {
+    opening: 10,
+    wallet: 1,
+    transaction: 10,
+    service: 1,
+    closing: 1,
+    withdrawal: 1,
+    payment: 10
+  },
+  dashboardVisibility: {
+    biznext: true,
+    roinet: true,
+    tez: true,
+    fino: true,
+    sbi: true,
+    cashBalance: true,
+    onlineBalance: true,
+    todayBusiness: true,
+    todayTransactions: true,
+    todayServices: true,
+    todayWithdrawals: true,
+    cashNetProfit: true,
+    onlineNetProfit: true,
+    totalNetProfit: true,
+    businessChart: true
+  },
+  dashboardLayout: {
+    wallets: [],
+    overview: []
+  }
+});
+
+let settings = emptySettings();
+function loadDeviceSettings() {
+  activeSettingsKey = `${SETTINGS_KEY}_${currentUser.uid}`;
+
+  try {
+    const savedSettings = localStorage.getItem(activeSettingsKey);
+
+    settings = savedSettings
+      ? {
+          ...emptySettings(),
+          ...JSON.parse(savedSettings)
+        }
+      : emptySettings();
+  } catch (error) {
+    console.error("Device settings load failed:", error);
+    settings = emptySettings();
+  }
+
+  const defaults = emptySettings();
+
+  settings.numberSteps = {
+    ...defaults.numberSteps,
+    ...(settings.numberSteps || {})
+  };
+
+  settings.dashboardVisibility = {
+    ...defaults.dashboardVisibility,
+    ...(settings.dashboardVisibility || {})
+  };
+
+  settings.dashboardLayout = {
+    ...defaults.dashboardLayout,
+    ...(settings.dashboardLayout || {})
+  };
+}
+let activeSettingsKey = null;
+
   function togglePasswordVisibility() {
     const passwordInput = document.getElementById("loginPassword");
     const toggleButton = document.querySelector(".password-toggle");
@@ -43,36 +115,6 @@ const THEME_KEY = "aditya_multi_services_theme_v1";
     currentDay: null,
     walletCarryForward: null,
     deletedEntries: [],
-    numberSteps: {
-      opening: 10,
-      wallet: 1,
-      transaction: 10,
-      service: 1,
-      closing: 1,
-      withdrawal: 1,
-      payment: 10
-    },
-    dashboardVisibility: {
-      biznext: true,
-      roinet: true,
-      tez: true,
-      fino: true,
-      sbi: true,
-      cashBalance: true,
-      onlineBalance: true,
-      todayBusiness: true,
-      todayTransactions: true,
-      todayServices: true,
-      todayWithdrawals: true,
-      cashNetProfit: true,
-      onlineNetProfit: true,
-      totalNetProfit: true,
-      businessChart: true
-    },
-      dashboardLayout: {
-      wallets: [],
-      overview: []
-    }
   });
   
   let data = emptyData();
@@ -151,9 +193,8 @@ function money(value) {
   });
 }
 
-
 function renderNumberStepSettings() {
-  const steps = data.numberSteps || emptyData().numberSteps;
+  const steps = settings.numberSteps || emptySettings().numberSteps;
 
   const fields = {
     opening: "stepOpening",
@@ -170,7 +211,6 @@ function renderNumberStepSettings() {
     if (input) input.value = steps[key];
   });
 }
-
 
 const dashboardVisibilityItems = {
   wallet: [
@@ -195,8 +235,8 @@ const dashboardVisibilityItems = {
 };
 
 function renderDashboardVisibilitySettings() {
-  const visibility = data.dashboardVisibility || {};
-  
+  const visibility = settings.dashboardVisibility || {};
+
   const renderItems = (items) => items.map(([key, id, label]) => `
     <label style="display:flex;align-items:center;gap:10px;margin:10px 0;">
       <input type="checkbox"
@@ -214,7 +254,7 @@ function renderDashboardVisibilitySettings() {
 }
 
 function applyDashboardVisibility() {
-  const visibility = data.dashboardVisibility || {};
+  const visibility = settings.dashboardVisibility || {};
 
   Object.values(dashboardVisibilityItems).flat().forEach(([key, id]) => {
     const element = document.getElementById(id);
@@ -225,8 +265,10 @@ function applyDashboardVisibility() {
 }
 
 function updateDashboardVisibility(key, visible) {
-  data.dashboardVisibility[key] = visible;
-  persist();
+  settings.dashboardVisibility = settings.dashboardVisibility || emptySettings().dashboardVisibility;
+  settings.dashboardVisibility[key] = visible;
+
+  saveDeviceSettings();
   applyDashboardVisibility();
 
   const message = document.getElementById("dashboardVisibilitySaveMessage");
@@ -241,9 +283,10 @@ function updateNumberStep(key, value) {
     return;
   }
 
-  data.numberSteps = data.numberSteps || emptyData().numberSteps;
-  data.numberSteps[key] = amount;
-  persist();
+  settings.numberSteps = settings.numberSteps || emptySettings().numberSteps;
+  settings.numberSteps[key] = amount;
+
+  saveDeviceSettings();
 
   const message = document.getElementById("numberStepSaveMessage");
   if (message) message.textContent = "Saved successfully.";
@@ -255,29 +298,29 @@ function applyDashboardLayout() {
   const groups = [
     {
       element: document.getElementById("dashboardWalletGroup"),
-      order: data.dashboardLayout?.wallets || []
+      order: settings.dashboardLayout?.wallets || []
     },
     {
       element: document.getElementById("dashboardOverviewGroup"),
-      order: data.dashboardLayout?.overview || []
+      order: settings.dashboardLayout?.overview || []
     }
   ];
 
   groups.forEach(({ element, order }) => {
     if (!element) return;
 
-if (!element.dataset.defaultOrder) {
-  element.dataset.defaultOrder = JSON.stringify(
-    Array.from(element.children).map(item => item.id)
-  );
-}
+    if (!element.dataset.defaultOrder) {
+      element.dataset.defaultOrder = JSON.stringify(
+        Array.from(element.children).map(item => item.id)
+      );
+    }
 
-const defaultOrder = JSON.parse(element.dataset.defaultOrder);
-const children = Array.from(element.children);
+    const defaultOrder = JSON.parse(element.dataset.defaultOrder);
+    const children = Array.from(element.children);
 
-if (order.length === 0) {
-  order = defaultOrder;
-}
+    if (order.length === 0) {
+      order = defaultOrder;
+    }
 
     const orderedItems = order
       .map(id => children.find(item => item.id === id))
@@ -431,9 +474,9 @@ function toggleDashboardCustomize() {
 }
 
 function saveDashboardLayout() {
-  data.dashboardLayout = getDashboardLayout();
+  settings.dashboardLayout = getDashboardLayout();
 
-  persist();
+  saveDeviceSettings();
 
   dashboardCustomizeMode = false;
 
@@ -448,7 +491,7 @@ function saveDashboardLayout() {
 }
 
 function resetDashboardLayout() {
-  data.dashboardLayout = {
+  settings.dashboardLayout = {
     wallets: [],
     overview: []
   };
@@ -456,7 +499,7 @@ function resetDashboardLayout() {
   dashboardCustomizeMode = false;
 
   applyDashboardLayout();
-  persist();
+  saveDeviceSettings();
 
   document.getElementById("dashboardSection")
     .classList.remove("dashboard-customize-active");
@@ -469,9 +512,9 @@ function resetDashboardLayout() {
 
   const message = document.getElementById("dashboardVisibilitySaveMessage");
 
-if (message) {
-  message.textContent = "Dashboard layout reset to default.";
-}
+  if (message) {
+    message.textContent = "Dashboard layout reset to default.";
+  }
 }
 
 function setupNumberWheelSteps() {
@@ -505,7 +548,7 @@ function setupNumberWheelSteps() {
 
     if (!key) return;
 
-    const step = Number(data.numberSteps?.[key]) || 1;
+    const step = Number(settings.numberSteps?.[key]) || 1;
     if (input.readOnly || input.disabled) return;
 
     event.preventDefault();
@@ -1057,6 +1100,19 @@ function persist() {
       showLoginMessage("Saved on this device. Cloud sync failed: " + (error.message || "Please check your connection."));
     });
  }
+
+function saveDeviceSettings() {
+  if (!currentUser || !activeSettingsKey) return;
+
+  try {
+    localStorage.setItem(
+      activeSettingsKey,
+      JSON.stringify(settings)
+    );
+  } catch (error) {
+    console.error("Device settings save failed:", error);
+  }
+}
 
 function moveToDeletedHistory(entry, type, source) {
   if (!entry) return;
@@ -4707,6 +4763,8 @@ async function signOutOtherDevices() {
 async function loadUserBusinessData(user) {
   currentUser = user;
   activeStorageKey = `${KEY}_${user.uid}`;
+   
+  loadDeviceSettings();
 
   const localCopy = localStorage.getItem(activeStorageKey);
 
