@@ -133,18 +133,6 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
 <section class="app-screen" id="screen-home">  
   <div id="dashboardSection">
 
-    <div class="dashboard-customize-toolbar">
-  <button type="button" id="customizeDashboardButton" onclick="toggleDashboardCustomize()">
-    CUSTOMIZE DASHBOARD
-  </button>
-  <button type="button" id="saveDashboardLayoutButton" onclick="saveDashboardLayout()" style="display:none;">
-    SAVE LAYOUT
-  </button>
-  <button type="button" id="resetDashboardLayoutButton" onclick="resetDashboardLayout()" style="display:none;">
-    RESET TO DEFAULT
-  </button>
-</div>
-
     <h3 class="section-title">Wallet Overview</h3>
 
     <div class="wallets" id="dashboardWalletGroup">
@@ -635,7 +623,6 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
       <input type="date" id="reportEndDate">
     </div>
 
-    
 <button type="button" onclick="generateReport()">
   GENERATE REPORT
 </button>
@@ -649,7 +636,6 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
   <section class="app-screen" id="screen-settings">
  
     <!-- SETTINGS -->
-
 
 <div class="card dashboard-settings-card">
   <details>
@@ -681,6 +667,31 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
   </details>
 </div>
 
+<div class="card dashboard-settings-card">
+  <details>
+    <summary class="dashboard-settings-summary">
+      <span>Customize Dashboard Layout</span>
+      <span class="settings-summary-subtitle">Rearrange dashboard cards</span>
+    </summary>
+
+    <p class="settings-description">
+      Change the order of your dashboard cards. Drag cards into your preferred positions, then save your layout.
+    </p>
+
+    <div class="dashboard-customize-toolbar">
+      <button type="button" id="customizeDashboardButton" onclick="toggleDashboardCustomize()">
+        CUSTOMIZE DASHBOARD
+      </button>
+      <button type="button" id="saveDashboardLayoutButton" onclick="saveDashboardLayout()" style="display:none;">
+        SAVE LAYOUT
+      </button>
+      <button type="button" id="resetDashboardLayoutButton" onclick="resetDashboardLayout()" style="display:none;">
+        RESET TO DEFAULT
+      </button>
+    </div>
+  </details>
+</div>
+    
 <div class="card dashboard-settings-card">
   <details>
     <summary class="dashboard-settings-summary">
