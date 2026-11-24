@@ -1649,7 +1649,8 @@ function calculateTotals(day) {
     netProfit: 0,
     business: 0,
     charges: 0,
-    serviceIncome: 0
+    serviceIncome: 0,
+    serviceExpenses: 0
   };
 
   transactions.forEach(t => {
@@ -1734,6 +1735,10 @@ totals.profit += charge;
 (day.expenses || []).forEach(expense => {
   const amount = Number(expense.amount) || 0;
   const paymentMethod = expense.paymentMethod || "CASH";
+
+    if (expense.category === "Service Expense") {
+    totals.serviceExpenses += amount;
+  }
 
   if (paymentMethod === "CASH") {
     totals.cash -= amount;
