@@ -2027,7 +2027,7 @@ if (!Number.isFinite(charge) || charge < 0) {
   document.getElementById("transactionAmount").value = "";
   document.getElementById("customerCharge").value = "";
   document.getElementById("customerCharge").readOnly = true;
-  document.getElementById("customerChargeToggle").textContent = "Unlock Edit";
+  updateCustomerChargeLockIcon();
   document.getElementById("chargePaymentMethod").value = "CASH";
 
   calculateChargePreview();
