@@ -2494,7 +2494,7 @@ const todayServices = allTodayTransactions.filter(
   todayTransactions.length + " transactions";
 
   document.getElementById("todayPhonePeProfit").textContent =
-  "Net PhonePe Profit: " + money(todayTransactions.reduce(
+  money(todayTransactions.reduce(
     (sum, t) => sum + (Number(t.charge) || 0), 0
   ));
 
@@ -2514,9 +2514,7 @@ document.getElementById("todayServiceAmount").textContent =
   "Total Amount: " + money(todayServiceIncome);
 
 document.getElementById("todayServiceProfit").textContent =
-  "Net Services Profit: " +
   money(todayServiceIncome - todayServiceExpenses);
-
   document.getElementById("todayWithdrawalAmount").textContent =
     money(todayWithdrawals.reduce(
       (sum, t) => sum + (Number(t.amount) || 0), 0
@@ -2526,7 +2524,7 @@ document.getElementById("todayServiceProfit").textContent =
   todayWithdrawals.length + " transactions";
  
   document.getElementById("todayAepsProfit").textContent =
-  "Net Withdrawal Profit: " + money(todayWithdrawals.reduce(
+  money(todayWithdrawals.reduce(
     (sum, t) => sum + (Number(t.charge) || 0), 0
   ));
 
@@ -2570,9 +2568,6 @@ const dailyTotals = calculateDailyTotals(todayReportDay);
 
 document.getElementById("totalBusiness").textContent =
   money(dailyTotals.business);
-
-document.getElementById("todayBusinessNetProfit").textContent =
-  "Total Net Profit: " + money(dailyTotals.netProfit);
 
   document.getElementById("biznextBalance").textContent = money(dailyTotals.biznext);
   document.getElementById("roinetBalance").textContent = money(dailyTotals.roinet);
