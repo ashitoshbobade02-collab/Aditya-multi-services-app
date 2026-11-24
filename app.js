@@ -2570,6 +2570,8 @@ document.getElementById("todayServiceProfit").textContent =
   const t = calculateTotals(day);
 const dailyTotals = calculateDailyTotals(todayReportDay);
   document.getElementById("totalBusiness").textContent =
+  document.getElementById("todayBusinessNetProfit").textContent =
+    "Total Net Profit: " + money(dailyTotals.netProfit);
   money(dailyTotals.business);
 
   document.getElementById("biznextBalance").textContent = money(dailyTotals.biznext);
