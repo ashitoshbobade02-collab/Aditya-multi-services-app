@@ -188,14 +188,12 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
       <div class="card" id="sectionTodayBusiness">
         <p>Today's Business</p>
         <h2 id="totalBusiness">₹0.00</h2>
-        <small id="todayBusinessNetProfit">Total Net Profit: ₹0.00</small>
       </div>
 
 <div class="card clickable-card" id="sectionTodayTransactions" onclick="openTodayTransactions()">
   <p>Today's Total PhonePe</p>
   <h2 id="todayTransactionCount">₹0.00</h2> 
   <small id="todayPhonePeCount">0 transactions</small>
-  <small id="todayPhonePeProfit">Net PhonePe Profit: ₹0.00</small>
   <small>View PhonePe History →</small>
 </div>
 
@@ -203,7 +201,6 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
   <p>Today's Total Services</p>
   <h2 id="todayServiceCount">0</h2>
   <small id="todayServiceAmount">Total Amount: ₹0.00</small>
-  <small id="todayServiceProfit">Net Services Profit: ₹0.00</small>
   <small>View Services History →</small>
 </div>
 
@@ -211,8 +208,22 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
   <p>Today's Total AEPS Withdrawals</p>
   <h2 id="todayWithdrawalAmount">₹0.00</h2>
   <small id="todayAepsCount">0 transactions</small>
-  <small id="todayAepsProfit">Net Withdrawal Profit: ₹0.00</small>
   <small>View AEPS History →</small>
+</div>
+
+<div class="card" id="sectionPhonePeNetProfit">
+  <p>PhonePe Net Profit</p>
+  <h2 class="green" id="todayPhonePeProfit">₹0.00</h2>
+</div>
+
+<div class="card" id="sectionServicesNetProfit">
+  <p>Services Net Profit</p>
+  <h2 class="green" id="todayServiceProfit">₹0.00</h2>
+</div>
+
+<div class="card" id="sectionAepsNetProfit">
+  <p>AEPS Net Profit</p>
+  <h2 class="green" id="todayAepsProfit">₹0.00</h2>
 </div>
 
 <div class="card" id="sectionCashNetProfit">
