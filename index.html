@@ -309,7 +309,7 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <input type="number" id="transactionAmount" min="0" step="10" placeholder="Enter amount" oninput="calculateChargePreview()">
 
     <label>Customer Charge (₹)</label>
-    <input type="number" id="customerCharge" min="0" step="1" placeholder="Auto-calculated" readonly>
+    <input type="number" id="customerCharge" min="0" step="1" placeholder="Auto-calculated" readonly oninput="calculateChargePreview()">
     <button type="button" id="customerChargeToggle" onclick="toggleCustomerChargeEdit()">Unlock Edit</button>
 
        <p id="chargePreview">Customer charge will appear here.</p>
