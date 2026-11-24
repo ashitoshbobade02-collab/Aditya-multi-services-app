@@ -1334,6 +1334,24 @@ function calculateChargePreview() {
     "Customer charge: " + money(displayedCharge);
 }
 
+function toggleCustomerChargeEdit() {
+  const chargeInput = document.getElementById("customerCharge");
+  const toggleButton = document.getElementById("customerChargeToggle");
+
+  chargeInput.readOnly = !chargeInput.readOnly;
+
+  toggleButton.textContent = chargeInput.readOnly
+    ? "Unlock Edit"
+    : "Lock Charge";
+
+  if (!chargeInput.readOnly) {
+    chargeInput.focus();
+  }
+
+  document.getElementById("chargePreview").textContent =
+    "Customer charge: " + money(Number(chargeInput.value) || 0);
+}
+
 /* ==================================
    SERVICES MANAGEMENT
 ================================== */
