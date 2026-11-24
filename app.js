@@ -2503,6 +2503,22 @@ const todayServices = allTodayTransactions.filter(
   document.getElementById("todayServiceCount").textContent =
     todayServices.length;
 
+  const todayServiceIncome = todayServices.reduce(
+  (sum, t) => sum + (Number(t.amount) || 0), 0
+);
+
+const todayServiceExpenses = todaySessions
+  .flatMap(session => session.expenses || [])
+  .filter(expense => expense.category === "Service Expense")
+  .reduce((sum, expense) => sum + (Number(expense.amount) || 0), 0);
+
+document.getElementById("todayServiceAmount").textContent =
+  "Total Amount: " + money(todayServiceIncome);
+
+document.getElementById("todayServiceProfit").textContent =
+  "Net Services Profit: " +
+  money(todayServiceIncome - todayServiceExpenses);
+
   document.getElementById("todayWithdrawalAmount").textContent =
     money(todayWithdrawals.reduce(
       (sum, t) => sum + (Number(t.amount) || 0), 0
