@@ -97,6 +97,38 @@ function loadDeviceSettings() {
 }
 let activeSettingsKey = null;
 
+function migrateOldSettings(oldData) {
+  if (!oldData || !activeSettingsKey) return;
+
+  // Never overwrite settings already saved on this device.
+  if (localStorage.getItem(activeSettingsKey)) return;
+
+  const hasOldSettings =
+    oldData.numberSteps ||
+    oldData.dashboardVisibility ||
+    oldData.dashboardLayout;
+
+  if (!hasOldSettings) return;
+
+  settings = {
+    ...emptySettings(),
+    numberSteps: {
+      ...emptySettings().numberSteps,
+      ...(oldData.numberSteps || {})
+    },
+    dashboardVisibility: {
+      ...emptySettings().dashboardVisibility,
+      ...(oldData.dashboardVisibility || {})
+    },
+    dashboardLayout: {
+      ...emptySettings().dashboardLayout,
+      ...(oldData.dashboardLayout || {})
+    }
+  };
+
+  saveDeviceSettings();
+}
+
   function togglePasswordVisibility() {
     const passwordInput = document.getElementById("loginPassword");
     const toggleButton = document.querySelector(".password-toggle");
@@ -4752,6 +4784,13 @@ async function loadUserBusinessData(user) {
   loadDeviceSettings();
 
   const localCopy = localStorage.getItem(activeStorageKey);
+  if (localCopy) {
+  try {
+    migrateOldSettings(JSON.parse(localCopy));
+  } catch (error) {
+    console.error("Local settings migration failed:", error);
+  }
+}
 
   try {
     const snapshot = await getDoc(
@@ -4759,11 +4798,14 @@ async function loadUserBusinessData(user) {
     );
 
     if (snapshot.exists() && snapshot.data().data) {
+      migrateOldSettings(snapshot.data().data);
       data = normalizeData(snapshot.data().data);
       localStorage.setItem(activeStorageKey, JSON.stringify(data));
 
     } else if (localCopy) {
-      data = normalizeData(JSON.parse(localCopy));
+  const oldLocalData = JSON.parse(localCopy);
+  migrateOldSettings(oldLocalData);
+  data = normalizeData(oldLocalData);
 
       // Restore only this account's own local copy.
       // The old shared localStorage data is never imported.
@@ -4782,10 +4824,13 @@ async function loadUserBusinessData(user) {
   } catch (error) {
     console.error("Cloud load failed:", error);
 
-    data = localCopy
-      ? normalizeData(JSON.parse(localCopy))
-      : emptyData();
-
+   if (localCopy) {
+  const oldLocalData = JSON.parse(localCopy);
+  migrateOldSettings(oldLocalData);
+  data = normalizeData(oldLocalData);
+} else {
+  data = emptyData();
+}
     showLoginMessage(
       "Cloud connection unavailable. Showing this account's device copy."
     );
