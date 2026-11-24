@@ -3928,6 +3928,15 @@ function openAppScreen(screenName, skipHistory = false) {
 
   const selectedScreen = document.getElementById("screen-" + screenName);
   if (!selectedScreen) return;
+
+  if (currentScreenName === "transaction" && screenName !== "transaction") {
+  const chargeInput = document.getElementById("customerCharge");
+
+  if (chargeInput) {
+    chargeInput.readOnly = true;
+    updateCustomerChargeLockIcon();
+  }
+}
  
   if (
   !skipHistory &&
