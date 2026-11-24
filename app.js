@@ -266,7 +266,18 @@ function applyDashboardLayout() {
   groups.forEach(({ element, order }) => {
     if (!element) return;
 
-    const children = Array.from(element.children);
+if (!element.dataset.defaultOrder) {
+  element.dataset.defaultOrder = JSON.stringify(
+    Array.from(element.children).map(item => item.id)
+  );
+}
+
+const defaultOrder = JSON.parse(element.dataset.defaultOrder);
+const children = Array.from(element.children);
+
+if (order.length === 0) {
+  order = defaultOrder;
+}
 
     const orderedItems = order
       .map(id => children.find(item => item.id === id))
@@ -442,10 +453,10 @@ function resetDashboardLayout() {
     overview: []
   };
 
+  dashboardCustomizeMode = false;
+
   applyDashboardLayout();
   persist();
-
-  dashboardCustomizeMode = false;
 
   document.getElementById("dashboardSection")
     .classList.remove("dashboard-customize-active");
@@ -456,8 +467,11 @@ function resetDashboardLayout() {
   document.getElementById("saveDashboardLayoutButton").style.display = "none";
   document.getElementById("resetDashboardLayoutButton").style.display = "none";
 
-  document.getElementById("dashboardVisibilitySaveMessage").textContent =
-    "Dashboard layout reset to default.";
+  const message = document.getElementById("dashboardVisibilitySaveMessage");
+
+if (message) {
+  message.textContent = "Dashboard layout reset to default.";
+}
 }
 
 function setupNumberWheelSteps() {
