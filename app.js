@@ -1318,13 +1318,20 @@ function calculateChargePreview() {
   const amount =
     Number(document.getElementById("transactionAmount").value) || 0;
 
-  const charge = ["AEPS", "C+", "C-"].includes(type)
+  const automaticCharge = ["AEPS", "C+", "C-"].includes(type)
     ? chargeFor(amount)
     : 0;
 
-  document.getElementById("customerCharge").value = charge;
+  const chargeInput = document.getElementById("customerCharge");
+
+  if (chargeInput.readOnly) {
+    chargeInput.value = automaticCharge;
+  }
+
+  const displayedCharge = Number(chargeInput.value) || 0;
+
   document.getElementById("chargePreview").textContent =
-    "Customer charge: " + money(charge);
+    "Customer charge: " + money(displayedCharge);
 }
 
 /* ==================================
