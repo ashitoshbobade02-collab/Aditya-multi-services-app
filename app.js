@@ -2485,13 +2485,13 @@ const todayServices = allTodayTransactions.filter(
   t => t.type === "SERVICE"
 );
 
-  document.getElementById("todayTransactionCount").textContent =
-  money(todayTransactions.reduce(
-    (sum, t) => sum + (Number(t.amount) || 0), 0
-  ));
-  
   document.getElementById("todayPhonePeCount").textContent =
-  todayTransactions.length + " transactions";
+  todayTransactions.length;
+
+  document.getElementById("todayTransactionCount").textContent =
+    "Total Amount: " + money(todayTransactions.reduce(
+      (sum, t) => sum + (Number(t.amount) || 0), 0
+    ));
 
   document.getElementById("todayPhonePeProfit").textContent =
   money(todayTransactions.reduce(
@@ -2515,13 +2515,13 @@ document.getElementById("todayServiceAmount").textContent =
 
 document.getElementById("todayServiceProfit").textContent =
   money(todayServiceIncome - todayServiceExpenses);
-  document.getElementById("todayWithdrawalAmount").textContent =
-    money(todayWithdrawals.reduce(
-      (sum, t) => sum + (Number(t.amount) || 0), 0
-    ));
-  
   document.getElementById("todayAepsCount").textContent =
-  todayWithdrawals.length + " transactions";
+  todayWithdrawals.length;
+
+document.getElementById("todayWithdrawalAmount").textContent =
+  "Total Amount: " + money(todayWithdrawals.reduce(
+    (sum, t) => sum + (Number(t.amount) || 0), 0
+  ));
  
   document.getElementById("todayAepsProfit").textContent =
   money(todayWithdrawals.reduce(
