@@ -133,9 +133,21 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
 <section class="app-screen" id="screen-home">  
   <div id="dashboardSection">
 
+    <div class="dashboard-customize-toolbar">
+  <button type="button" id="customizeDashboardButton" onclick="toggleDashboardCustomize()">
+    CUSTOMIZE DASHBOARD
+  </button>
+  <button type="button" id="saveDashboardLayoutButton" onclick="saveDashboardLayout()" style="display:none;">
+    SAVE LAYOUT
+  </button>
+  <button type="button" id="resetDashboardLayoutButton" onclick="resetDashboardLayout()" style="display:none;">
+    RESET TO DEFAULT
+  </button>
+</div>
+
     <h3 class="section-title">Wallet Overview</h3>
 
-    <div class="wallets">
+    <div class="wallets" id="dashboardWalletGroup">
       <div class="wallet" id="sectionBiznext">
         <small>Biznext Wallet</small>
         <h2 id="biznextBalance">₹0.00</h2>
@@ -174,7 +186,7 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
 
     <h3 class="section-title">Today's Overview</h3>
 
-    <div class="wallets">
+    <div class="wallets" id="dashboardOverviewGroup">
       <div class="card" id="sectionCashBalance">
         <p>Cash Balance</p>
         <h2 id="cashBalance">₹0.00</h2>
