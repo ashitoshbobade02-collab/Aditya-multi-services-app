@@ -191,9 +191,9 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
       </div>
 
 <div class="card clickable-card" id="sectionTodayTransactions" onclick="openTodayTransactions()">
-  <p>Today's Total Transactions</p>
+  <p>Today's Total PhonePe</p>
   <h2 id="todayTransactionCount">0</h2>
-  <small>View Transaction History →</small>
+  <small>View PhonePe History →</small>
 </div>
 
 <div class="card clickable-card" id="sectionTodayServices" onclick="openTodayServices()">
@@ -275,8 +275,8 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <label>Transaction Type</label>
     <select id="transactionType" onchange="updateTransactionFields()">
       <option value="AEPS">AEPS</option>
-      <option value="C+">Cash Deposit (C+)</option>
-      <option value="C-">Cash Withdrawal (C-)</option>
+      <option value="C+">PhonePe Paid</option>
+      <option value="C-">PhonePe Received</option>
     </select>
 
     <div id="platformSection">
@@ -294,7 +294,7 @@ html{scroll-behavior:smooth;scroll-padding-top:16px}
     <input type="number" id="transactionAmount" min="0" step="10" placeholder="Enter amount" oninput="calculateChargePreview()">
 
     <label>Customer Charge (₹)</label>
-    <input type="number" id="customerCharge" readonly placeholder="Automatic calculation">
+    <input type="number" id="customerCharge" min="0" step="1" placeholder="Auto-calculated, editable">
 
        <p id="chargePreview">Customer charge will appear here.</p>
 
