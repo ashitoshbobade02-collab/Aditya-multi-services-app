@@ -1013,6 +1013,7 @@ function setupTransactionKeyboard() {
     "transactionType",
     "platform",
     "transactionAmount",
+    "customerCharge",
     "chargePaymentMethod"
   ];
 
@@ -1904,9 +1905,24 @@ function addBusinessTransaction() {
     return;
   }
 
-  const charge = ["AEPS", "C+", "C-"].includes(type)
-    ? chargeFor(amount)
-    : 0;
+  const automaticCharge = ["AEPS", "C+", "C-"].includes(type)
+  ? chargeFor(amount)
+  : 0;
+
+const chargeInput = document.getElementById("customerCharge").value.trim();
+
+const charge = ["AEPS", "C+", "C-"].includes(type)
+  ? (chargeInput === "" ? automaticCharge : Number(chargeInput))
+  : 0;
+
+if (!Number.isFinite(charge) || charge < 0) {
+  showCustomPopup(
+    "Invalid Customer Charge",
+    "Enter a valid customer charge.",
+    "error"
+  );
+  return;
+}
    
   const chargePaymentMethod =
     document.getElementById("chargePaymentMethod").value;
@@ -2407,9 +2423,9 @@ function openTodayTransactions() {
 
   const items = (reportDay.sessions || [])
     .flatMap(session => session.transactions || [])
-    .filter(t => t.type !== "SERVICE");
+    .filter(t => ["C+", "C-"].includes(t.type));
 
-  showDashboardHistory("Today's Transactions", items, "transactions");
+  showDashboardHistory("PhonePe History", items, "transactions");
 }
 
 function openTodayServices() {
@@ -2433,7 +2449,7 @@ function openTodayWithdrawals() {
 
   const items = (reportDay.sessions || [])
     .flatMap(session => session.transactions || [])
-    .filter(t => ["AEPS", "ONLINE_WITHDRAWAL"].includes(t.type));
+    .filter(t => t.type === "AEPS");
 
   showDashboardHistory("Today's Withdrawals", items, "withdrawals");
 }
@@ -2454,22 +2470,22 @@ const todayReportDay = getReportDays(today(), today())[0] || {
 
 const todaySessions = todayReportDay.sessions || [];
 const allTodayTransactions = todaySessions.flatMap(s => s.transactions || []);
-const allTodayWithdrawals = allTodayTransactions.filter(t =>
-  ["AEPS", "ONLINE_WITHDRAWAL"].includes(t.type)
+const todayTransactions = allTodayTransactions.filter(
+  t => ["C+", "C-"].includes(t.type)
 );
 
-  const todayTransactions = allTodayTransactions.filter(
-  t => t.type !== "SERVICE"
+const todayWithdrawals = allTodayTransactions.filter(
+  t => t.type === "AEPS"
 );
 
 const todayServices = allTodayTransactions.filter(
   t => t.type === "SERVICE"
 );
 
-const todayWithdrawals = allTodayWithdrawals;
-
   document.getElementById("todayTransactionCount").textContent =
-    todayTransactions.length;
+  money(todayTransactions.reduce(
+    (sum, t) => sum + (Number(t.amount) || 0), 0
+  ));
 
   document.getElementById("todayServiceCount").textContent =
     todayServices.length;
