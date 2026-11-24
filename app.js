@@ -4662,6 +4662,7 @@ Object.assign(window, {
   startBusinessDay,
   updateTransactionFields,
   calculateChargePreview,
+  toggleCustomerChargeEdit,
   addBusinessTransaction,
   addOnlineWithdrawal,
   updateServiceFields,
