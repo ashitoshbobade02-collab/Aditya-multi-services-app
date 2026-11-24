@@ -1292,3 +1292,59 @@ th {
 .customer-charge-lock:hover {
   background: var(--light-blue);
 }
+
+/* Dashboard customization */
+
+.dashboard-customize-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.dashboard-customize-toolbar button {
+  padding: 10px 15px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-customize-active .dashboard-sort-item {
+  position: relative;
+  outline: 1px dashed var(--blue);
+  outline-offset: 3px;
+}
+
+.dashboard-drag-handle {
+  display: none;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--text);
+  cursor: grab;
+  touch-action: none;
+}
+
+.dashboard-customize-active .dashboard-drag-handle {
+  display: flex;
+}
+
+.dashboard-drag-handle:active {
+  cursor: grabbing;
+}
+
+.dashboard-sort-item.dashboard-dragging {
+  opacity: 0.45;
+  outline: 2px dashed var(--blue);
+}
