@@ -790,7 +790,7 @@ function exportExcel() {
   ];
 
   const transactions = [
-    ["Date", "Time", "Type", "Amount", "Charge", "Charge Payment", "Platform"]
+    ["Date", "Time", "Type", "Amount", "Charge", "Charge Payment", "Platform", "Notes"]
   ];
 
   const expenses = [
@@ -817,11 +817,11 @@ report.days.forEach(day => {
   const sessions = getDaySessions(day);
 
   sessions.forEach(session => {
-    (session.transactions || []).forEach(t => {
-      transactions.push([
-        day.date, t.time || "", t.type || "", t.amount || 0,
-        t.charge || 0, t.chargePaymentMethod || "CASH",
-        t.platform || ""
+     (session.transactions || []).forEach(t => {
+       transactions.push([
+       day.date, t.time || "", t.type || "", t.amount || 0,
+       t.charge || 0, t.chargePaymentMethod || "CASH",
+       t.platform || "", t.note || ""
       ]);
     });
 
@@ -964,7 +964,8 @@ report.days.forEach(day => {
         pdfMoney(item.amount || 0),
         pdfMoney(item.charge || 0),
         item.chargePaymentMethod || "CASH",
-        item.platform || ""
+        item.platform || "",
+        item.note || ""
       ]);
     });
 
@@ -1057,7 +1058,7 @@ report.days.forEach(day => {
 
   addTable(
     "Transaction Details",
-    ["Date", "Time", "Type", "Amount", "Charge", "Charge Paid By", "Platform"],
+    ["Date", "Time", "Type", "Amount", "Charge", "Charge Paid By", "Platform", "Notes"]
     transactionRows
   );
   
@@ -2294,7 +2295,8 @@ if (!Number.isFinite(charge) || charge < 0) {
     amount,
     charge,
     chargePaymentMethod,
-    platform
+    platform,
+    note
   };
 
   const totals = calculateTotals(day);
@@ -2333,6 +2335,7 @@ if (!Number.isFinite(charge) || charge < 0) {
   persist();
 
   document.getElementById("transactionAmount").value = "";
+  document.getElementById("transactionNote").value = "";
   document.getElementById("customerCharge").value = "";
   document.getElementById("customerCharge").readOnly = true;
   updateCustomerChargeLockIcon();
@@ -2737,14 +2740,17 @@ function showDashboardHistory(title, items, type) {
       let details = "";
 
       if (type === "transactions") {
-        details = `
-          <p>Amount: ${money(t.amount)}</p>
-          <p>Customer Charge: ${money(t.charge || 0)}</p>
-          ${t.type === "SERVICE"
-            ? `<p>Payment: ${t.paymentMethod || ""}</p>`
-            : `<p>Charge Payment: ${t.chargePaymentMethod || "N/A"}</p>`}
-        `;
-      } else if (type === "services") {
+       details = `
+      <p>Amount: ${money(t.amount)}</p>
+      <p>Customer Charge: ${money(t.charge || 0)}</p>
+       ${t.type === "SERVICE"
+       ? `<p>Payment: ${t.paymentMethod || ""}</p>`
+       : `<p>Charge Payment: ${t.chargePaymentMethod || "N/A"}</p>`}
+     ${t.note ? `<p>Notes: ${escapeHTML(t.note)}</p>` : ""}
+   `;
+ }
+      
+      else if (type === "services") {
         details = `
           <p>Amount: ${money(t.amount)}</p>
           <p>Quantity: ${t.quantity || "Direct entry"}</p>
