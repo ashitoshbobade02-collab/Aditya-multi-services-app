@@ -2288,6 +2288,8 @@ if (!Number.isFinite(charge) || charge < 0) {
     ? document.getElementById("platform").value
     : "";
 
+  const note = document.getElementById("transactionNote").value.trim();
+
    const transaction = {
     id: Date.now(),
     time: new Date().toLocaleTimeString("en-IN"),
