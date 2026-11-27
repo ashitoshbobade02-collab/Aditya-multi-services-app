@@ -1058,7 +1058,7 @@ report.days.forEach(day => {
 
   addTable(
     "Transaction Details",
-    ["Date", "Time", "Type", "Amount", "Charge", "Charge Paid By", "Platform", "Notes"]
+    ["Date", "Time", "Type", "Amount", "Charge", "Charge Paid By", "Platform", "Notes"],
     transactionRows
   );
   
