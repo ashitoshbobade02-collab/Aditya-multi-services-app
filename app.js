@@ -3016,7 +3016,7 @@ document.getElementById("combinedCollection").textContent =
     list.innerHTML = normalTransactions.length
       ? normalTransactions.map(t => `
           <div style="padding:12px 0;border-bottom:1px solid #e2eaf2">
-            <strong>${t.type} ${t.platform ? "· " + t.platform : ""}</strong>
+            <strong>${t.type === "C+" ? "PhonePe Paid" : t.type === "C-" ? "PhonePe Received" : t.type} ${t.platform ? "· " + t.platform : ""}</strong>
             <p>${t.time}</p>
             <p>Amount: ${money(t.amount)}</p>
             <p>Customer charge: ${money(t.charge)}</p>
