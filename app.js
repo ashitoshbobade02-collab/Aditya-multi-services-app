@@ -2839,7 +2839,7 @@ const todayReportDay = getReportDays(today(), today())[0] || {
 const todaySessions = todayReportDay.sessions || [];
 const allTodayTransactions = todaySessions.flatMap(s => s.transactions || []);
 const todayTransactions = allTodayTransactions.filter(
-  t => ["C+", "C-"].includes(t.type)
+  t => ["AEPS", "C+", "C-"].includes(t.type)
 );
 
 const todayWithdrawals = allTodayTransactions.filter(
