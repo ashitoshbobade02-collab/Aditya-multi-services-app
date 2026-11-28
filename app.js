@@ -3649,6 +3649,13 @@ function renderCalendar() {
   `;
 }
 
+function openCalendarHistory() {
+  renderCalendar();
+
+  document.getElementById("calendarHistoryList")
+    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function exportData() {
   const blob = new Blob(
     [JSON.stringify(data, null, 2)],
