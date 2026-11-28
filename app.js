@@ -1857,9 +1857,13 @@ function addServiceTransaction() {
   const day = currentDay();
 
   if (!day || day.closed) {
-    alert("Start a business day first.");
-    return;
-  }
+  showCustomPopup(
+    "Business Day Not Started",
+    "Please start a business day first.",
+    "error"
+  );
+  return;
+}
 
   const type = document.getElementById("serviceType").value;
   const mode = document.getElementById("serviceEntryMode").value;
@@ -1868,9 +1872,13 @@ function addServiceTransaction() {
     Number(document.getElementById("serviceTotal").value);
 
   if (!Number.isFinite(amount) || amount <= 0) {
-    alert("Enter a valid service amount.");
-    return;
-  }
+  showCustomPopup(
+    "Invalid Service Amount",
+    "Please enter a valid service amount.",
+    "error"
+  );
+  return;
+}
 
   const method =
     document.getElementById("servicePaymentMethod").value;
@@ -1893,10 +1901,13 @@ function addServiceTransaction() {
     const expected = Math.round(amount * 100) / 100;
 
     if (cashAmount < 0 || onlineAmount < 0 || paid !== expected) {
-      alert("Cash and Online amounts must equal the service total.");
-      return;
-    }
-  }
+  showCustomPopup(
+    "Payment Mismatch",
+    "Cash and Online amounts must equal the service total.",
+    "error"
+  );
+  return;
+}
 
   let serviceName = "";
 
@@ -1904,10 +1915,15 @@ function addServiceTransaction() {
     serviceName =
       document.getElementById("otherServiceDescription").value.trim();
 
-    if (!serviceName) {
-      alert("Enter the service description.");
-      return;
-    }
+  if (!serviceName) {
+  showCustomPopup(
+    "Service Description Required",
+    "Please enter the service description.",
+    "error"
+  );
+  return;
+}
+    
   } else if (type === "ID_LAMINATION") {
     serviceName = "ID Card Lamination";
   } else {
