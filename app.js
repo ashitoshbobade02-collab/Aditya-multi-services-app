@@ -3098,7 +3098,7 @@ function saveExpense() {
   }
 
  const currentTotals = calculateTotals(day);
-const availableBalance = paymentMethod === "ONLINE"
+ const availableBalance = paymentMethod === "ONLINE"
   ? currentTotals.online
   : currentTotals.cash;
 
@@ -3335,15 +3335,18 @@ alert("Business day saved! The shop is now closed.");
 ================================== */
 
 function showHistory() {
+  const history = document.getElementById("todayCompleteHistoryList");
+  const calendar = document.getElementById("calendarHistoryList");
+
+  if (calendar) calendar.style.display = "none";
+  if (history) history.style.display = "block";
+
   renderTodayCompleteHistory();
 
-  const history = document.getElementById("todayCompleteHistoryList");
-  if (history) {
-    history.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
-  }
+  history?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 }
 
 function renderTodayCompleteHistory() {
@@ -3650,10 +3653,18 @@ function renderCalendar() {
 }
 
 function openCalendarHistory() {
+  const history = document.getElementById("todayCompleteHistoryList");
+  const calendar = document.getElementById("calendarHistoryList");
+
+  if (history) history.style.display = "none";
+  if (calendar) calendar.style.display = "block";
+
   renderCalendar();
 
-  document.getElementById("calendarHistoryList")
-    ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  calendar?.scrollIntoView({
+    behavior: "smooth",
+    block: "start"
+  });
 }
 
 function exportData() {
