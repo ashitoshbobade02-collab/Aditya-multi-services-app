@@ -5047,6 +5047,7 @@ Object.assign(window, {
   changeCalendarMonth,
   selectHistoryDate,
   renderCalendar,
+  openCalendarHistory,
   toggleTheme,
   exportData,
   restoreBackup,
