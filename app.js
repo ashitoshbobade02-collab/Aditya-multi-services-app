@@ -2379,9 +2379,13 @@ function addOnlineWithdrawal() {
   const day = currentDay();
 
   if (!day || day.closed) {
-    alert("Start a business day first.");
-    return;
-  }
+   showCustomPopup(
+     "Business Day Not Started",
+     "Please start a business day first.",
+     "error"
+   );
+   return;
+ }
 
   const platform =
     document.getElementById("withdrawalPlatform").value;
@@ -2392,10 +2396,14 @@ function addOnlineWithdrawal() {
   const note =
     document.getElementById("withdrawalNote").value.trim();
 
-  if (!Number.isFinite(amount) || amount <= 0) {
-    alert("Enter a valid withdrawal amount.");
-    return;
-  }
+   if (!Number.isFinite(amount) || amount <= 0) {
+     showCustomPopup(
+     "Invalid Withdrawal Amount",
+     "Please enter a valid withdrawal amount.",
+     "error"
+   );
+   return;
+ }
 
   const totals = calculateTotals(day);
 
@@ -2408,9 +2416,13 @@ function addOnlineWithdrawal() {
   };
 
   if (amount > walletBalances[platform]) {
-    alert("Insufficient " + platform + " wallet balance.");
-    return;
-  }
+  showCustomPopup(
+    "Insufficient Wallet Balance",
+    "Your " + platform + " wallet does not have enough balance.",
+    "error"
+  );
+  return;
+}
 
   day.transactions.push({
     id: Date.now(),
