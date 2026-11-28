@@ -3256,9 +3256,13 @@ function saveBusinessDay() {
   const day = currentDay();
 
   if (!day) {
-    alert("Start a business day first.");
-    return;
-  }
+   showCustomPopup(
+     "Business Day Not Started",
+     "Please start a business day first.",
+     "error"
+   );
+   return;
+ }
 
  const cashInput = document.getElementById("actualCash").value.trim();
 const onlineInput = document.getElementById("actualOnline").value.trim();
@@ -3354,7 +3358,11 @@ data.walletCarryForward = {
 refreshDashboard();
 openAppScreen("opening");
 
-alert("Business day saved! The shop is now closed.");
+showCustomPopup(
+  "Business Day Saved",
+  "The business day has been closed successfully.",
+  "success"
+);
   }
 );
 }
